@@ -54,7 +54,7 @@ project(videomancer-sdk C CXX ASM)
     message(STATUS "Project Version Patch:   ${PROJECT_VERSION_PATCH}")
     message(STATUS "Project Version:         ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen_project_version/project_version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lzx/sdk/project_version.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/videomancer_sdk_version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lzx/sdk/videomancer_sdk_version.hpp)
 
 add_subdirectory(third_party)
 

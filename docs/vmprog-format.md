@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Status:** Production  
-**Canonical Reference:** [src/security/vmprog_format.hpp](../src/security/vmprog_format.hpp)  
+**Canonical Reference:** [src/lzx/sdk/vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp)  
 **Audience:** Firmware developers, FPGA toolchain authors, program authors
 
 ---
@@ -64,7 +64,7 @@ The format prioritizes:
 
 ### 2.1 Layout Overview
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ File Header (64 bytes)                  │
 │ - Magic: 'VMPG'                         │
@@ -98,7 +98,7 @@ The format prioritizes:
 
 All offsets are absolute byte offsets from the start of the file:
 
-```
+```text
 Header starts at: 0
 TOC starts at: header.toc_offset (typically 64)
 TOC ends at: header.toc_offset + header.toc_bytes
@@ -119,9 +119,6 @@ File ends at: header.file_size
 ---
 
 ## 3. Data Types and Enumerations
-
-### 3.1 Validation Result Codes
-
 
 ### 3.1 Validation Result Codes
 
@@ -225,6 +222,7 @@ Indicates compatible hardware platforms:
 Defines how parameter values are interpreted and displayed:
 
 #### Linear Scaling Modes
+
 | Value | Name | Description |
 |------:|------|-------------|
 | 0 | `linear` | Linear 1:1 mapping |
@@ -233,6 +231,7 @@ Defines how parameter values are interpreted and displayed:
 | 3 | `linear_double` | Linear × 2.0 |
 
 #### Discrete/Boolean Modes
+
 | Value | Name | Description |
 |------:|------|-------------|
 | 4 | `boolean` | On/off switch |
@@ -245,6 +244,7 @@ Defines how parameter values are interpreted and displayed:
 | 11 | `steps_256` | 256 discrete steps |
 
 #### Angular/Polar Modes
+
 | Value | Name | Description |
 |------:|------|-------------|
 | 12 | `polar_degs_90` | 0-90 degrees |
@@ -255,6 +255,7 @@ Defines how parameter values are interpreted and displayed:
 | 17 | `polar_degs_2880` | 0-2880 degrees |
 
 #### Easing Curve Modes
+
 | Value | Name | Description |
 |------:|------|-------------|
 | 18 | `quad_in` | Quadratic ease-in |
@@ -323,6 +324,7 @@ All structures use `#pragma pack(push, 1)` for byte-aligned packing.
 | 32 | uint8_t[32] | sha256_package | 32 | Package hash (optional) |
 
 **Constants:**
+
 - `expected_magic` = 0x47504D56u
 - `max_file_size` = 67108864u (64 MB)
 - `default_version_major` = 1
@@ -330,6 +332,7 @@ All structures use `#pragma pack(push, 1)` for byte-aligned packing.
 - `struct_size` = 64
 
 **Validation:**
+
 - Magic must equal 0x47504D56
 - `version_major` must be 1
 - `header_size` must be 64
@@ -353,9 +356,11 @@ All structures use `#pragma pack(push, 1)` for byte-aligned packing.
 | 48 | uint32_t[4] | reserved | 16 | Reserved (zeros) |
 
 **Constants:**
+
 - `struct_size` = 64
 
 **Validation:**
+
 - `type` must not be `none` (0)
 - `type` must be ≤ 10 (bitstream_hd_dual)
 - `offset` must be ≥ 64 and < file_size
@@ -374,9 +379,11 @@ Used in signed descriptors to link artifacts:
 | 4 | uint8_t[32] | sha256 | 32 | SHA-256 hash |
 
 **Constants:**
+
 - `struct_size` = 36
 
 **Validation:**
+
 - `type` must be valid TOC entry type (0-10)
 - For unused slots: `type` must be `none` (0) and hash must be all zeros
 
@@ -396,16 +403,19 @@ This structure is signed by Ed25519:
 | 328 | uint32_t | build_id | 4 | Build identifier |
 
 **Constants:**
+
 - `max_artifacts` = 8
 - `struct_size` = 332
 
 **Validation:**
+
 - `artifact_count` must be ≤ 8
 - `reserved_pad[0..2]` must all be 0
 - Artifacts `[0..artifact_count-1]`: Must have valid type (not none)
 - Artifacts `[artifact_count..7]`: Must be fully zeroed (type=none, hash=zeros)
 
 **Notes:**
+
 - This entire structure is the input to Ed25519 signature verification
 - The signature is stored separately as a TOC entry
 
@@ -428,11 +438,12 @@ Configures one user-controllable parameter:
 | 19 | uint8_t | value_label_count | 1 | Number of value labels |
 | 20 | uint8_t[2] | reserved_pad | 2 | Reserved padding |
 | 22 | char[32] | name_label | 32 | Parameter name |
-| 54 | char[16][32] | value_labels | 512 | Value label strings |
+| 54 | char\[16\]\[32\] | value_labels | 512 | Value label strings |
 | 566 | char[4] | suffix_label | 4 | Unit suffix (e.g., "°") |
 | 570 | uint8_t[2] | reserved | 2 | Reserved |
 
 **Constants:**
+
 - `name_label_max_length` = 32
 - `value_label_max_length` = 32
 - `suffix_label_max_length` = 4
@@ -440,6 +451,7 @@ Configures one user-controllable parameter:
 - `struct_size` = 572
 
 **Validation:**
+
 - `parameter_id` must be ≤ 12
 - `control_mode` must be ≤ 35 (expo_in_out)
 - `value_label_count` must be ≤ 16
@@ -479,6 +491,7 @@ Main program metadata structure:
 | 7238 | uint8_t[2] | reserved | 2 | Reserved |
 
 **Constants:**
+
 - `program_id_max_length` = 64
 - `program_name_max_length` = 32
 - `author_max_length` = 64
@@ -489,6 +502,7 @@ Main program metadata structure:
 - `struct_size` = 7240
 
 **Validation:**
+
 - `parameter_count` must be ≤ 12
 - `abi_min_major` > 0 and `abi_max_major` > 0
 - `abi_min_major` < `abi_max_major`, OR
@@ -517,6 +531,7 @@ vmprog_validation_result validate_vmprog_header_v1_0(
 ```
 
 **Checks:**
+
 - Magic number (0x47504D56)
 - Version (major must be 1)
 - Header size (must be 64)
@@ -537,6 +552,7 @@ vmprog_validation_result validate_vmprog_toc_entry_v1_0(
 ```
 
 **Checks:**
+
 - Entry type is not `none` (0)
 - Offset is ≥ 64 and < file_size
 - Size doesn't cause offset overflow
@@ -553,6 +569,7 @@ vmprog_validation_result validate_vmprog_artifact_hash_v1_0(
 ```
 
 **Checks:**
+
 - Type is valid (≤ 10)
 
 **Returns:** `ok` or specific error code
@@ -566,6 +583,7 @@ vmprog_validation_result validate_vmprog_signed_descriptor_v1_0(
 ```
 
 **Checks:**
+
 - Artifact count ≤ 8
 - Reserved padding is zeroed
 - Used artifacts [0..count-1] have valid types
@@ -582,6 +600,7 @@ vmprog_validation_result validate_vmprog_parameter_config_v1_0(
 ```
 
 **Checks:**
+
 - Parameter ID ≤ 12
 - Control mode ≤ 35
 - Value label count ≤ 16
@@ -601,6 +620,7 @@ vmprog_validation_result validate_vmprog_program_config_v1_0(
 ```
 
 **Checks:**
+
 - Parameter count ≤ 12
 - ABI range validity
 - Hardware mask not zero
@@ -623,6 +643,7 @@ vmprog_validation_result validate_vmprog_package(
 ```
 
 **Performs:**
+
 1. Header validation
 2. All TOC entry validation
 3. Optional: All payload hash verification
@@ -632,6 +653,7 @@ vmprog_validation_result validate_vmprog_package(
 7. Optional: Ed25519 signature verification
 
 **Parameters:**
+
 - `file_data` - Complete file contents
 - `file_size` - File size in bytes
 - `verify_hashes` - If true, verify all hashes
@@ -641,6 +663,7 @@ vmprog_validation_result validate_vmprog_package(
 **Returns:** First error encountered, or `ok` if all checks pass
 
 **Usage:**
+
 ```cpp
 // Quick structural validation
 auto result = validate_vmprog_package(data, size, false, false);
@@ -673,12 +696,14 @@ bool calculate_config_sha256(
 Computes the SHA-256 hash of the program configuration. Creates a copy with all reserved fields zeroed before hashing.
 
 **Parameters:**
+
 - `config` - Program configuration to hash
 - `out_hash` - Output buffer (must be 32 bytes)
 
 **Returns:** `true` on success
 
 **Notes:**
+
 - Only hashes used parameters [0..parameter_count-1]
 - Ensures deterministic hashing by zeroing reserved fields
 
@@ -695,6 +720,7 @@ bool calculate_package_sha256(
 Computes SHA-256 of entire file with `sha256_package` field zeroed.
 
 **Parameters:**
+
 - `file_data` - Complete file contents
 - `file_size` - File size in bytes
 - `out_hash` - Output buffer (must be 32 bytes)
@@ -702,6 +728,7 @@ Computes SHA-256 of entire file with `sha256_package` field zeroed.
 **Returns:** `true` on success, `false` if file too small
 
 **Algorithm:**
+
 1. Hash bytes [0..31] (before sha256_package field)
 2. Hash 32 zero bytes (in place of sha256_package)
 3. Hash bytes [64..file_size-1] (after sha256_package)
@@ -719,6 +746,7 @@ bool verify_package_sha256(
 Verifies that `sha256_package` field in header matches computed hash.
 
 **Parameters:**
+
 - `file_data` - Complete file contents
 - `file_size` - File size in bytes
 
@@ -737,6 +765,7 @@ bool verify_ed25519_signature(
 Verifies Ed25519 signature over signed descriptor.
 
 **Parameters:**
+
 - `signature` - Ed25519 signature (64 bytes)
 - `public_key` - Ed25519 public key (32 bytes)
 - `signed_descriptor` - Descriptor structure (332 bytes)
@@ -756,6 +785,7 @@ bool verify_payload_hash(
 Verifies payload data matches expected hash from TOC entry.
 
 **Parameters:**
+
 - `payload_data` - Payload bytes
 - `payload_size` - Payload size in bytes
 - `expected_hash` - Expected SHA-256 hash
@@ -775,6 +805,7 @@ vmprog_validation_result verify_all_payload_hashes(
 Verifies all TOC entry payload hashes in one pass.
 
 **Parameters:**
+
 - `file_data` - Complete file contents
 - `file_size` - File size in bytes
 - `header` - Validated header structure
@@ -794,6 +825,7 @@ void calculate_data_hash(
 Computes SHA-256 hash of arbitrary data.
 
 **Parameters:**
+
 - `data` - Data to hash
 - `size` - Size in bytes
 - `out_hash` - Output buffer (32 bytes)
@@ -811,6 +843,7 @@ bool verify_with_builtin_keys(
 Tries to verify signature against all built-in public keys.
 
 **Parameters:**
+
 - `signature` - Ed25519 signature (64 bytes)
 - `signed_descriptor` - Descriptor to verify
 - `out_key_index` - Optional output for which key succeeded
@@ -818,6 +851,7 @@ Tries to verify signature against all built-in public keys.
 **Returns:** `true` if any built-in key verifies signature
 
 **Usage:**
+
 ```cpp
 size_t key_index;
 if (verify_with_builtin_keys(sig, descriptor, &key_index)) {
@@ -850,11 +884,13 @@ void safe_strncpy(char* dest, const char* src, size_t size);
 Safely copies string with guaranteed null-termination and zero-padding.
 
 **Parameters:**
+
 - `dest` - Destination buffer
 - `src` - Source null-terminated string
 - `size` - Size of destination including null terminator
 
 **Behavior:**
+
 - Copies up to `size-1` characters
 - Always null-terminates
 - Zeros remaining bytes for determinism
@@ -918,6 +954,7 @@ const vmprog_toc_entry_v1_0* find_toc_entry(
 Finds first TOC entry of specified type.
 
 **Parameters:**
+
 - `toc` - TOC array pointer
 - `toc_count` - Number of TOC entries
 - `type` - Entry type to find
@@ -976,6 +1013,7 @@ Converts validation result code to human-readable string.
 **Returns:** String description of error
 
 **Example output:**
+
 - `ok` → "OK"
 - `invalid_magic` → "Invalid magic number"
 - `invalid_hash` → "Invalid hash"
@@ -989,6 +1027,7 @@ void init_vmprog_header(vmprog_header_v1_0& header);
 ```
 
 Initializes header with default values:
+
 - Magic: 0x47504D56
 - Version: 1.0
 - Header size: 64
@@ -1002,6 +1041,7 @@ void init_vmprog_config(vmprog_program_config_v1_0& config);
 ```
 
 Initializes program config with defaults:
+
 - Version: 1.0.0
 - ABI range: [1.0, 2.0)
 - Hardware: videomancer_core_rev_a
@@ -1014,6 +1054,7 @@ void init_signed_descriptor(vmprog_signed_descriptor_v1_0& descriptor);
 ```
 
 Initializes descriptor with defaults:
+
 - All fields: 0
 - Flags: none
 - Artifact count: 0
@@ -1025,6 +1066,7 @@ void init_toc_entry(vmprog_toc_entry_v1_0& entry);
 ```
 
 Initializes TOC entry with defaults:
+
 - Type: none
 - Flags: none
 - All other fields: 0
@@ -1036,6 +1078,7 @@ void init_parameter_config(vmprog_parameter_config_v1_0& param);
 ```
 
 Initializes parameter with defaults:
+
 - ID: none
 - Control mode: linear
 - Range: [0, 65535]
@@ -1056,6 +1099,7 @@ uint32_t from_little_endian_32(uint32_t value);
 Converts 32-bit values to/from little-endian.
 
 **Notes:**
+
 - No-op on little-endian systems (x86, ARM)
 - Byte-swaps on big-endian systems
 - Symmetric operation (to and from are identical)
@@ -1301,6 +1345,7 @@ for (uint32_t i = 0; i < config->parameter_count; ++i) {
 **Use:** `validate_vmprog_package()` with `verify_signature=true`
 
 **Recommended public key verification:**
+
 ```cpp
 // Try all built-in keys
 bool verified = lzx::verify_with_builtin_keys(signature, descriptor);
@@ -1324,6 +1369,7 @@ bool verified = lzx::verify_ed25519_signature(
 5. ✓ Verify all referenced bitstream types are available
 
 **Example:**
+
 ```cpp
 bool is_compatible(const lzx::vmprog_program_config_v1_0& config) {
     // Check ABI
@@ -1361,6 +1407,7 @@ Based on verification results, classify packages:
 | Invalid structure | **Malformed** | ✗ Reject |
 
 **Recommended UI indicators:**
+
 - Official Verified: Green checkmark, "Official"
 - Community Verified: Blue checkmark, "Verified"
 - Community Unsigned: Yellow caution, "Unsigned"
@@ -1384,6 +1431,7 @@ struct vmprog_header_v1_0 {
 ```
 
 **Verification:**
+
 ```cpp
 static_assert(sizeof(vmprog_header_v1_0) == 64, "Size mismatch");
 static_assert(offsetof(vmprog_header_v1_0, magic) == 0, "Offset mismatch");
@@ -1406,6 +1454,7 @@ static_assert(offsetof(vmprog_header_v1_0, magic) == 0, "Offset mismatch");
 - **Future:** May be assigned meaning in minor version updates
 
 **Example:**
+
 ```cpp
 config.reserved[0] = 0;
 config.reserved[1] = 0;
@@ -1422,6 +1471,7 @@ config.reserved_pad = 0;
 - Unused bytes should be zeroed
 
 **Example:**
+
 ```cpp
 // Correct
 lzx::safe_strncpy(config.program_name, "My Program", 
@@ -1491,6 +1541,7 @@ if (!lzx::verify_with_builtin_keys(sig, descriptor)) {
 - Use provided validation functions before trusting struct contents
 
 **Example:**
+
 ```cpp
 // Safe
 if (lzx::is_string_terminated(config.program_name, 
@@ -1528,9 +1579,9 @@ printf("%s\n", config.program_name);  // DANGEROUS
 
 ### 11.1 Canonical Implementation
 
-- **Header file:** [src/security/vmprog_format.hpp](../src/security/vmprog_format.hpp)
-- **Crypto wrapper:** [src/security/vmprog_crypto.hpp](../src/security/vmprog_crypto.hpp)
-- **Public keys:** [src/security/vmprog_public_keys.hpp](../src/security/vmprog_public_keys.hpp)
+- **Header file:** [src/lzx/sdk/vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp)
+- **Crypto wrapper:** [src/lzx/sdk/vmprog_crypto.hpp](../src/lzx/sdk/vmprog_crypto.hpp)
+- **Public keys:** [src/lzx/sdk/vmprog_public_keys.hpp](../src/lzx/sdk/vmprog_public_keys.hpp)
 
 ### 11.2 Cryptographic Standards
 
@@ -1563,6 +1614,7 @@ The header file contains comprehensive compile-time checks:
 - String buffer sizes (must match constants)
 
 **Example:**
+
 ```cpp
 static_assert(sizeof(vmprog_header_v1_0) == 64, 
               "Header size mismatch");
@@ -1577,11 +1629,13 @@ static_assert(offsetof(vmprog_header_v1_0, magic) == 0,
 | 1.0 | 2024-2025 | Initial production release |
 
 **Version numbering:**
+
 - **Major:** Breaking changes (incompatible format changes)
 - **Minor:** Backward-compatible additions (new optional features)
 - **Patch:** Bug fixes (no format changes)
 
 **Compatibility policy:**
+
 - Readers must support their own major version
 - Readers should gracefully handle newer minor versions
 - Readers must reject different major versions
@@ -1603,6 +1657,7 @@ static_assert(offsetof(vmprog_header_v1_0, magic) == 0,
 | SHA-256 hash | 32 | - |
 
 **Total fixed overhead (minimum):**
+
 - Header: 64 bytes
 - Config TOC entry: 64 bytes  
 - Descriptor TOC entry: 64 bytes
@@ -1620,7 +1675,7 @@ static_assert(offsetof(vmprog_header_v1_0, magic) == 0,
 
 ### Magic Numbers
 
-```
+```text
 File header:  0x47504D56  ('VMPG' little-endian)
 ```
 
@@ -1734,10 +1789,10 @@ The program configuration is a fixed-size binary structure containing program me
 | license           | char[]          |    32 | License identifier                  |
 | category          | char[]          |    24 | Program category                    |
 | description       | char[]          |   128 | Program description                 |
-| hardware          | char[4][24]     |    96 | Compatible hardware list (max 4)    |
+| hardware          | char\[4\]\[24\]     |    96 | Compatible hardware list (max 4)    |
 | hardware_count    | uint32_t        |     4 | Number of hardware entries          |
 | kernel_abi        | char[]          |    24 | Required kernel ABI                 |
-| video_modes       | char[8][16]     |   128 | Supported video modes (max 8)       |
+| video_modes       | char\[8\]\[16\]     |   128 | Supported video modes (max 8)       |
 | video_modes_count | uint32_t        |     4 | Number of video mode entries        |
 | bram_kbits        | uint32_t        |     4 | BRAM usage in kilobits              |
 | dsp_blocks        | uint32_t        |     4 | DSP block usage                     |
@@ -1745,9 +1800,9 @@ The program configuration is a fixed-size binary structure containing program me
 | latency_frames    | uint32_t        |     4 | Processing latency in frames        |
 | linear            | uint32_t        |     4 | Number of linear controls           |
 | boolean           | uint32_t        |     4 | Number of boolean controls          |
-| lin_labels        | char[8][16]     |   128 | Linear control labels (max 8)       |
+| lin_labels        | char\[8\]\[16\]     |   128 | Linear control labels (max 8)       |
 | lin_labels_count  | uint32_t        |     4 | Number of linear labels             |
-| bool_labels       | char[8][16]     |   128 | Boolean control labels (max 8)      |
+| bool_labels       | char\[8\]\[16\]     |   128 | Boolean control labels (max 8)      |
 | bool_labels_count | uint32_t        |     4 | Number of boolean labels            |
 | bitstream_path    | char[]          |    64 | Original bitstream file path        |
 | icon_path         | char[]          |    64 | Original icon file path             |
@@ -1933,7 +1988,7 @@ Identical source inputs must produce identical binary outputs.
 
 ## 10. References
 
-- **Canonical Implementation:** [src/security/vmprog_format.hpp](../src/security/vmprog_format.hpp)
+- **Canonical Implementation:** [src/lzx/sdk/vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp)
 - **SHA-256:** FIPS 180-4
 - **Ed25519:** RFC 8032
 - **Cryptographic Library:** Monocypher

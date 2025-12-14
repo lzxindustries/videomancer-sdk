@@ -7,7 +7,7 @@
 
 namespace lzx {
 
-namespace project_version {
+namespace videomancer_sdk_version {
 
 constexpr const char *git_tag = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@";
 constexpr const char *git_hash = "@PROJECT_VERSION_HASH@";
@@ -16,6 +16,6 @@ constexpr unsigned long major = @PROJECT_VERSION_MAJOR@;
 constexpr unsigned long minor = @PROJECT_VERSION_MINOR@;
 constexpr unsigned long patch = @PROJECT_VERSION_PATCH@;
 
-} // namespace project_version
+} // namespace videomancer_sdk_version
 
 } // namespace lzx

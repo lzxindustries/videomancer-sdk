@@ -7,15 +7,15 @@
 
 namespace lzx {
 
-namespace project_version {
+namespace videomancer_sdk_version {
 
-constexpr const char *git_tag = "0.1.7";
-constexpr const char *git_hash = "g7db71a3";
-constexpr unsigned long git_commits = 123;
+constexpr const char *git_tag = "0.1.0";
+constexpr const char *git_hash = "";
+constexpr unsigned long git_commits = 0;
 constexpr unsigned long major = 0;
 constexpr unsigned long minor = 1;
-constexpr unsigned long patch = 7;
+constexpr unsigned long patch = 0;
 
-} // namespace project_version
+} // namespace videomancer_sdk_version
 
 } // namespace lzx
