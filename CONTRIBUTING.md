@@ -1,7 +1,5 @@
 # Contributing to Videomancer SDK
 
-Thank you for your interest in the Videomancer SDK. This document provides information about the project maintenance and how to report issues.
-
 ## Table of Contents
 
 - [Maintenance Policy](#maintenance-policy)
@@ -12,30 +10,7 @@ Thank you for your interest in the Videomancer SDK. This document provides infor
 
 ## Maintenance Policy
 
-The Videomancer SDK is **actively maintained by LZX Industries LLC** as the official development kit for Videomancer hardware. This project is maintained internally to ensure quality, compatibility, and alignment with our hardware roadmap.
-
-### Contribution Model
-
-- **Primary Development:** LZX Industries developers
-- **Issue Reports:** Community members are encouraged to report bugs and issues
-- **External Contributions:** Not actively solicited; please discuss with maintainers before investing significant effort
-- **Pull Requests:** Reviewed on a case-by-case basis; acceptance not guaranteed
-
-### Why This Approach?
-
-- **Quality Control:** Ensures consistency with our hardware and firmware
-- **Compatibility:** Maintains tight integration with Videomancer devices
-- **Support:** Allows us to provide reliable support to our customers
-- **Roadmap Alignment:** Development prioritizes features aligned with our product direction
-
-## Code of Conduct
-
-All interactions in this project should be professional and respectful:
-
-- Be respectful in all communications
-- Focus on technical merit
-- Accept maintainer decisions gracefully
-- Understand that this is a commercially supported product
+Maintained by LZX Industries. Bug reports welcome. External contributions reviewed case-by-case; discuss significant changes before investing effort.
 
 ## Reporting Bugs
 
@@ -57,6 +32,7 @@ Clear description of the issue
 
 **To Reproduce**
 Steps to reproduce:
+
 1. Step one
 2. Step two
 3. See error
@@ -64,38 +40,26 @@ Steps to reproduce:
 **Expected Behavior**
 What should happen
 
-**Actual Behavior**
+**Actual Behavior**  
 What actually happens
 
-**Environment**
+**Environment**  
+
 - OS: [e.g., Windows 11, Ubuntu 22.04]
 - Compiler: [e.g., GCC 11.2, MSVC 2022]
 - CMake Version: [e.g., 3.25]
 - SDK Version: [e.g., 0.1.7]
 
-**Additional Context**
+**Additional Context**  
 Any other relevant information, logs, or files
 
 ## Feature Requests
 
-While we prioritize development based on our internal roadmap, we're interested in hearing about use cases and needs from the Videomancer community.
-
-### Feature Request Guidelines
-
-- Describe the use case and problem it solves
-- Explain why it's important for Videomancer users
-- Provide examples or mockups if applicable
-- Understand that implementation is subject to LZX Industries' priorities
-
-**Note:** Feature requests may be closed if they don't align with our product direction, but feedback is valuable for understanding community needs.
+Submit via GitHub Issues. Describe use case and impact. Implementation subject to LZX Industries priorities.
 
 ## Community Discussion
 
-For general questions, usage help, or discussions:
-
-- **GitHub Discussions:** Use for questions and community interaction
-- **Issues:** Reserved for bug reports and confirmed problems
-- **Documentation:** Check the comprehensive format specification in `docs/`
+Use GitHub Discussions for questions. Issues for bugs only.
 
 ## Development Information
 
@@ -103,10 +67,8 @@ This section provides technical information for those interested in understandin
 
 ### Build Requirements
 
-### Build Requirements
-
-- CMake 3.13 or later
-- C++17 compatible compiler (C++20 on non-Windows)
+- CMake 3.13+
+- C++17 compiler (C++20 on non-Windows)
 - Git
 
 ### Building from Source
@@ -152,20 +114,4 @@ The SDK follows these conventions:
 
 ## License
 
-By engaging with this project (reporting issues, discussions, etc.), you acknowledge that:
-
-- The Videomancer SDK is licensed under GPL-3.0
-- LZX Industries LLC retains all rights to accept, modify, or reject contributions
-- Any submitted content may be used by LZX Industries under the project license
-
-## Questions?
-
-For questions about the SDK:
-
-- **Technical Issues:** Open a GitHub issue
-- **Usage Questions:** Check documentation first, then GitHub Discussions
-- **Commercial Support:** Contact LZX Industries directly
-
----
-
-**Note:** This is a commercially supported product maintained by LZX Industries LLC. While we appreciate community feedback and bug reports, active development and feature implementation are managed internally to ensure quality and compatibility with Videomancer hardware.
+GPL-3.0. Contributions subject to project license.

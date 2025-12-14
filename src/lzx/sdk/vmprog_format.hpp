@@ -279,7 +279,7 @@ namespace lzx {
     struct vmprog_header_v1_0
     {
         static constexpr uint32_t expected_magic = 0x47504D56u;  // 'VMPG' (4 ASCII chars, little-endian)
-        static constexpr uint32_t max_file_size = 67108864u;      // 64 MB maximum file size
+        static constexpr uint32_t max_file_size = 1048576u;       // 1 MB maximum file size
         static constexpr uint16_t default_version_major = 1;
         static constexpr uint16_t default_version_minor = 0;
         static constexpr uint16_t struct_size = 64;
@@ -449,11 +449,11 @@ namespace lzx {
     static_assert(vmprog_header_v1_0::expected_magic == 0x47504D56u,
         "expected_magic must be 0x47504D56 (little-endian 'VMPG')");
 
-    // File size limit validation - ensure max_file_size is 64 MB
-    static_assert(vmprog_header_v1_0::max_file_size == 67108864u,
-        "max_file_size must be 67108864 (64 MB)");
+    // File size limit validation - ensure max_file_size is 1 MB
+    static_assert(vmprog_header_v1_0::max_file_size == 1048576u,
+        "max_file_size must be 1048576 (1 MB)");
 
-    static_assert(vmprog_header_v1_0::max_file_size == (64u * 1024u * 1024u),
+    static_assert(vmprog_header_v1_0::max_file_size == (1u * 1024u * 1024u),
         "max_file_size calculation mismatch");
 
     // String buffer size validations

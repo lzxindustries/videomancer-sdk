@@ -11,8 +11,6 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(videomancer-sdk C CXX ASM)
-
   execute_process(
         COMMAND git describe --tags --abbrev=7
         OUTPUT_VARIABLE GIT_DESCRIBE

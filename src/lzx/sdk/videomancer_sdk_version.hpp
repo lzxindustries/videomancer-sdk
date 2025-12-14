@@ -10,8 +10,8 @@ namespace lzx {
 namespace videomancer_sdk_version {
 
 constexpr const char *git_tag = "0.1.0";
-constexpr const char *git_hash = "";
-constexpr unsigned long git_commits = 0;
+constexpr const char *git_hash = "gd8a5be0";
+constexpr unsigned long git_commits = 1;
 constexpr unsigned long major = 0;
 constexpr unsigned long minor = 1;
 constexpr unsigned long patch = 0;

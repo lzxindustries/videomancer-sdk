@@ -25,38 +25,10 @@
 
 ## 1. Overview
 
-The `.vmprog` file format is a **binary container** for distributing FPGA programs to Videomancer video synthesis devices. It provides:
+Binary container for FPGA programs with cryptographic verification (Ed25519 + SHA-256), hardware compatibility checking, ABI management, and user parameter configuration.
 
-- **Structured packaging** of FPGA bitstreams and metadata
-- **Cryptographic integrity** via SHA-256 hashing
-- **Digital signatures** using Ed25519
-- **Hardware compatibility** checking
-- **ABI version** management
-- **Parameter configuration** for user controls
-
-### 1.1 Key Features
-
-- **Version:** 1.0 (major.minor versioning)
-- **Maximum file size:** 64 MB
-- **Endianness:** Little-endian for all multi-byte integers
-- **Alignment:** All structures are packed (`#pragma pack(1)`)
-- **Security:** Built-in public key verification support
-- **String encoding:** Null-terminated UTF-8
-
-### 1.2 Format Philosophy
-
-The format prioritizes:
-
-1. **Security** - Cryptographic verification of all content
-2. **Compatibility** - Clear hardware and ABI requirements
-3. **Simplicity** - Fixed-size structures where possible
-4. **Extensibility** - Reserved fields for future versions
-5. **Determinism** - Reproducible builds for signing
-
-### 1.3 File Extension
-
-- Primary: `.vmprog`
-- MIME type: `application/x-vmprog` (proposed)
+**Properties:** Version 1.0 | 1 MB max | Little-endian | Packed structures | UTF-8 strings  
+**Extension:** `.vmprog` | MIME: `application/x-vmprog` (proposed)
 
 ---
 
@@ -111,7 +83,7 @@ File ends at: header.file_size
 - **Header:** Fixed 64 bytes
 - **TOC entry:** Fixed 64 bytes
 - **Maximum TOC count:** 256 entries (recommended limit)
-- **Maximum file size:** 67,108,864 bytes (64 MB)
+- **Maximum file size:** 1,048,576 bytes (1 MB)
 - **Program config:** Fixed 7,240 bytes
 - **Signed descriptor:** Fixed 332 bytes
 - **Ed25519 signature:** Fixed 64 bytes
@@ -326,21 +298,12 @@ All structures use `#pragma pack(push, 1)` for byte-aligned packing.
 **Constants:**
 
 - `expected_magic` = 0x47504D56u
-- `max_file_size` = 67108864u (64 MB)
+- `max_file_size` = 1048576u (1 MB)
 - `default_version_major` = 1
 - `default_version_minor` = 0
 - `struct_size` = 64
 
-**Validation:**
 
-- Magic must equal 0x47504D56
-- `version_major` must be 1
-- `header_size` must be 64
-- `file_size` must be ≥ 64 and ≤ 67108864
-- `toc_offset` must be ≥ 64 and < `file_size`
-- `toc_bytes` must equal `toc_count × 64`
-- `toc_count` must be > 0 and ≤ 256
-- `reserved_pad` must be 0
 
 ### 4.2 TOC Entry
 
@@ -359,13 +322,7 @@ All structures use `#pragma pack(push, 1)` for byte-aligned packing.
 
 - `struct_size` = 64
 
-**Validation:**
 
-- `type` must not be `none` (0)
-- `type` must be ≤ 10 (bitstream_hd_dual)
-- `offset` must be ≥ 64 and < file_size
-- If `size` > 0: `offset` ≤ file_size - size (overflow check)
-- `reserved[0..3]` must all be 0
 
 ### 4.3 Artifact Hash
 
@@ -382,10 +339,7 @@ Used in signed descriptors to link artifacts:
 
 - `struct_size` = 36
 
-**Validation:**
 
-- `type` must be valid TOC entry type (0-10)
-- For unused slots: `type` must be `none` (0) and hash must be all zeros
 
 ### 4.4 Signed Descriptor
 
@@ -407,17 +361,7 @@ This structure is signed by Ed25519:
 - `max_artifacts` = 8
 - `struct_size` = 332
 
-**Validation:**
-
-- `artifact_count` must be ≤ 8
-- `reserved_pad[0..2]` must all be 0
-- Artifacts `[0..artifact_count-1]`: Must have valid type (not none)
-- Artifacts `[artifact_count..7]`: Must be fully zeroed (type=none, hash=zeros)
-
-**Notes:**
-
-- This entire structure is the input to Ed25519 signature verification
-- The signature is stored separately as a TOC entry
+**Notes:** Signed by Ed25519. Signature stored as separate TOC entry.
 
 ### 4.5 Parameter Configuration
 
@@ -450,18 +394,7 @@ Configures one user-controllable parameter:
 - `max_value_labels` = 16
 - `struct_size` = 572
 
-**Validation:**
 
-- `parameter_id` must be ≤ 12
-- `control_mode` must be ≤ 35 (expo_in_out)
-- `value_label_count` must be ≤ 16
-- `min_value` ≤ `max_value`
-- `initial_value` must be in range [min_value, max_value]
-- `display_min_value` ≤ `display_max_value`
-- `name_label` must be null-terminated
-- `suffix_label` must be null-terminated
-- Each value_label `[0..value_label_count-1]` must be null-terminated
-- `reserved_pad[0..1]` and `reserved[0..1]` must be 0
 
 ### 4.6 Program Configuration
 
@@ -501,19 +434,7 @@ Main program metadata structure:
 - `num_parameters` = 12
 - `struct_size` = 7240
 
-**Validation:**
 
-- `parameter_count` must be ≤ 12
-- `abi_min_major` > 0 and `abi_max_major` > 0
-- `abi_min_major` < `abi_max_major`, OR
-  (`abi_min_major` == `abi_max_major` AND `abi_min_minor` < `abi_max_minor`)
-- `hw_mask` must not be `none` (0)
-- `program_id` must be null-terminated and non-empty
-- `program_name` must be null-terminated and non-empty
-- `author`, `license`, `category`, `description` must be null-terminated
-- `reserved_pad` must be 0
-- `reserved[0..1]` must be 0
-- Each parameter `[0..parameter_count-1]` must pass validation
 
 ---
 
@@ -521,116 +442,20 @@ Main program metadata structure:
 
 All validation functions are inline and return `vmprog_validation_result`.
 
-### 5.1 Header Validation
+### 5.1 Individual Structure Validation
 
 ```cpp
-vmprog_validation_result validate_vmprog_header_v1_0(
-    const vmprog_header_v1_0& header,
-    uint32_t file_size
-);
+vmprog_validation_result validate_vmprog_header_v1_0(const vmprog_header_v1_0& header, uint32_t file_size);
+vmprog_validation_result validate_vmprog_toc_entry_v1_0(const vmprog_toc_entry_v1_0& entry, uint32_t file_size);
+vmprog_validation_result validate_vmprog_artifact_hash_v1_0(const vmprog_artifact_hash_v1_0& artifact);
+vmprog_validation_result validate_vmprog_signed_descriptor_v1_0(const vmprog_signed_descriptor_v1_0& descriptor);
+vmprog_validation_result validate_vmprog_parameter_config_v1_0(const vmprog_parameter_config_v1_0& param);
+vmprog_validation_result validate_vmprog_program_config_v1_0(const vmprog_program_config_v1_0& config);
 ```
 
-**Checks:**
+Validates individual structures. Returns `ok` or error code.
 
-- Magic number (0x47504D56)
-- Version (major must be 1)
-- Header size (must be 64)
-- File size (≥ 64, ≤ 64MB, matches header.file_size)
-- TOC offset (≥ 64, < file_size)
-- TOC size (must equal toc_count × 64, fits in file)
-- TOC count (> 0, ≤ 256)
-
-**Returns:** `ok` or specific error code
-
-### 5.2 TOC Entry Validation
-
-```cpp
-vmprog_validation_result validate_vmprog_toc_entry_v1_0(
-    const vmprog_toc_entry_v1_0& entry,
-    uint32_t file_size
-);
-```
-
-**Checks:**
-
-- Entry type is not `none` (0)
-- Offset is ≥ 64 and < file_size
-- Size doesn't cause offset overflow
-- Reserved fields are zeroed
-
-**Returns:** `ok` or specific error code
-
-### 5.3 Artifact Hash Validation
-
-```cpp
-vmprog_validation_result validate_vmprog_artifact_hash_v1_0(
-    const vmprog_artifact_hash_v1_0& artifact
-);
-```
-
-**Checks:**
-
-- Type is valid (≤ 10)
-
-**Returns:** `ok` or specific error code
-
-### 5.4 Signed Descriptor Validation
-
-```cpp
-vmprog_validation_result validate_vmprog_signed_descriptor_v1_0(
-    const vmprog_signed_descriptor_v1_0& descriptor
-);
-```
-
-**Checks:**
-
-- Artifact count ≤ 8
-- Reserved padding is zeroed
-- Used artifacts [0..count-1] have valid types
-- Unused artifacts [count..7] are fully zeroed
-
-**Returns:** `ok` or specific error code
-
-### 5.5 Parameter Configuration Validation
-
-```cpp
-vmprog_validation_result validate_vmprog_parameter_config_v1_0(
-    const vmprog_parameter_config_v1_0& param
-);
-```
-
-**Checks:**
-
-- Parameter ID ≤ 12
-- Control mode ≤ 35
-- Value label count ≤ 16
-- Value ranges (min ≤ max, initial in range)
-- Display ranges (min ≤ max)
-- String null-termination
-- Reserved fields zeroed
-
-**Returns:** `ok` or specific error code
-
-### 5.6 Program Configuration Validation
-
-```cpp
-vmprog_validation_result validate_vmprog_program_config_v1_0(
-    const vmprog_program_config_v1_0& config
-);
-```
-
-**Checks:**
-
-- Parameter count ≤ 12
-- ABI range validity
-- Hardware mask not zero
-- Required strings non-empty and null-terminated
-- Reserved fields zeroed
-- All parameters [0..count-1] valid
-
-**Returns:** `ok` or specific error code
-
-### 5.7 Comprehensive Package Validation
+### 5.2 Comprehensive Package Validation
 
 ```cpp
 vmprog_validation_result validate_vmprog_package(
@@ -684,190 +509,30 @@ auto result = validate_vmprog_package(
 
 All cryptographic functions use the monocypher library (BLAKE2b-256 for hashing, Ed25519 for signatures).
 
-### 6.1 Config Hash Calculation
+### 6.1 Hash Functions
 
 ```cpp
-bool calculate_config_sha256(
-    const vmprog_program_config_v1_0& config, 
-    uint8_t* out_hash
-);
+bool calculate_config_sha256(const vmprog_program_config_v1_0& config, uint8_t* out_hash);
+bool calculate_package_sha256(const uint8_t* file_data, uint32_t file_size, uint8_t* out_hash);
+bool verify_package_sha256(const uint8_t* file_data, uint32_t file_size);
+bool verify_payload_hash(const uint8_t* payload_data, uint32_t payload_size, const uint8_t expected_hash[32]);
+vmprog_validation_result verify_all_payload_hashes(const uint8_t* file_data, uint32_t file_size, const vmprog_header_v1_0& header);
+void calculate_data_hash(const uint8_t* data, uint32_t size, uint8_t out_hash[32]);
 ```
 
-Computes the SHA-256 hash of the program configuration. Creates a copy with all reserved fields zeroed before hashing.
+SHA-256 hashing and verification. All `out_hash` buffers must be 32 bytes.
 
-**Parameters:**
-
-- `config` - Program configuration to hash
-- `out_hash` - Output buffer (must be 32 bytes)
-
-**Returns:** `true` on success
-
-**Notes:**
-
-- Only hashes used parameters [0..parameter_count-1]
-- Ensures deterministic hashing by zeroing reserved fields
-
-### 6.2 Package Hash Calculation
+### 6.2 Signature Functions
 
 ```cpp
-bool calculate_package_sha256(
-    const uint8_t* file_data,
-    uint32_t file_size,
-    uint8_t* out_hash
-);
-```
-
-Computes SHA-256 of entire file with `sha256_package` field zeroed.
-
-**Parameters:**
-
-- `file_data` - Complete file contents
-- `file_size` - File size in bytes
-- `out_hash` - Output buffer (must be 32 bytes)
-
-**Returns:** `true` on success, `false` if file too small
-
-**Algorithm:**
-
-1. Hash bytes [0..31] (before sha256_package field)
-2. Hash 32 zero bytes (in place of sha256_package)
-3. Hash bytes [64..file_size-1] (after sha256_package)
-
-
-### 6.3 Package Hash Verification
-
-```cpp
-bool verify_package_sha256(
-    const uint8_t* file_data,
-    uint32_t file_size
-);
-```
-
-Verifies that `sha256_package` field in header matches computed hash.
-
-**Parameters:**
-
-- `file_data` - Complete file contents
-- `file_size` - File size in bytes
-
-**Returns:** `true` if hash matches, `false` otherwise
-
-### 6.4 Ed25519 Signature Verification
-
-```cpp
-bool verify_ed25519_signature(
-    const uint8_t signature[64],
-    const uint8_t public_key[32],
-    const vmprog_signed_descriptor_v1_0& signed_descriptor
-);
-```
-
-Verifies Ed25519 signature over signed descriptor.
-
-**Parameters:**
-
-- `signature` - Ed25519 signature (64 bytes)
-- `public_key` - Ed25519 public key (32 bytes)
-- `signed_descriptor` - Descriptor structure (332 bytes)
-
-**Returns:** `true` if signature valid, `false` otherwise
-
-### 6.5 Payload Hash Verification
-
-```cpp
-bool verify_payload_hash(
-    const uint8_t* payload_data,
-    uint32_t payload_size,
-    const uint8_t expected_hash[32]
-);
-```
-
-Verifies payload data matches expected hash from TOC entry.
-
-**Parameters:**
-
-- `payload_data` - Payload bytes
-- `payload_size` - Payload size in bytes
-- `expected_hash` - Expected SHA-256 hash
-
-**Returns:** `true` if hash matches
-
-### 6.6 All Payload Hash Verification
-
-```cpp
-vmprog_validation_result verify_all_payload_hashes(
-    const uint8_t* file_data,
-    uint32_t file_size,
-    const vmprog_header_v1_0& header
-);
-```
-
-Verifies all TOC entry payload hashes in one pass.
-
-**Parameters:**
-
-- `file_data` - Complete file contents
-- `file_size` - File size in bytes
-- `header` - Validated header structure
-
-**Returns:** `ok` if all hashes valid, error code otherwise
-
-### 6.7 Arbitrary Data Hashing
-
-```cpp
-void calculate_data_hash(
-    const uint8_t* data,
-    uint32_t size,
-    uint8_t out_hash[32]
-);
-```
-
-Computes SHA-256 hash of arbitrary data.
-
-**Parameters:**
-
-- `data` - Data to hash
-- `size` - Size in bytes
-- `out_hash` - Output buffer (32 bytes)
-
-### 6.8 Built-in Public Key Verification
-
-```cpp
-bool verify_with_builtin_keys(
-    const uint8_t signature[64],
-    const vmprog_signed_descriptor_v1_0& signed_descriptor,
-    size_t* out_key_index = nullptr
-);
-```
-
-Tries to verify signature against all built-in public keys.
-
-**Parameters:**
-
-- `signature` - Ed25519 signature (64 bytes)
-- `signed_descriptor` - Descriptor to verify
-- `out_key_index` - Optional output for which key succeeded
-
-**Returns:** `true` if any built-in key verifies signature
-
-**Usage:**
-
-```cpp
-size_t key_index;
-if (verify_with_builtin_keys(sig, descriptor, &key_index)) {
-    printf("Verified with key %zu\n", key_index);
-}
-```
-
-### 6.9 Get Public Key Count
-
-```cpp
+bool verify_ed25519_signature(const uint8_t signature[64], const uint8_t public_key[32], const vmprog_signed_descriptor_v1_0& signed_descriptor);
+bool verify_with_builtin_keys(const uint8_t signature[64], const vmprog_signed_descriptor_v1_0& signed_descriptor, size_t* out_key_index = nullptr);
 constexpr size_t get_public_key_count();
 ```
 
-Returns the number of built-in public keys.
+Ed25519 signature verification. `verify_with_builtin_keys` tries all built-in keys.
 
-**Returns:** Count of keys in `vmprog_public_keys` array
+
 
 ---
 
@@ -1301,118 +966,36 @@ for (uint32_t i = 0; i < config->parameter_count; ++i) {
 
 ## 9. Verification Procedures
 
-### 9.1 Basic Validation Checklist
+### 9.1 Validation Levels
 
-**Before trusting any package data:**
+**Basic:** `validate_vmprog_package(data, size, false, false)` - Structure only  
+**Integrity:** `validate_vmprog_package(data, size, true, false)` - Structure + hashes  
+**Authenticated:** `validate_vmprog_package(data, size, true, true, pubkey)` - Full verification
 
-1. ✓ Verify magic number (0x47504D56)
-2. ✓ Verify version (major must be 1)
-3. ✓ Verify header size (must be 64)
-4. ✓ Verify file size matches filesystem
-5. ✓ Verify TOC is within file bounds
-6. ✓ Verify all TOC entries are within file bounds
-7. ✓ Verify all required TOC entries are present
-
-**Use:** `validate_vmprog_header_v1_0()` for items 1-6
-
-### 9.2 Integrity Verification Checklist
-
-**For tamper detection:**
-
-1. ✓ Compute SHA-256 of each payload
-2. ✓ Compare with TOC entry hash
-3. ✓ Reject if any hash mismatch
-4. ✓ If sha256_package present, verify package hash
-5. ✓ Verify config structure
-6. ✓ Verify signed descriptor structure
-
-**Use:** `validate_vmprog_package()` with `verify_hashes=true`
-
-### 9.3 Signature Verification Checklist
-
-**For authentication:**
-
-1. ✓ Check `signed_pkg` flag in header
-2. ✓ Locate `signed_descriptor` TOC entry (type 2)
-3. ✓ Locate `signature` TOC entry (type 3)
-4. ✓ Verify descriptor size (must be 332 bytes)
-5. ✓ Verify signature size (must be 64 bytes)
-6. ✓ Verify descriptor hash from TOC matches
-7. ✓ Verify Ed25519 signature with public key
-8. ✓ Verify all artifact hashes in descriptor match TOC
-9. ✓ Verify config hash in descriptor matches actual config
-
-**Use:** `validate_vmprog_package()` with `verify_signature=true`
-
-**Recommended public key verification:**
+### 9.2 Compatibility Check
 
 ```cpp
-// Try all built-in keys
-bool verified = lzx::verify_with_builtin_keys(signature, descriptor);
-
-// Or use specific key
-bool verified = lzx::verify_ed25519_signature(
-    signature, 
-    lzx::vmprog_public_keys[0], 
-    descriptor
-);
-```
-
-### 9.4 Compatibility Verification Checklist
-
-**Before loading program:**
-
-1. ✓ Read `abi_min_major/minor` and `abi_max_major/minor`
-2. ✓ Check firmware ABI is in range: `abi_min ≤ firmware_abi < abi_max`
-3. ✓ Read `hw_mask` from config
-4. ✓ Check hardware match: `(hw_mask & device_hw_flags) != 0`
-5. ✓ Verify all referenced bitstream types are available
-
-**Example:**
-
-```cpp
-bool is_compatible(const lzx::vmprog_program_config_v1_0& config) {
-    // Check ABI
-    uint16_t fw_abi_major = 1;
-    uint16_t fw_abi_minor = 5;
+bool is_compatible(const vmprog_program_config_v1_0& config, 
+                   uint16_t fw_abi_maj, uint16_t fw_abi_min, 
+                   vmprog_hardware_flags_v1_0 device_hw) {
+    // ABI range check
+    if (fw_abi_maj < config.abi_min_major || fw_abi_maj >= config.abi_max_major) return false;
+    if (fw_abi_maj == config.abi_min_major && fw_abi_min < config.abi_min_minor) return false;
+    if (fw_abi_maj == config.abi_max_major && fw_abi_min >= config.abi_max_minor) return false;
     
-    if (fw_abi_major < config.abi_min_major) return false;
-    if (fw_abi_major == config.abi_min_major && 
-        fw_abi_minor < config.abi_min_minor) return false;
-    if (fw_abi_major >= config.abi_max_major) return false;
-    if (fw_abi_major == config.abi_max_major && 
-        fw_abi_minor >= config.abi_max_minor) return false;
-    
-    // Check hardware
-    auto device_hw = lzx::vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
-    if ((config.hw_mask & device_hw) == lzx::vmprog_hardware_flags_v1_0::none) {
-        return false;
-    }
-    
-    return true;
+    // Hardware check
+    return (config.hw_mask & device_hw) != vmprog_hardware_flags_v1_0::none;
 }
 ```
 
-### 9.5 Program Classification
+### 9.3 Trust Levels
 
-Based on verification results, classify packages:
-
-| Verification Status | Classification | Trust Level |
-|---------------------|----------------|-------------|
-| Valid signature from built-in key | **Official Verified** | ✓✓✓ High |
-| Valid signature from user key | **Community Verified** | ✓✓ Medium |
-| No signature, valid hashes | **Community Unsigned** | ✓ Low |
-| Invalid signature | **Tampered/Malicious** | ✗ Reject |
-| Invalid hashes | **Corrupted** | ✗ Reject |
-| Invalid structure | **Malformed** | ✗ Reject |
-
-**Recommended UI indicators:**
-
-- Official Verified: Green checkmark, "Official"
-- Community Verified: Blue checkmark, "Verified"
-- Community Unsigned: Yellow caution, "Unsigned"
-- Tampered: Red X, "Invalid Signature - DO NOT USE"
-- Corrupted: Red X, "File Corrupted"
+| Verification | Classification | Use |
+|--------------|----------------|-----|
+| Valid signature (built-in key) | Official | High trust |
+| Valid signature (user key) | Verified | Medium trust |
+| No signature, valid hashes | Unsigned | Low trust |
+| Invalid signature/hash | Reject | Do not use |
 
 ---
 
@@ -1577,426 +1160,8 @@ printf("%s\n", config.program_name);  // DANGEROUS
 
 ## 11. References
 
-### 11.1 Canonical Implementation
+**Implementation:** [vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp) | [vmprog_crypto.hpp](../src/lzx/sdk/vmprog_crypto.hpp) | [vmprog_public_keys.hpp](../src/lzx/sdk/vmprog_public_keys.hpp)
 
-- **Header file:** [src/lzx/sdk/vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp)
-- **Crypto wrapper:** [src/lzx/sdk/vmprog_crypto.hpp](../src/lzx/sdk/vmprog_crypto.hpp)
-- **Public keys:** [src/lzx/sdk/vmprog_public_keys.hpp](../src/lzx/sdk/vmprog_public_keys.hpp)
+**Standards:** SHA-256 (FIPS 180-4) | Ed25519 (RFC 8032) | Monocypher 4.x
 
-### 11.2 Cryptographic Standards
-
-- **SHA-256:** FIPS 180-4 (using BLAKE2b-256 as equivalent)
-- **Ed25519:** RFC 8032 (EdDSA signature scheme)
-- **Cryptographic library:** Monocypher 4.x
-
-### 11.3 Related Documentation
-
-- **ABI Specification:** [docs/fpga-kernel-abi.md](fpga-kernel-abi.md)
-- **Key Management:** [docs/keys.md](keys.md)
-- **Compatibility:** [docs/abi-and-compatibility.md](abi-and-compatibility.md)
-
-### 11.4 Tools
-
-- **Package creator:** `scripts/pack_vmprog/`
-- **Signature tools:** `scripts/gen_signed_descriptor/`
-- **Verification tools:** Built into firmware
-
-### 11.5 Static Assertions
-
-The header file contains comprehensive compile-time checks:
-
-- Structure sizes (must match `struct_size` constants)
-- Field offsets (must match binary layout)
-- Alignment (must be 32-bit aligned)
-- Array dimensions (must match constants)
-- Enum sizes (must be uint32_t)
-- Magic numbers (must be correct values)
-- String buffer sizes (must match constants)
-
-**Example:**
-
-```cpp
-static_assert(sizeof(vmprog_header_v1_0) == 64, 
-              "Header size mismatch");
-static_assert(offsetof(vmprog_header_v1_0, magic) == 0, 
-              "Magic must be at offset 0");
-```
-
-### 11.6 Version History
-
-| Version | Date | Description |
-|---------|------|-------------|
-| 1.0 | 2024-2025 | Initial production release |
-
-**Version numbering:**
-
-- **Major:** Breaking changes (incompatible format changes)
-- **Minor:** Backward-compatible additions (new optional features)
-- **Patch:** Bug fixes (no format changes)
-
-**Compatibility policy:**
-
-- Readers must support their own major version
-- Readers should gracefully handle newer minor versions
-- Readers must reject different major versions
-
----
-
-## Appendix A: Structure Size Summary
-
-| Structure | Size (bytes) | Alignment |
-|-----------|-------------:|-----------|
-| `vmprog_header_v1_0` | 64 | 4-byte |
-| `vmprog_toc_entry_v1_0` | 64 | 4-byte |
-| `vmprog_artifact_hash_v1_0` | 36 | 4-byte |
-| `vmprog_signed_descriptor_v1_0` | 332 | 4-byte |
-| `vmprog_parameter_config_v1_0` | 572 | 4-byte |
-| `vmprog_program_config_v1_0` | 7240 | 4-byte |
-| Ed25519 signature | 64 | - |
-| Ed25519 public key | 32 | - |
-| SHA-256 hash | 32 | - |
-
-**Total fixed overhead (minimum):**
-
-- Header: 64 bytes
-- Config TOC entry: 64 bytes  
-- Descriptor TOC entry: 64 bytes
-- Signature TOC entry: 64 bytes
-- Bitstream TOC entry: 64 bytes (minimum 1)
-- Config payload: 7240 bytes
-- Descriptor payload: 332 bytes
-- Signature payload: 64 bytes
-
-**Minimum viable package:** ~8,016 bytes + bitstream(s)
-
----
-
-## Appendix B: Quick Reference
-
-### Magic Numbers
-
-```text
-File header:  0x47504D56  ('VMPG' little-endian)
-```
-
-### Version Check
-
-```cpp
-if (header.magic != 0x47504D56u) return error;
-if (header.version_major != 1) return error;
-```
-
-### Quick Validation
-
-```cpp
-auto result = lzx::validate_vmprog_package(data, size, true, true, pubkey);
-if (result != lzx::vmprog_validation_result::ok) return error;
-```
-
-### Find Config
-
-```cpp
-auto* config_entry = lzx::find_toc_entry(toc, count, 
-    lzx::vmprog_toc_entry_type_v1_0::config);
-auto* config = (vmprog_program_config_v1_0*)(data + config_entry->offset);
-```
-
-### Verify Signature
-
-```cpp
-bool ok = lzx::verify_with_builtin_keys(signature, descriptor);
-```
-
----
-
-**Document Version:** 2.0  
-**Last Updated:** 2025-01-14  
-**Maintainer:** LZX Industries LLC
-
-| Offset | Size | Type     | Field              | Description                                           |
-| -----: | ---: | -------- | ------------------ | ----------------------------------------------------- |
-|   0x00 |    4 | uint32_t | magic              | Magic number `0x47504D56` (`'VMPG'`)                  |
-|   0x04 |    2 | uint16_t | version            | Format version (1)                                    |
-|   0x06 |    2 | uint16_t | header_size        | Header size in bytes (64)                             |
-|   0x08 |    4 | uint32_t | file_size          | Total size of .vmprog file in bytes                   |
-|   0x0C |    4 | uint32_t | flags              | Header flags (see Header Flags)                       |
-|   0x10 |    4 | uint32_t | toc_offset         | Byte offset to TOC from file start                    |
-|   0x14 |    4 | uint32_t | toc_bytes          | Size of TOC in bytes                                  |
-|   0x18 |    4 | uint32_t | toc_count          | Number of TOC entries                                 |
-|   0x1C |   32 | uint8_t  | sha256_package[32] | Optional SHA-256 of entire file (with this field = 0) |
-|   0x3C |    4 | uint32_t | reserved           | Reserved for future use (must be 0)                   |
-
-### 2.2 Header Flags: `vmprog_header_flags_v1`
-
-| Value      | Name       | Description                         |
-| ---------: | ---------- | ----------------------------------- |
-| 0x00000000 | none       | No flags set                        |
-| 0x00000001 | signed_pkg | Package is cryptographically signed |
-
----
-
-## 3. Table of Contents (TOC)
-
-### 3.1 Structure: `vmprog_toc_entry_v1` (64 bytes)
-
-Each TOC entry describes one payload item.
-
-| Offset | Size | Type     | Field         | Description                       |
-| -----: | ---: | -------- | ------------- | --------------------------------- |
-|   0x00 |    4 | uint32_t | type          | Entry type (see TOC Entry Types)  |
-|   0x04 |    4 | uint32_t | flags         | Entry flags                       |
-|   0x08 |    4 | uint32_t | offset        | Byte offset to payload from start |
-|   0x0C |    4 | uint32_t | size          | Size of payload in bytes          |
-|   0x10 |   32 | uint8_t  | sha256[32]    | SHA-256 hash of payload           |
-|   0x30 |   16 | uint32_t | reserved[4]   | Reserved for future use (zeros)   |
-
-### 3.2 TOC Entry Types: `vmprog_toc_entry_type_v1`
-
-| Value | Name                  | Description                |
-| ----: | --------------------- | -------------------------- |
-|     0 | none                  | Invalid/empty entry        |
-|     1 | config                | Program configuration      |
-|     2 | signed_descriptor     | Signature descriptor       |
-|     3 | signature             | Ed25519 signature          |
-|     4 | bitstream_sd_analog   | SD analog input bitstream  |
-|     5 | bitstream_sd_hdmi     | SD HDMI input bitstream    |
-|     6 | bitstream_sd_dual     | SD dual input bitstream    |
-|     7 | bitstream_hd_analog   | HD analog input bitstream  |
-|     8 | bitstream_hd_hdmi     | HD HDMI input bitstream    |
-|     9 | bitstream_hd_dual     | HD dual input bitstream    |
-
-### 3.3 TOC Entry Flags: `vmprog_toc_entry_flags_v1`
-
-| Value      | Name | Description  |
-| ---------: | ---- | ------------ |
-| 0x00000000 | none | No flags set |
-
----
-
-## 4. Program Configuration (512 bytes)
-
-### 4.1 Structure: `vmprog_config_v1`
-
-The program configuration is a fixed-size binary structure containing program metadata.
-
-| Field             | Type            | Size  | Description                         |
-| ----------------- | --------------- | ----: | ----------------------------------- |
-| manifest_version  | uint32_t        |     4 | Manifest format version             |
-| program_name      | char[]          |    64 | Display name                        |
-| program_id        | char[]          |    64 | Unique program identifier           |
-| program_version   | char[]          |    16 | Version string                      |
-| author            | char[]          |    64 | Author name                         |
-| license           | char[]          |    32 | License identifier                  |
-| category          | char[]          |    24 | Program category                    |
-| description       | char[]          |   128 | Program description                 |
-| hardware          | char\[4\]\[24\]     |    96 | Compatible hardware list (max 4)    |
-| hardware_count    | uint32_t        |     4 | Number of hardware entries          |
-| kernel_abi        | char[]          |    24 | Required kernel ABI                 |
-| video_modes       | char\[8\]\[16\]     |   128 | Supported video modes (max 8)       |
-| video_modes_count | uint32_t        |     4 | Number of video mode entries        |
-| bram_kbits        | uint32_t        |     4 | BRAM usage in kilobits              |
-| dsp_blocks        | uint32_t        |     4 | DSP block usage                     |
-| max_fclk_mhz      | uint32_t        |     4 | Maximum FCLK in MHz                 |
-| latency_frames    | uint32_t        |     4 | Processing latency in frames        |
-| linear            | uint32_t        |     4 | Number of linear controls           |
-| boolean           | uint32_t        |     4 | Number of boolean controls          |
-| lin_labels        | char\[8\]\[16\]     |   128 | Linear control labels (max 8)       |
-| lin_labels_count  | uint32_t        |     4 | Number of linear labels             |
-| bool_labels       | char\[8\]\[16\]     |   128 | Boolean control labels (max 8)      |
-| bool_labels_count | uint32_t        |     4 | Number of boolean labels            |
-| bitstream_path    | char[]          |    64 | Original bitstream file path        |
-| icon_path         | char[]          |    64 | Original icon file path             |
-| readme_path       | char[]          |    64 | Original readme file path           |
-| signed_flag       | bool            |     1 | Indicates if package should be signed |
-| signature_path    | char[]          |    64 | Original signature file path        |
-| descriptor_path   | char[]          |    64 | Original descriptor file path       |
-
-**Total Size:** 512 bytes
-
-All string fields are null-terminated UTF-8. Unused array entries must be zeroed.
-
----
-
-## 5. Signed Descriptor (432 bytes)
-
-### 5.1 Structure: `vmprog_signed_descriptor_v1`
-
-The signed descriptor is a **deterministic binary structure** that is cryptographically signed. It contains the authoritative identity and compatibility information for the program.
-
-| Offset | Size | Type            | Field            | Description                              |
-| -----: | ---: | --------------- | ---------------- | ---------------------------------------- |
-|   0x00 |    4 | uint32_t        | magic            | Magic number `0x44534D56` (`'VMSD'`)     |
-|   0x04 |    2 | uint16_t        | version          | Descriptor version (1)                   |
-|   0x06 |    2 | uint16_t        | reserved[1]      | Reserved (must be 0)                     |
-|   0x08 |   64 | char[]          | program_id       | Unique program identifier                |
-|   0x48 |   16 | char[]          | program_version  | Version string                           |
-|   0x58 |    2 | uint16_t        | abi_min_major    | Minimum ABI major version                |
-|   0x5A |    2 | uint16_t        | abi_min_minor    | Minimum ABI minor version                |
-|   0x5C |    2 | uint16_t        | abi_max_major    | Maximum ABI major version (exclusive)    |
-|   0x5E |    2 | uint16_t        | abi_max_minor    | Maximum ABI minor version (exclusive)    |
-|   0x60 |    4 | uint32_t        | hw_mask          | Compatible hardware mask                 |
-|   0x64 |    1 | uint8_t         | artifact_count   | Number of valid artifacts (0-8)          |
-|   0x65 |    3 | uint8_t         | reserved_pad[3]  | Reserved padding                         |
-|   0x68 |  320 | artifact_hash[] | artifacts[8]     | Array of artifact hashes (8×40 bytes)    |
-|  0x1A8 |    4 | uint32_t        | flags            | Descriptor flags                         |
-|  0x1AC |    4 | uint32_t        | build_id         | Build identifier                         |
-
-**Total Size:** 432 bytes
-
-### 5.2 Signed Descriptor Constants
-
-- **Magic:** `0x44534D56` (`'VMSD'` in little-endian)
-- **Version:** `1`
-- **Max Artifacts:** `8`
-- **Size:** `432` bytes (fixed)
-
-### 5.3 Artifact Hash Entry: `vmprog_artifact_hash_v1` (40 bytes)
-
-Each artifact hash entry links a TOC entry to its expected hash.
-
-| Offset | Size | Type     | Field         | Description               |
-| -----: | ---: | -------- | ------------- | ------------------------- |
-|   0x00 |    4 | uint32_t | type          | Artifact type (TOC type)  |
-|   0x04 |   32 | uint8_t  | sha256[32]    | SHA-256 hash of artifact  |
-|   0x24 |    4 | uint32_t | reserved[1]   | Reserved (must be 0)      |
-
-**Note:** Only entries `[0..artifact_count-1]` are valid. Entries `[artifact_count..7]` must be zeroed.
-
-### 5.4 Hardware Flags: `vmprog_hardware_flags_v1`
-
-| Value      | Name                     | Description             |
-| ---------: | ------------------------ | ----------------------- |
-| 0x00000000 | none                     | No hardware specified   |
-| 0x00000001 | videomancer_core_rev_a   | Videomancer Core Rev A  |
-| 0x00000002 | videomancer_core_rev_b   | Videomancer Core Rev B  |
-
-### 5.5 Signed Descriptor Flags: `vmprog_signed_descriptor_flags_v1`
-
-| Value      | Name | Description  |
-| ---------: | ---- | ------------ |
-| 0x00000000 | none | No flags set |
-
----
-
-## 6. Signature
-
-### 6.1 Format
-
-- **Algorithm:** Ed25519
-- **Size:** Exactly 64 bytes
-- **Signature covers:** The entire `vmprog_signed_descriptor_v1` structure (432 bytes)
-
-The signature is stored as a TOC entry of type `signature` (3).
-
----
-
-## 7. Integrity and Authentication
-
-### 7.1 Per-Item Integrity
-
-Each TOC entry includes a SHA-256 hash of its payload. Readers **must verify** these hashes before using payload data.
-
-### 7.2 Package-Level Integrity
-
-The optional `sha256_package` field in the header contains the SHA-256 hash of the entire file, computed with this field set to all zeros.
-
-### 7.3 Cryptographic Signing
-
-For signed packages:
-
-1. The `signed_pkg` flag (0x00000001) is set in the header
-2. A `signed_descriptor` TOC entry (type 2) contains the descriptor
-3. A `signature` TOC entry (type 3) contains the Ed25519 signature
-4. The signature is verified against the descriptor bytes
-5. Descriptor artifact hashes are compared against TOC entry hashes
-
----
-
-## 8. Verification Procedure
-
-### 8.1 Basic Validation
-
-1. Verify magic number is `0x47504D56`
-2. Verify version is `1`
-3. Verify header_size is `64`
-4. Verify file_size matches actual file size
-5. Verify TOC offset and size are within file bounds
-6. Verify all TOC entry offsets and sizes are within file bounds
-
-### 8.2 Integrity Verification
-
-1. For each required TOC entry:
-   - Read payload at specified offset
-   - Compute SHA-256 hash
-   - Compare to hash in TOC entry
-   - Reject if mismatch
-
-### 8.3 Signature Verification (if signed_pkg flag set)
-
-1. Locate `signed_descriptor` TOC entry (type 2)
-2. Locate `signature` TOC entry (type 3)
-3. Read and verify descriptor hash from TOC
-4. Read signature (must be exactly 64 bytes)
-5. Verify Ed25519 signature over descriptor
-6. For each artifact in descriptor:
-   - Find matching TOC entry by type
-   - Verify TOC hash matches descriptor hash
-7. Reject package if signature or hashes invalid
-
-### 8.4 Compatibility Verification
-
-1. Read descriptor `abi_min_major` and `abi_max_major`
-2. Verify firmware ABI is within range: `abi_min <= firmware_abi < abi_max`
-3. Verify hardware compatibility: `(hw_mask & device_hw_flags) != 0`
-4. Reject if incompatible
-
-### 8.5 Program Classification
-
-Based on verification results:
-
-- **Official Verified:** Signed package with valid signature from trusted key
-- **Community Unsigned:** Valid package without signature
-- **Tampered/Invalid:** Signature present but verification failed
-
----
-
-## 9. Implementation Notes
-
-### 9.1 Struct Packing
-
-All structures use `#pragma pack(push, 1)` for byte-aligned packing with no padding.
-
-### 9.2 Reserved Fields
-
-All reserved fields **must** be set to zero when creating packages and **should** be ignored when reading packages.
-
-### 9.3 String Encoding
-
-All string fields are null-terminated UTF-8. Unused portions of fixed-size string fields must be zeroed.
-
-### 9.4 Determinism
-
-Signed packages must be deterministic:
-
-- TOC entries in canonical order
-- All padding and reserved fields zeroed
-- Descriptor bytes are canonical
-
-Identical source inputs must produce identical binary outputs.
-
----
-
-## 10. References
-
-- **Canonical Implementation:** [src/lzx/sdk/vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp)
-- **SHA-256:** FIPS 180-4
-- **Ed25519:** RFC 8032
-- **Cryptographic Library:** Monocypher
-
----
-
-## 11. Version History
-
-| Version | Date       | Description                  |
-| ------: | ---------- | ---------------------------- |
-|     1.0 | 2024-2025  | Initial stable specification |
+**Version:** 1.0 (2024-2025) - Initial production release

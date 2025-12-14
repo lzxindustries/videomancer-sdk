@@ -2,30 +2,18 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-> Official FPGA development kit for Videomancer hardware
-
-Videomancer by LZX Industries is a real-time video processing device built on the Raspberry Pi RP2040 microcontroller and the Lattice ICE40HX4K FPGA. It provides a flexible platform for creating custom video effects with hardware description languages.
+> Official SDK for Videomancer FPGA hardware by LZX Industries
 
 **Repository:** [github.com/lzxindustries/videomancer-sdk](https://github.com/lzxindustries/videomancer-sdk)
 
-## Overview
-
-The Videomancer SDK is the **official development kit maintained by LZX Industries** for developing, packaging, and deploying FPGA programs to Videomancer hardware. This SDK includes:
-
-- **Program Package Format (`.vmprog`)** - Secure container format for FPGA bitstreams with cryptographic verification
-- **Cryptographic Libraries** - Ed25519 signing and SHA-256 hashing for program integrity
-- **Hardware Abstraction** - APIs for FPGA configuration and parameter management
-- **Build Tools** - CMake-based build system for cross-platform development
+Header-only C++ library for developing, packaging, and deploying FPGA programs with cryptographic verification. Includes `.vmprog` format specification, Ed25519/SHA-256 crypto, and CMake build tools.
 
 ## Features
 
-- ✅ Cryptographically signed FPGA program packages
-- ✅ Ed25519 digital signatures for authenticity verification
-- ✅ SHA-256 content hashing for integrity checks
-- ✅ Hardware compatibility detection
-- ✅ ABI version management
-- ✅ User-configurable program parameters
-- ✅ Support for multiple bitstream variants (SD/HD, analog/HDMI)
+- Cryptographically signed packages (Ed25519 + SHA-256)
+- Hardware compatibility and ABI version management  
+- User-configurable parameters
+- Multiple bitstream variants (SD/HD, analog/HDMI)
 
 ## Getting Started
 
@@ -84,18 +72,8 @@ void validate_program_file(const uint8_t* file_data, size_t file_size) {
 
 ## Documentation
 
-- **[Program Package Format](docs/vmprog-format.md)** - Complete specification of the `.vmprog` file format
-- **[Third Party Licenses](THIRD_PARTY_LICENSES.md)** - Licenses for included dependencies
-
-## Third Party Libraries
-
-This project includes the following third-party libraries:
-
-| Library | Version | License | Purpose |
-|---------|---------|---------|---------|
-| [Monocypher](https://monocypher.org/) | Latest | BSD-2-Clause OR CC0-1.0 | Cryptographic operations (Ed25519, SHA-256) |
-
-See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for complete license texts.
+- [Program Package Format](docs/vmprog-format.md) - `.vmprog` file format specification
+- [Third Party Licenses](THIRD_PARTY_LICENSES.md) - Monocypher (BSD-2-Clause OR CC0-1.0)
 
 ## Project Structure
 
@@ -127,38 +105,10 @@ videomancer-sdk/
 └── THIRD_PARTY_LICENSES.md             # Third-party licenses
 ```
 
-### Third Party Components
+## Contributions
 
-Third-party libraries included in this project retain their original licenses. See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for details.
-
-## Support and Contributions
-
-### Maintenance
-
-This SDK is **actively maintained by LZX Industries LLC**. Development priorities are aligned with our hardware roadmap and customer needs.
-
-### Bug Reports
-
-Community bug reports are welcome and appreciated. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting issues.
-
-### Feature Requests
-
-While we prioritize features based on our internal roadmap, we're interested in hearing about use cases from the Videomancer community. Please understand that implementation is subject to our product priorities.
-
-### External Contributions
-
-This project is primarily developed internally by LZX Industries. External contributions are reviewed on a case-by-case basis. Please discuss significant changes with maintainers before investing effort.
-
-For more information, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Commercial Support
-
-For commercial support, custom development, or partnership inquiries, please contact LZX Industries directly.
+Maintained by LZX Industries. Bug reports welcome. External contributions reviewed case-by-case. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 or later - see the [LICENSE](LICENSE) file for details.
-
-**Copyright (C) 2025 LZX Industries LLC**
-
-This is a commercially maintained open-source project. While the source code is freely available under GPL-3.0, active development and support are provided by LZX Industries.
+GPL-3.0 - Copyright (C) 2025 LZX Industries LLC. See [LICENSE](LICENSE).

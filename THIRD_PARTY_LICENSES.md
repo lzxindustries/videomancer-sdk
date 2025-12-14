@@ -1,17 +1,10 @@
 # Third Party Licenses
 
-This document contains the licenses for third-party software included in the Videomancer SDK.
-
----
-
 ## Monocypher
 
 **Location:** `third_party/monocypher/`  
 **Copyright:** Copyright (c) 2017-2019, Loup Vaillant  
-**License:** Dual-licensed under BSD-2-Clause OR CC0-1.0  
-**SPDX License Identifier:** BSD-2-Clause OR CC0-1.0
-
-Monocypher is a cryptographic library providing Ed25519 signatures and other cryptographic primitives.
+**License:** BSD-2-Clause OR CC0-1.0
 
 ### BSD 2-Clause License
 
