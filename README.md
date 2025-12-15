@@ -4,80 +4,67 @@
 
 > Official SDK for Videomancer FPGA hardware by LZX Industries
 
+Header-only C++ SDK for the `.vmprog` file format - cryptographically signed FPGA program packages for Videomancer hardware. Includes complete format specification, Ed25519/BLAKE2b cryptography, and Python TOML converter.
+
 **Repository:** [github.com/lzxindustries/videomancer-sdk](https://github.com/lzxindustries/videomancer-sdk)
 
-Header-only C++ SDK for the `.vmprog` file format - cryptographically signed FPGA program packages for Videomancer hardware. Includes complete format specification, Ed25519/BLAKE2b cryptography, CMake build system, and Python TOML converter.
+## Overview
 
-## ⚠️ Repository Status - Partial Release
+The Videomancer SDK provides a complete toolchain for creating, building, packaging, and distributing FPGA programs for Videomancer hardware. Includes format specification, cryptographic verification, FPGA build chain integration, RTL libraries, and automated packaging workflows.
 
-**This repository is currently incomplete.** Version 0.1.0 provides the core `.vmprog` format specification and packaging tools, but additional components are under development and will be released in future versions.
+**Key Features:**
 
-**Currently Available:**
-
-- ✅ `.vmprog` binary format specification
-- ✅ C++ SDK with cryptographic verification
-- ✅ Python TOML to binary converter
-- ✅ Documentation and build system
-
-**Coming in Future Releases:**
-
-- ⏳ **FPGA Build Chain** - Toolchain integration for ICE40HX4K
-- ⏳ **Example FPGA Programs** - Reference designs and templates
-- ⏳ **RTL VHDL Libraries** - Reusable hardware components
-- ⏳ **RTL Constraints** - Timing and pin constraints for Videomancer hardware
-- ⏳ **VMProg Packaging Tools** - Complete workflow from bitstream to signed package
-
-**Current Use Cases:**
-
-- Understanding the `.vmprog` format
-- Building tools that read/validate `.vmprog` files
-- Preparing program configurations in TOML format
-- Contributing to format specification discussions
-
-For FPGA development, check back for future releases.
-
-## What's Inside
-
-### Core SDK (C++17/20)
-
-- `vmprog_format.hpp` - Complete `.vmprog` format specification (1,746 lines)
-- `vmprog_crypto.hpp` - Cryptographic primitives (248 lines)
-- `vmprog_public_keys.hpp` - Ed25519 key storage (41 lines)
-- Comprehensive validation functions for all structures
-- Support for 7,240-byte program configurations
-
-### Python Tools
-
-- `toml_to_config_binary.py` - TOML to binary converter (443 lines)
-- Example TOML with 3 parameters (frequency, amplitude, waveform)
-- Test suite with shell and Python verification scripts
-- Python 3.10+ and 3.11+ compatible (tomli/tomllib)
-
-### Documentation
-
-- [vmprog-format.md](docs/vmprog-format.md) - 1,167-line format specification
-- Complete API documentation in header files
-- Usage examples and code snippets
-- Third-party license documentation
+- **Complete Build Chain:** FPGA synthesis toolchain (OSS CAD Suite) with automated build scripts
+- **Binary Format:** Distribute FPGA programs up to 1 MB with cryptographic signing
+- **RTL Libraries:** VHDL components for video processing, sync generation, and YUV conversion
+- **Python Tooling:** TOML converter and `.vmprog` packaging tool
+- **Cryptographic Security:** Ed25519 signature verification and BLAKE2b-256 hashing
+- **Parameter System:** 12 user-configurable parameters with 36 control modes
+- **Hardware Compatibility:** Rev A/B detection flags and ABI version management
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start (Complete Workflow)
 
-- CMake 3.13+
-- C++17 compiler (C++20 on non-Windows)
-- Git (for version extraction)
-- Python 3.10+ (for TOML converter)
-
-### Building the SDK
+Build everything with these three commands:
 
 ```bash
-# Clone repository
+# 1. Clone repository
 git clone https://github.com/lzxindustries/videomancer-sdk.git
 cd videomancer-sdk
 
-# Build (creates build/ directory)
-./build.sh
+# 2. One-time setup: Install FPGA toolchain (OSS CAD Suite)
+bash setup.sh
+
+# 3. Build all FPGA programs (synthesizes bitstreams and creates .vmprog packages)
+bash build_programs.sh
+
+# Output: All programs packaged in out/ directory
+# Example: out/passthru.vmprog
+```
+
+**What this does:**
+- `setup.sh` - Downloads and installs OSS CAD Suite (Yosys, nextpnr, GHDL) to `build/oss-cad-suite/`
+- `build_programs.sh` - For each program in `programs/`:
+  - Synthesizes 6 FPGA bitstream variants (SD/HD × analog/HDMI/dual)
+  - Converts TOML config to binary format
+  - Packages everything into a signed `.vmprog` file
+
+### Prerequisites
+
+- **System:** Linux (Ubuntu/Debian recommended) or WSL2
+- **SDK Build:** CMake 3.13+, C++17 compiler (C++20 on non-Windows), Git
+- **FPGA Build:** OSS CAD Suite (installed by `setup.sh`)
+- **Python:** Python 3.7+ (standard library only)
+- **Disk Space:** ~2 GB for OSS CAD Suite toolchain
+
+### Building SDK Headers Only
+
+If you only need the SDK headers without FPGA build capability:
+
+```bash
+# Build SDK headers and configure CMake
+./build_sdk.sh
 
 # Or manually
 mkdir build && cd build
@@ -86,26 +73,35 @@ cmake --build .
 cmake --install . --prefix install
 ```
 
-### Using in Your CMake Project
+### Building Specific Programs
+
+```bash
+# Build a single program instead of all programs
+./build_programs.sh passthru
+
+# Output: out/passthru.vmprog
+```
+
+### Using in Your Project
+
+Add to your CMakeLists.txt:
 
 ```cmake
-# Add as subdirectory
 add_subdirectory(videomancer-sdk)
-
-# Link to your target
 target_link_libraries(your_target PRIVATE videomancer-sdk)
 ```
 
-### Basic Usage Example
+## Usage Examples
+
+### Validating a .vmprog File
 
 ```cpp
-#include <lzx/sdk/vmprog_format.hpp>
-#include <lzx/sdk/vmprog_crypto.hpp>
-#include <lzx/sdk/vmprog_public_keys.hpp>
+#include <lzx/videomancer/vmprog_format.hpp>
+#include <lzx/videomancer/vmprog_crypto.hpp>
+#include <lzx/videomancer/vmprog_public_keys.hpp>
 
 using namespace lzx;
 
-// Validate a complete .vmprog file
 bool validate_program_package(const uint8_t* data, size_t size) {
     // Check file size
     if (size > vmprog_header_v1_0::max_file_size) {
@@ -121,7 +117,6 @@ bool validate_program_package(const uint8_t* data, size_t size) {
     // Verify signature if present
     if ((header->flags & vmprog_header_flags_v1_0::signed_pkg) != 
         vmprog_header_flags_v1_0::none) {
-        
         // Extract signature and signed descriptor from TOC
         // Verify using vmprog_ed25519_verify()
         // See docs/vmprog-format.md for complete implementation
@@ -131,12 +126,14 @@ bool validate_program_package(const uint8_t* data, size_t size) {
 }
 ```
 
-### Creating Program Configurations (Python)
+### Creating Program Configurations
+
+Use the Python TOML converter to create binary program configurations:
 
 ```bash
 cd scripts/toml_to_config_binary
 
-# Create/edit TOML configuration
+# Create TOML configuration
 cat > my_program.toml << 'EOF'
 [program]
 program_id = "com.example.myprogram"
@@ -145,68 +142,112 @@ author = "Your Name"
 program_version_major = 1
 program_version_minor = 0
 program_version_patch = 0
-# ... (see example_program_config.toml)
 
 [[parameter]]
 parameter_id = 1  # rotary_potentiometer_1
 name_label = "Frequency"
-# ...
+# ... (see example_program_config.toml for full template)
 EOF
 
-# Convert to binary
+# Convert to binary (produces 7,240-byte file)
 python3 toml_to_config_binary.py my_program.toml my_program_config.bin
-
-# Verify output (7,240 bytes)
-ls -lh my_program_config.bin
 ```
 
-## Documentation & Resources
+### Packaging Complete Programs
 
-- **[vmprog-format.md](docs/vmprog-format.md)** - Complete binary format specification
-- **API Documentation** - Inline in header files (`vmprog_format.hpp`, `vmprog_crypto.hpp`)
+Create complete `.vmprog` packages from bitstreams and configuration:
+
+```bash
+cd scripts/vmprog_pack
+
+# Package program with bitstreams
+python3 vmprog_pack.py ../../build/programs/passthru ../../out/passthru.vmprog
+
+# Input directory structure:
+#   build/programs/passthru/
+#     program_config.bin (7,240 bytes)
+#     bitstreams/
+#       sd_analog.bin, sd_hdmi.bin, sd_dual.bin
+#       hd_analog.bin, hd_hdmi.bin, hd_dual.bin
+```
+
+## SDK Components
+
+### Core Headers
+
+- **[vmprog_format.hpp](src/lzx/videomancer/vmprog_format.hpp)** - Complete `.vmprog` format specification with all data structures and validation functions
+- **[vmprog_crypto.hpp](src/lzx/videomancer/vmprog_crypto.hpp)** - Ed25519 signature verification and BLAKE2b-256 hashing
+- **[vmprog_public_keys.hpp](src/lzx/videomancer/vmprog_public_keys.hpp)** - Ed25519 public key storage
+
+### Build Scripts
+
+- **[setup.sh](setup.sh)** - One-time setup script that downloads and extracts OSS CAD Suite (Yosys, nextpnr, GHDL)
+- **[build_sdk.sh](build_sdk.sh)** - Builds SDK headers and configures CMake
+- **[clean_sdk.sh](clean_sdk.sh)** - Removes build artifacts
+- **[build_programs.sh](build_programs.sh)** - Complete FPGA build workflow: synthesizes bitstreams for all 6 variants, generates config binary, packages into `.vmprog` files
+
+### Python Tools
+
+- **[toml_to_config_binary.py](scripts/toml_to_config_binary/toml_to_config_binary.py)** - Converts TOML configuration files to 7,240-byte binary format with comprehensive validation
+- **[vmprog_pack.py](scripts/vmprog_pack/vmprog_pack.py)** - Creates complete `.vmprog` packages from bitstreams and configuration with SHA-256 verification
+- **[example_program_config.toml](scripts/toml_to_config_binary/example_program_config.toml)** - Template with 3 parameters demonstrating the configuration format
+
+### FPGA Build System
+
+- **[Makefile](fpga/Makefile)** - FPGA synthesis workflow using Yosys (GHDL plugin), nextpnr-ice40, and icepack
+- Supports all 6 bitstream variants with configurable resolution and frequency
+- Automatically includes program-specific VHDL, RTL libraries, and hardware constraints
+
+### RTL Libraries (VHDL)
+
+- **[top.vhd](fpga/rtl/top.vhd)** - Top-level entity connecting RP2040, SPI, and video pipeline
+- **[core.vhd](fpga/rtl/core.vhd)** - Core video processing module (program integration point)
+- **[video_sync_generator.vhd](fpga/rtl/video_sync_generator.vhd)** - Configurable video timing generation
+- **[video_timing_pkg.vhd](fpga/rtl/video_timing_pkg.vhd)** - Standard video timing definitions (480i, 480p, 720p, 1080i)
+- **[yuv422_to_yuv444.vhd](fpga/rtl/yuv422_to_yuv444.vhd)** / **[yuv444_to_yuv422.vhd](fpga/rtl/yuv444_to_yuv422.vhd)** - YUV format converters
+- **[spi_peripheral.vhd](fpga/rtl/spi_peripheral.vhd)** - SPI interface for RP2040 communication
+- **[blanking_yuv444.vhd](fpga/rtl/blanking_yuv444.vhd)** - Blanking signal insertion
+- **[program_yuv444.vhd](fpga/rtl/program_yuv444.vhd)** - Program logic wrapper interface
+
+### Example Programs
+
+- **[passthru](programs/passthru/)** - Simple passthrough program demonstrating minimal FPGA implementation with no parameters
+
+### Documentation
+
+- **[vmprog-format.md](docs/vmprog-format.md)** - Complete binary format specification with diagrams, validation procedures, and implementation guidelines
+- **[vmprog_pack README](scripts/vmprog_pack/README.md)** - Detailed documentation for the program packaging tool
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
-- **[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** - Monocypher licensing
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and development information
+- **[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** - Monocypher and SiliconBlue ICE40 licensing information
 
-## Requirements
+## Technical Specifications
 
-**Build:**
+### Binary Format
 
-- CMake 3.13+
-- C++17 compiler (C++20 on non-Windows)
-- Git (for version extraction)
+- **Architecture:** Little-endian, packed structures, UTF-8 strings
+- **Maximum File Size:** 1 MB (1,048,576 bytes)
+- **File Extension:** `.vmprog`
+- **MIME Type:** `application/x-vmprog` (proposed)
+- **Structure:** Header (64 bytes) + Table of Contents + Artifacts
 
-**Python Tools:**
+### Cryptography
 
-- Python 3.10+ (tomli) or 3.11+ (tomllib built-in)
+- **Signatures:** Ed25519 (64-byte signatures, 32-byte public keys)
+- **Hashing:** BLAKE2b-256 (SHA-256 equivalent, 32-byte output)
+- **Library:** Monocypher 4.0.2 (BSD-2-Clause OR CC0-1.0)
+- **Security:** Constant-time operations, secure memory wiping
 
-**Runtime:**
+### Parameter System
 
-- None (header-only library)
+- **12 Parameters Total:** 6 rotary potentiometers, 5 toggle switches, 1 linear slide
+- **36 Control Modes:** Linear, stepped, polar, easing curves (sine, quadratic, cubic, exponential)
+- **Configuration:** Custom labels, value ranges, display formatting with float precision
+- **Binary Size:** 572 bytes per parameter, 7,240 bytes total configuration
 
-## Technical Details
+### Bitstream Variants
 
-**Binary Format:**
-
-- Little-endian, packed structures
-- Maximum file size: 1 MB (1,048,576 bytes)
-- Table of contents (TOC) based architecture
-- SHA-256 checksums for all artifacts
-
-**Cryptography:**
-
-- Ed25519 signatures (Monocypher 4.0.2)
-- BLAKE2b-256 hashing (SHA-256 equivalent)
-- Constant-time operations for security
-
-**Parameter System:**
-
-- 12 parameters (6 rotary, 5 toggle, 1 linear)
-- 36 control modes (linear, steps, polar, easing)
-- Custom labels and value ranges
-- Display formatting with float precision
-
-**Bitstream Variants:**
+Six variant types for different resolutions and output formats:
 
 - `bitstream_sd_analog` - SD resolution, analog output
 - `bitstream_sd_hdmi` - SD resolution, HDMI output
@@ -219,45 +260,85 @@ ls -lh my_program_config.bin
 
 ```text
 videomancer-sdk/
-├── src/lzx/sdk/                         # Core SDK headers
-│   ├── vmprog_format.hpp                # Format specification (1,746 lines)
-│   ├── vmprog_crypto.hpp                # Crypto wrappers (248 lines)
-│   ├── vmprog_public_keys.hpp           # Ed25519 keys (41 lines)
-│   └── videomancer_sdk_version.hpp      # Version (auto-generated)
+├── src/lzx/videomancer/                   # Core SDK headers
+│   ├── vmprog_format.hpp                  # Format specification (1,746 lines)
+│   ├── vmprog_crypto.hpp                  # Cryptographic wrappers (248 lines)
+│   └── vmprog_public_keys.hpp             # Ed25519 public keys (41 lines)
+├── fpga/                                  # FPGA development
+│   ├── Makefile                           # FPGA synthesis workflow
+│   ├── rtl/                               # VHDL RTL libraries (12 modules)
+│   │   ├── top.vhd, core.vhd, spi_peripheral.vhd
+│   │   ├── video_sync_generator.vhd, video_timing_pkg.vhd
+│   │   └── yuv422_to_yuv444.vhd, yuv444_to_yuv422.vhd, ...
+│   └── constraints/                       # Pin/timing constraints
+│       ├── videomancer_core_rev_a/
+│       └── videomancer_core_rev_b/
+├── programs/                              # FPGA program examples
+│   └── passthru/                          # Passthrough test program
+│       ├── passthru.vhd                   # FPGA implementation
+│       └── passthru.toml                  # Configuration
 ├── scripts/
-│   ├── toml_to_config_binary/           # Python converter tool
-│   │   ├── toml_to_config_binary.py     # TOML → binary (443 lines)
-│   │   ├── example_program_config.toml  # Example with 3 parameters
-│   │   ├── test_converter.py            # Python test suite
-│   │   └── test_conversion.sh           # Shell test script
-│   └── videomancer_sdk_version/
-│       └── videomancer_sdk_version.hpp.in  # CMake template
-├── third_party/monocypher/              # Cryptographic library
-│   └── src/                             # Monocypher source files
+│   ├── toml_to_config_binary/             # TOML → binary converter
+│   │   ├── toml_to_config_binary.py       # Converter (443 lines)
+│   │   ├── example_program_config.toml
+│   │   └── test_conversion.sh
+│   ├── vmprog_pack/                       # .vmprog packager
+│   │   ├── vmprog_pack.py                 # Packager (731 lines)
+│   │   ├── README.md                      # Tool documentation
+│   │   └── test_vmprog_pack.sh
+│   └── videomancer_sdk_version/           # CMake version generation
+├── third_party/
+│   ├── monocypher/                        # Cryptography (BSD-2-Clause OR CC0-1.0)
+│   └── SiliconBlue/                       # ICE40 FPGA primitives (Lattice)
 ├── docs/
-│   └── vmprog-format.md                 # Format spec (1,167 lines)
-├── CMakeLists.txt                       # Build configuration
-├── build.sh / clean.sh                  # Build automation
-├── CHANGELOG.md                         # Version history
-├── CONTRIBUTING.md                      # Contribution policy
-└── THIRD_PARTY_LICENSES.md              # Third-party licenses
+│   └── vmprog-format.md                   # Format specification (1,167 lines)
+├── build/                                 # Build output (created by scripts)
+│   ├── oss-cad-suite/                     # FPGA toolchain (Yosys, nextpnr, GHDL)
+│   └── programs/                          # Built program artifacts
+├── out/                                   # Final .vmprog packages
+├── setup.sh                               # Download/install OSS CAD Suite
+├── build_sdk.sh                           # Build SDK headers
+├── clean_sdk.sh                           # Clean build artifacts
+├── build_programs.sh                      # Build all programs → .vmprog
+└── CMakeLists.txt                         # CMake configuration
 ```
+
+## Development Status
+
+**Version 0.1.0** (Released 2025-12-14) provides a complete FPGA development and packaging toolchain:
+
+✅ **Complete:**
+- `.vmprog` format specification and SDK headers
+- Full FPGA build chain (OSS CAD Suite integration)
+- RTL VHDL component libraries for video processing
+- Python packaging tools (TOML converter, vmprog_pack)
+- Automated build scripts for complete workflow
+- Example program (passthru) demonstrating full development cycle
+
+🔄 **In Progress:**
+- Additional example programs demonstrating video effects
+- Ed25519 signature generation tools
+
+**Current capabilities:** Complete FPGA program development from VHDL → bitstream → signed `.vmprog` package.
 
 ## Contributing
 
-Maintained by LZX Industries. Bug reports and issues welcome. External code contributions reviewed case-by-case - see [CONTRIBUTING.md](CONTRIBUTING.md) for policy.
+Maintained by LZX Industries. Bug reports and issues are welcome. External code contributions are reviewed on a case-by-case basis - see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
 **GPL-3.0-only** - Copyright (C) 2025 LZX Industries LLC
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3. See [LICENSE](LICENSE) for complete terms.
 
-See [LICENSE](LICENSE) for full terms.
+**Third-Party Components:**
 
-**Third-Party:**
+- **Monocypher 4.0.2:** BSD-2-Clause OR CC0-1.0
+- **SiliconBlue ICE40 Components:** Proprietary (Lattice Semiconductor)
 
-- Monocypher 4.0.2: BSD-2-Clause OR CC0-1.0 (see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md))
+See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for complete third-party license information.
+
+---
 
 **Videomancer** is a trademark of LZX Industries LLC.  
-For hardware, support, and more: [lzxindustries.net](https://lzxindustries.net)
+For hardware, support, and more information: [lzxindustries.net](https://lzxindustries.net)

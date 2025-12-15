@@ -1,5 +1,7 @@
 #!/bin/bash
 # Videomancer SDK Build Script
+# Copyright (C) 2025 LZX Industries LLC
+# SPDX-License-Identifier: GPL-3.0-only
 
 set -e  # Exit on error
 

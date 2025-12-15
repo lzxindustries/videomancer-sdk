@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Status:** Production  
-**Canonical Reference:** [src/lzx/sdk/vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp)  
+**Canonical Reference:** [src/lzx/videomancer/vmprog_format.hpp](../src/lzx/videomancer/vmprog_format.hpp)  
 **Audience:** Firmware developers, FPGA toolchain authors, program authors
 
 ---
@@ -1160,7 +1160,7 @@ printf("%s\n", config.program_name);  // DANGEROUS
 
 ## 11. References
 
-**Implementation:** [vmprog_format.hpp](../src/lzx/sdk/vmprog_format.hpp) | [vmprog_crypto.hpp](../src/lzx/sdk/vmprog_crypto.hpp) | [vmprog_public_keys.hpp](../src/lzx/sdk/vmprog_public_keys.hpp)
+**Implementation:** [vmprog_format.hpp](../src/lzx/videomancer/vmprog_format.hpp) | [vmprog_crypto.hpp](../src/lzx/videomancer/vmprog_crypto.hpp) | [vmprog_public_keys.hpp](../src/lzx/videomancer/vmprog_public_keys.hpp)
 
 **Standards:** SHA-256 (FIPS 180-4) | Ed25519 (RFC 8032) | Monocypher 4.x
 

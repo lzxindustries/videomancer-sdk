@@ -1,0 +1,21 @@
+# Copyright (C) 2025 LZX Industries LLC
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Passthru Program Configuration
+
+[program]
+program_id = "com.lzxindustries.passthru"
+program_version_major = 1
+program_version_minor = 0
+program_version_patch = 0
+abi_min_major = 1
+abi_min_minor = 0
+abi_max_major = 2
+abi_max_minor = 0
+hw_mask = 0x00000003  # videomancer_core_rev_a | videomancer_core_rev_b
+program_name = "Passthru"
+author = "Lars Larsen"
+license = "GPL-3.0"
+category = "Utility"
+description = "Simple passthrough program with null parameters for testing."
+parameter_count = 0

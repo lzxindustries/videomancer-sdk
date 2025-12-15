@@ -2,11 +2,21 @@
 
 ## Table of Contents
 
-- [Maintenance Policy](#maintenance-policy)
-- [Reporting Bugs](#reporting-bugs)
-- [Feature Requests](#feature-requests)
-- [Community Discussion](#community-discussion)
-- [Development Information](#development-information)
+- [Contributing to Videomancer SDK](#contributing-to-videomancer-sdk)
+  - [Table of Contents](#table-of-contents)
+  - [Maintenance Policy](#maintenance-policy)
+  - [Reporting Bugs](#reporting-bugs)
+    - [Before Reporting](#before-reporting)
+    - [Bug Report Template](#bug-report-template)
+  - [Feature Requests](#feature-requests)
+  - [Community Discussion](#community-discussion)
+  - [Development Information](#development-information)
+    - [Build Requirements](#build-requirements)
+    - [Building from Source](#building-from-source)
+    - [Project Structure](#project-structure)
+    - [Coding Standards](#coding-standards)
+    - [Architecture](#architecture)
+  - [License](#license)
 
 ## Maintenance Policy
 
@@ -78,9 +88,11 @@ This section provides technical information for those interested in understandin
 git clone https://github.com/lzxindustries/videomancer-sdk.git
 cd videomancer-sdk
 
-# Run build script
-chmod +x build.sh
-./build.sh
+# Run initial setup (one-time)
+./setup.sh
+
+# Build SDK headers
+./build_sdk.sh
 
 # Or manually:
 mkdir -p build && cd build
@@ -90,7 +102,7 @@ cmake --build .
 
 ### Project Structure
 
-- `src/lzx/sdk/` - Header-only SDK files
+- `src/lzx/videomancer/` - Header-only SDK files
 - `third_party/monocypher/` - Cryptographic library
 - `docs/` - Format specification and documentation
 - `scripts/` - Build and utility scripts

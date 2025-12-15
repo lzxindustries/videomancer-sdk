@@ -9,120 +9,138 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2025-12-14
 
+Initial public release of the Videomancer SDK. Complete FPGA development toolchain including format specification, C++ SDK, FPGA build chain, RTL libraries, and automated packaging workflow for cryptographically signed `.vmprog` packages.
+
 ### Added
 
-#### Core SDK
+#### Core SDK Components
 
-- Header-only C++ library for `.vmprog` file format v1.0
-- `vmprog_format.hpp` - Complete format specification (1,746 lines)
-- `vmprog_crypto.hpp` - Cryptographic primitives wrapper (248 lines)
-- `vmprog_public_keys.hpp` - Ed25519 public key storage (41 lines)
-- Binary structures with 1 MB maximum file size
-- Comprehensive validation functions for all structures
-- Support for 12 user-configurable parameters
-- Hardware compatibility flags (Videomancer Core rev A/B)
-- ABI version range management
-- 36 parameter control modes (linear, steps, polar, easing curves)
+- **vmprog_format.hpp** - Complete `.vmprog` v1.0 format specification with binary structures and validation functions
+- **vmprog_crypto.hpp** - Ed25519 signature verification and BLAKE2b-256 hashing wrappers
+- **vmprog_public_keys.hpp** - Ed25519 public key storage
+- Header-only C++ library (C++17/20) with zero runtime dependencies
 
-#### Data Structures
+#### Binary Format Structures
 
-- `vmprog_header_v1_0` - 64-byte file header with magic, version, TOC
+- `vmprog_header_v1_0` - 64-byte file header (magic: 'VMPG', version, TOC metadata)
 - `vmprog_toc_entry_v1_0` - 64-byte table of contents entries
 - `vmprog_program_config_v1_0` - 7,240-byte program configuration
 - `vmprog_signed_descriptor_v1_0` - 332-byte cryptographic descriptor
-- `vmprog_parameter_config_v1_0` - 572-byte parameter definitions
+- `vmprog_parameter_config_v1_0` - 572-byte parameter definitions (12 parameters total)
 - `vmprog_artifact_hash_v1_0` - 36-byte artifact hash entries
+
+#### Features
+
+- Maximum file size: 1 MB (1,048,576 bytes)
+- 12 user-configurable parameters (6 rotary, 5 toggle, 1 linear)
+- 36 parameter control modes (linear, stepped, polar, easing curves)
+- Hardware compatibility flags (Videomancer Core rev A/B)
+- ABI version range management
+- 6 bitstream variants (SD/HD × analog/HDMI/dual output)
+- Little-endian packed structures with UTF-8 strings
 
 #### Cryptography
 
-- Ed25519 digital signature verification via Monocypher
-- BLAKE2b-256 hashing (SHA-256 equivalent)
-- Secure memory operations (constant-time comparison, zeroing)
+- Ed25519 digital signatures (64-byte signatures, 32-byte public keys)
+- BLAKE2b-256 hashing (SHA-256 equivalent security)
+- Constant-time operations and secure memory wiping
 - Support for up to 8 signed artifacts per package
+- Monocypher 4.0.2 cryptographic library (BSD-2-Clause OR CC0-1.0)
 
-#### Tools & Utilities
+#### FPGA Build Chain
 
-- `toml_to_config_binary.py` - TOML to binary converter (443 lines)
-- Example TOML configuration with 3 parameters
-- Comprehensive validation (enum bounds, value ranges, ABI checks)
-- Test suite with shell and Python verification scripts
-- Python 3.10+ and 3.11+ compatibility (tomli/tomllib)
+- **OSS CAD Suite Integration** - Yosys (with GHDL plugin), nextpnr-ice40, icepack
+- **Makefile** - Automated FPGA synthesis workflow for Lattice ICE40HX4K
+- Support for all 6 bitstream variants with configurable frequency
+- Automatic inclusion of program VHDL, RTL libraries, and constraints
+- ICE40HX4K target with TQ144 package
+
+#### RTL VHDL Libraries
+
+- **top.vhd** - Top-level entity (RP2040 SPI interface, video pipeline integration)
+- **core.vhd** - Core video processing module (program integration point)
+- **video_sync_generator.vhd** - Configurable video timing generation
+- **video_timing_pkg.vhd** - Standard video timing constants (480i, 480p, 720p, 1080i)
+- **video_field_detector.vhd** - Field detection for interlaced video
+- **yuv422_to_yuv444.vhd** / **yuv444_to_yuv422.vhd** - YUV format converters
+- **blanking_yuv444.vhd** - Blanking signal insertion
+- **program_yuv444.vhd** - Program logic wrapper interface
+- **spi_peripheral.vhd** - SPI peripheral for RP2040 communication
+- **sync_slv.vhd** - Clock domain crossing synchronizer
+- **core_pkg.vhd** - Core package with type definitions
+
+#### Hardware Constraints
+
+- Pin mapping for Videomancer Core rev A and rev B
+- Timing constraints for SD (30 MHz) and HD (80 MHz) modes
+- ICE40HX4K-TQ144 specific PCF files
+
+#### Build Scripts
+
+- **setup.sh** - One-time setup: downloads and installs OSS CAD Suite (20250523 release)
+- **build_sdk.sh** - Builds SDK headers, configures CMake, generates version info
+- **clean_sdk.sh** - Removes all build artifacts
+- **build_programs.sh** - Complete workflow: synthesizes all 6 bitstream variants, generates config binary, packages `.vmprog` files
+
+#### Python Tools
+
+- **toml_to_config_binary.py** - TOML to binary converter with comprehensive validation (enum bounds, value ranges, ABI checks)
+- **vmprog_pack.py** - Complete `.vmprog` packager (creates TOC, calculates SHA-256 hashes, validates output)
+- **test_converter.py** / **test_conversion.sh** - Test suite for TOML converter
+- **test_vmprog_pack.sh** - Test suite for packaging tool
+- Example TOML configuration demonstrating 3 parameters
+- Python 3.7+ compatibility (standard library only)
+
+#### Example Programs
+
+- **passthru** - Simple passthrough program with no parameters
+  - passthru.vhd - Minimal FPGA implementation (data passthrough)
+  - passthru.toml - Configuration with zero parameters
+  - Demonstrates complete development workflow from VHDL to `.vmprog`
 
 #### Build System
 
 - CMake 3.13+ with interface library pattern
-- Git-based version extraction and generation
-- Auto-generated version header from git tags
-- Header-only library installation
-- Build automation scripts (build.sh, clean.sh)
+- Git-based version extraction and auto-generation
+- Header-only library installation with CMake integration
+- Automatic dependency management for Monocypher
 
 #### Documentation
 
-- Complete format specification in `docs/vmprog-format.md` (1,167 lines)
-- README with quickstart, features, and examples
-- CONTRIBUTING guidelines (restrictive, LZX Industries maintained)
-- Third-party licenses in `THIRD_PARTY_LICENSES.md`
-- CHANGELOG following Keep a Changelog format
+- **vmprog-format.md** - Complete binary format specification with diagrams and validation procedures
+- **vmprog_pack README.md** - Detailed documentation for packaging tool with usage examples
+- README with quickstart guide, complete toolchain documentation, and examples
+- CONTRIBUTING guidelines (LZX Industries maintained, external contributions case-by-case)
+- THIRD_PARTY_LICENSES documentation (Monocypher, SiliconBlue ICE40 components)
 
-### Dependencies
+### Project Information
 
-- Monocypher 4.0.2 (BSD-2-Clause OR CC0-1.0) - Ed25519, BLAKE2b
+- **License:** GPL-3.0-only
+- **Copyright:** 2025 LZX Industries LLC
+- **Platform:** Videomancer (RP2040 + Lattice ICE40HX4K FPGA)
+- **Repository:** <https://github.com/lzxindustries/videomancer-sdk>
 
-### Technical Specifications
+### Notes
 
-- C++17 minimum (C++20 on non-Windows)
-- Little-endian binary format with packed structures
-- Maximum file size: 1 MB (1,048,576 bytes)
-- Maximum parameters: 12 (rotary pots 1-6, toggle switches 7-11, linear pot 12)
-- Maximum value labels: 16 per parameter
-- Bitstream variants: 6 types (SD/HD × analog/HDMI/dual)
-
-### Project Metadata
-
-- License: GPL-3.0-only
-- Copyright: 2025 LZX Industries LLC
-- Repository: <https://github.com/lzxindustries/videomancer-sdk>
-- Platform: Videomancer (RP2040 + ICE40HX4K FPGA)
-
-## Release Notes
-
-### Version 0.1.0 - Initial Public Release
-
-First open-source release of the Videomancer SDK, providing a complete specification and reference implementation for the `.vmprog` file format used to package FPGA programs for Videomancer hardware.
-
-**Highlights:**
-
-- **Production-Ready Format Specification** - Complete binary format with cryptographic signing, TOC-based structure, and comprehensive validation
-- **Header-Only C++ Library** - Zero runtime dependencies, easy integration, interface library pattern
-- **Python Tooling** - TOML to binary converter with full validation and test suite
-- **Cryptographic Security** - Ed25519 signatures, BLAKE2b-256 hashing via Monocypher
-- **Flexible Parameters** - 12 configurable inputs with 36 control modes and custom labeling
-- **Hardware Detection** - Compatibility flags and ABI version ranges
-- **Professional Documentation** - 1,167-line format specification, comprehensive API docs
-
-**Target Users:**
-
-- FPGA developers creating Videomancer programs
-- Tool developers building authoring software
-- Hardware integrators working with .vmprog files
+**Scope of v0.1.0:**
+- Complete FPGA development toolchain (setup → build → package)
+- Format specification and SDK headers (complete)
+- RTL VHDL libraries for video processing (complete)
+- Python configuration and packaging tools (complete)
+- Automated build scripts for full workflow (complete)
+- Example program demonstrating complete development cycle (passthru)
 
 **Stability:**
-
-- Pre-release (0.x) - API may evolve before 1.0
-- Binary format is stable and backward compatible
-- Breaking changes will bump minor version
-
-**What's Not Included:**
-
-- Runtime firmware (proprietary, runs on Videomancer hardware)
-- FPGA toolchain (use vendor tools to generate bitstreams)
-- GUI authoring tools (community encouraged to build)
+- Pre-release (0.x series) - API may evolve before 1.0
+- Binary format is stable and maintains backward compatibility
+- Breaking changes will increment minor version
+- FPGA build chain tested with OSS CAD Suite 20250523
 
 **Known Limitations:**
-
-- 1 MB file size limit (sufficient for ICE40HX4K bitstreams)
-- 12 parameter maximum (matches hardware capabilities)
+- 1 MB file size limit (sufficient for ICE40HX4K bitstreams + metadata)
+- 12 parameter maximum (matches Videomancer hardware interface)
 - Single Ed25519 public key (additional keys require SDK update)
+- Signature generation not included (verification only)
 
 [Unreleased]: https://github.com/lzxindustries/videomancer-sdk/compare/0.1.0...HEAD
 [0.1.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.1.0
