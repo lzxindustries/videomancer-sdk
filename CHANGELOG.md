@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core SDK
+
 - Header-only C++ library for `.vmprog` file format v1.0
 - `vmprog_format.hpp` - Complete format specification (1,746 lines)
 - `vmprog_crypto.hpp` - Cryptographic primitives wrapper (248 lines)
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 36 parameter control modes (linear, steps, polar, easing curves)
 
 #### Data Structures
+
 - `vmprog_header_v1_0` - 64-byte file header with magic, version, TOC
 - `vmprog_toc_entry_v1_0` - 64-byte table of contents entries
 - `vmprog_program_config_v1_0` - 7,240-byte program configuration
@@ -32,12 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `vmprog_artifact_hash_v1_0` - 36-byte artifact hash entries
 
 #### Cryptography
+
 - Ed25519 digital signature verification via Monocypher
 - BLAKE2b-256 hashing (SHA-256 equivalent)
 - Secure memory operations (constant-time comparison, zeroing)
 - Support for up to 8 signed artifacts per package
 
 #### Tools & Utilities
+
 - `toml_to_config_binary.py` - TOML to binary converter (443 lines)
 - Example TOML configuration with 3 parameters
 - Comprehensive validation (enum bounds, value ranges, ABI checks)
@@ -45,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python 3.10+ and 3.11+ compatibility (tomli/tomllib)
 
 #### Build System
+
 - CMake 3.13+ with interface library pattern
 - Git-based version extraction and generation
 - Auto-generated version header from git tags
@@ -52,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build automation scripts (build.sh, clean.sh)
 
 #### Documentation
+
 - Complete format specification in `docs/vmprog-format.md` (1,167 lines)
 - README with quickstart, features, and examples
 - CONTRIBUTING guidelines (restrictive, LZX Industries maintained)
@@ -75,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - License: GPL-3.0-only
 - Copyright: 2025 LZX Industries LLC
-- Repository: https://github.com/lzxindustries/videomancer-sdk
+- Repository: <https://github.com/lzxindustries/videomancer-sdk>
 - Platform: Videomancer (RP2040 + ICE40HX4K FPGA)
 
 ## Release Notes
@@ -95,21 +101,25 @@ First open-source release of the Videomancer SDK, providing a complete specifica
 - **Professional Documentation** - 1,167-line format specification, comprehensive API docs
 
 **Target Users:**
+
 - FPGA developers creating Videomancer programs
 - Tool developers building authoring software
 - Hardware integrators working with .vmprog files
 
-**Stability:** 
+**Stability:**
+
 - Pre-release (0.x) - API may evolve before 1.0
 - Binary format is stable and backward compatible
 - Breaking changes will bump minor version
 
 **What's Not Included:**
+
 - Runtime firmware (proprietary, runs on Videomancer hardware)
 - FPGA toolchain (use vendor tools to generate bitstreams)
 - GUI authoring tools (community encouraged to build)
 
 **Known Limitations:**
+
 - 1 MB file size limit (sufficient for ICE40HX4K bitstreams)
 - 12 parameter maximum (matches hardware capabilities)
 - Single Ed25519 public key (additional keys require SDK update)
