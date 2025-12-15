@@ -73,6 +73,65 @@ The build process:
 ./build_programs.sh passthru
 ```
 
+### Building Programs from External Directories
+
+You can organize your programs in separate directories outside the SDK using environment variables:
+
+```bash
+# Set up external directory structure
+export VIDEOMANCER_SDK_ROOT="/path/to/videomancer-sdk"
+export VIDEOMANCER_PROGRAMS_DIR="/path/to/my-programs/"
+export VIDEOMANCER_BUILD_DIR="/path/to/my-build/"
+export VIDEOMANCER_OUT_DIR="/path/to/my-output/"
+
+# Build programs from external directory
+cd /path/to/videomancer-sdk
+./build_programs.sh
+```
+
+**Complete Example:**
+
+```bash
+# Create external programs directory
+mkdir -p ~/my-videomancer-programs/my-effect
+cd ~/my-videomancer-programs/my-effect
+
+# Create your program files
+cat > my-effect.vhd << 'EOF'
+-- Your VHDL implementation
+library ieee;
+use ieee.std_logic_1164.all;
+-- ... implementation ...
+EOF
+
+cat > my-effect.toml << 'EOF'
+[program]
+program_id = "com.example.my-effect"
+program_name = "My Effect"
+program_version = "1.0.0"
+abi_version = ">=1.0,<2.0"
+# ... configuration ...
+EOF
+
+# Set environment variables and build
+export VIDEOMANCER_SDK_ROOT=~/videomancer-sdk
+export VIDEOMANCER_PROGRAMS_DIR=~/my-videomancer-programs/
+export VIDEOMANCER_BUILD_DIR=~/my-videomancer-programs/build/
+export VIDEOMANCER_OUT_DIR=~/my-videomancer-programs/out/
+
+cd ~/videomancer-sdk
+./build_programs.sh
+
+# Your packaged program will be at:
+# ~/my-videomancer-programs/out/my-effect.vmprog
+```
+
+**Environment Variables:**
+- `VIDEOMANCER_SDK_ROOT` - SDK installation path (default: script directory)
+- `VIDEOMANCER_PROGRAMS_DIR` - Directory containing program subdirectories (default: `programs/`)
+- `VIDEOMANCER_BUILD_DIR` - Build artifacts output (default: `build/programs/`)
+- `VIDEOMANCER_OUT_DIR` - Final `.vmprog` packages output (default: `out/`)
+
 ## Creating Your Own Programs
 
 ### Program Structure
