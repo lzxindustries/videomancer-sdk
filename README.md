@@ -32,7 +32,8 @@ bash build_programs.sh
 
 ### Prerequisites
 
-- **System:** Linux (Ubuntu/Debian recommended) or WSL2
+- **System:** Linux (Ubuntu/Debian recommended), WSL2 on Windows, or macOS (Intel or Apple Silicon)
+- **macOS only:** [Homebrew](https://brew.sh/) package manager
 - **FPGA Build:** OSS CAD Suite (installed by `setup.sh`)
 - **Python:** Python 3.7+
 - **Disk Space:** ~2 GB for OSS CAD Suite toolchain

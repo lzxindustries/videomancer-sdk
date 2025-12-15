@@ -17,18 +17,73 @@ echo -e "${BLUE}Videomancer SDK Setup${NC}"
 echo -e "${BLUE}====================================${NC}"
 echo ""
 echo -e "${YELLOW}This script will install:${NC}"
-echo "  - Build tools (cmake, git, gcc, g++)"  
+echo "  - Build tools (cmake, git, gcc, g++)"
 echo "  - OSS CAD Suite (Yosys, nextpnr, GHDL)"
 echo ""
-echo -e "${YELLOW}Note: Requires sudo for package installation${NC}"
+echo -e "${YELLOW}Note: Requires sudo for package installation (Linux)${NC}"
+echo -e "${YELLOW}      Requires Homebrew on macOS (https://brew.sh)${NC}"
 echo ""
 
 path=$PWD
 rm -rf build
 
-echo -e "${GREEN}Installing build dependencies...${NC}"
-sudo apt update
-sudo apt install -y cmake git gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib gcc g++ build-essential
+# Detect operating system
+OS="$(uname -s)"
+case "${OS}" in
+    Linux*)
+        OS_TYPE="Linux"
+        ;;
+    Darwin*)
+        OS_TYPE="macOS"
+        ;;
+    *)
+        echo -e "${RED}ERROR: Unsupported operating system: ${OS}${NC}"
+        echo -e "${RED}Supported: Linux, macOS${NC}"
+        exit 1
+        ;;
+esac
+
+echo -e "${GREEN}Detected OS: ${OS_TYPE}${NC}"
+echo ""
+
+if [ "${OS_TYPE}" = "Linux" ]; then
+    echo -e "${GREEN}Installing build dependencies...${NC}"
+    sudo apt update
+    sudo apt install -y cmake git gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib gcc g++ build-essential
+    
+    OSS_ARCH="linux-x64"
+    DOWNLOAD_CMD="wget"
+elif [ "${OS_TYPE}" = "macOS" ]; then
+    # Check if Homebrew is installed
+    if ! command -v brew &> /dev/null; then
+        echo -e "${RED}ERROR: Homebrew is not installed${NC}"
+        echo -e "${YELLOW}Please install Homebrew first:${NC}"
+        echo -e "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        echo ""
+        echo -e "${YELLOW}Or visit: https://brew.sh${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}Installing build dependencies...${NC}"
+    brew install --cask gcc-arm-embedded || {
+        echo -e "${YELLOW}Warning: gcc-arm-embedded installation failed or already installed${NC}"
+    }
+    
+    # Detect architecture (Apple Silicon vs Intel)
+    ARCH="$(uname -m)"
+    if [ "${ARCH}" = "arm64" ]; then
+        OSS_ARCH="darwin-arm64"
+        echo -e "${GREEN}Detected Apple Silicon (ARM64)${NC}"
+    elif [ "${ARCH}" = "x86_64" ]; then
+        OSS_ARCH="darwin-x64"
+        echo -e "${GREEN}Detected Intel (x86_64)${NC}"
+    else
+        echo -e "${RED}ERROR: Unsupported macOS architecture: ${ARCH}${NC}"
+        exit 1
+    fi
+    
+    DOWNLOAD_CMD="curl -L -O"
+fi
 
 echo -e "${GREEN}Downloading OSS CAD Suite...${NC}"
 mkdir build
@@ -36,19 +91,25 @@ cd build
 
 # OSS CAD Suite download
 OSS_VERSION="20250523"
-OSS_FILE="oss-cad-suite-linux-x64-${OSS_VERSION}.tgz"
+OSS_FILE="oss-cad-suite-${OSS_ARCH}-${OSS_VERSION}.tgz"
 OSS_URL="https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2025-05-23/${OSS_FILE}"
-# Expected SHA-256: d062bdee4ba3e2c52398c38c3effdeb1a0f9131c4b6f8fd1a0e8c8e8e8e8e8e8
-# To verify manually: sha256sum ${OSS_FILE}
 
 if [ -f "${OSS_FILE}" ]; then
     echo -e "${YELLOW}Using existing ${OSS_FILE}${NC}"
 else
-    wget "${OSS_URL}" || {
-        echo -e "${RED}ERROR: Failed to download OSS CAD Suite${NC}"
-        echo -e "${RED}Please check your internet connection and try again.${NC}"
-        exit 1
-    }
+    if [ "${OS_TYPE}" = "Linux" ]; then
+        wget "${OSS_URL}" || {
+            echo -e "${RED}ERROR: Failed to download OSS CAD Suite${NC}"
+            echo -e "${RED}Please check your internet connection and try again.${NC}"
+            exit 1
+        }
+    elif [ "${OS_TYPE}" = "macOS" ]; then
+        curl -L "${OSS_URL}" -o "${OSS_FILE}" || {
+            echo -e "${RED}ERROR: Failed to download OSS CAD Suite${NC}"
+            echo -e "${RED}Please check your internet connection and try again.${NC}"
+            exit 1
+        }
+    fi
 fi
 
 # Verify the download completed successfully

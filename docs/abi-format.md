@@ -30,9 +30,11 @@ Each SPI transaction consists of a 16-bit frame with the following structure:
 
 | Field | Bits | Description |
 |-------|------|-------------|
-| R/W̅  | 15 | Read/Write flag (0 = Write, 1 = Read) |
+| R/W̅  | 15 | Read/Write flag (must be 0 for write) |
 | Address | 14:10 | 5-bit register address (0x00 - 0x1F) |
 | Data | 9:0 | 10-bit data payload |
+
+**Important:** All control registers are **write-only**. Read operations (R/W̅ = 1) are not supported and will be ignored by the FPGA. The MCU application must maintain its own state tracking for control values.
 
 ### Timing Diagram
 
@@ -60,31 +62,6 @@ MOSI ────────┤ 0 │A4 │A3 │A2 │A1 │A0 │D9 │D8 │
 3. MCU de-asserts CS̅ HIGH
 4. FPGA latches data on CS̅ rising edge
 
-#### Read Transaction
-
-```
-CS̅   ────┐                                                      ┌────
-         └──────────────────────────────────────────────────────┘
-
-SCK  ────────┐   ┐   ┐   ┐   ┐   ┐   ┐   ┐   ┐   ┐   ┐   ┐   ┐
-             └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─┐ └─
-
-MOSI ────────┤ 1 │A4 │A3 │A2 │A1 │A0 │ X │ X │...│ X │ X │───
-             └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───
-              R/W̅  ├────Address────┤  ├────Don't Care────┤
-
-MISO ────────┤ X │ X │ X │ X │ X │ X │D9 │D8 │...│D1 │D0 │───
-             └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───
-                                          ├────────Data────────┤
-```
-
-**Transaction Sequence:**
-
-1. MCU asserts CS̅ LOW
-2. MCU clocks out 16 bits with R/W̅ = 1 and target address
-3. FPGA responds with register data on MISO (bits 9-0)
-4. MCU de-asserts CS̅ HIGH
-
 ### Timing Requirements
 
 | Parameter | Min | Typ | Max | Unit | Notes |
@@ -100,24 +77,26 @@ MISO ────────┤ X │ X │ X │ X │ X │ X │D9 │D8 │
 
 | Address | Bit Range | Field Name | Type | Description |
 |---------|-----------|------------|------|-------------|
-| 0x00 | [9:0] | `rotary_potentiometer_1` | R/W | Rotary potentiometer 1 value (0-1023) |
-| 0x01 | [9:0] | `rotary_potentiometer_2` | R/W | Rotary potentiometer 2 value (0-1023) |
-| 0x02 | [9:0] | `rotary_potentiometer_3` | R/W | Rotary potentiometer 3 value (0-1023) |
-| 0x03 | [9:0] | `rotary_potentiometer_4` | R/W | Rotary potentiometer 4 value (0-1023) |
-| 0x04 | [9:0] | `rotary_potentiometer_5` | R/W | Rotary potentiometer 5 value (0-1023) |
-| 0x05 | [9:0] | `rotary_potentiometer_6` | R/W | Rotary potentiometer 6 value (0-1023) |
-| 0x06 | [0] | `toggle_switch_7` | R/W | Toggle switch 7 state (0=OFF, 1=ON) |
-| 0x06 | [1] | `toggle_switch_8` | R/W | Toggle switch 8 state (0=OFF, 1=ON) |
-| 0x06 | [2] | `toggle_switch_9` | R/W | Toggle switch 9 state (0=OFF, 1=ON) |
-| 0x06 | [3] | `toggle_switch_10` | R/W | Toggle switch 10 state (0=OFF, 1=ON) |
-| 0x06 | [4] | `toggle_switch_11` | R/W | Toggle switch 11 state (0=OFF, 1=ON) |
+| 0x00 | [9:0] | `rotary_potentiometer_1` | W | Rotary potentiometer 1 value (0-1023) |
+| 0x01 | [9:0] | `rotary_potentiometer_2` | W | Rotary potentiometer 2 value (0-1023) |
+| 0x02 | [9:0] | `rotary_potentiometer_3` | W | Rotary potentiometer 3 value (0-1023) |
+| 0x03 | [9:0] | `rotary_potentiometer_4` | W | Rotary potentiometer 4 value (0-1023) |
+| 0x04 | [9:0] | `rotary_potentiometer_5` | W | Rotary potentiometer 5 value (0-1023) |
+| 0x05 | [9:0] | `rotary_potentiometer_6` | W | Rotary potentiometer 6 value (0-1023) |
+| 0x06 | [0] | `toggle_switch_7` | W | Toggle switch 7 state (0=OFF, 1=ON) |
+| 0x06 | [1] | `toggle_switch_8` | W | Toggle switch 8 state (0=OFF, 1=ON) |
+| 0x06 | [2] | `toggle_switch_9` | W | Toggle switch 9 state (0=OFF, 1=ON) |
+| 0x06 | [3] | `toggle_switch_10` | W | Toggle switch 10 state (0=OFF, 1=ON) |
+| 0x06 | [4] | `toggle_switch_11` | W | Toggle switch 11 state (0=OFF, 1=ON) |
 | 0x06 | [9:5] | - | Reserved | Reserved for future use |
-| 0x07 | [9:0] | `linear_potentiometer_12` | R/W | Linear potentiometer 12 value (0-1023) |
-| 0x08 | [3:0] | `video_timing_id` | R/W | Video timing mode identifier (0-15) |
+| 0x07 | [9:0] | `linear_potentiometer_12` | W | Linear potentiometer 12 value (0-1023) |
+| 0x08 | [3:0] | `video_timing_id` | W | Video timing mode identifier (0-15) |
 | 0x08 | [9:4] | - | Reserved | Reserved for future use |
 | 0x09-0x1F | - | - | Reserved | Reserved for future expansion |
 
 ### Register Details
+
+**Access Mode:** All registers are **write-only**. The FPGA does not support read operations.
 
 #### Potentiometer Registers (0x00-0x05, 0x07)
 
@@ -188,31 +167,18 @@ Selects the video timing mode for the output generator. The following timing mod
    }
    ```
 
-3. **Read Operation:**
-   ```c
-   uint16_t read_register(uint8_t addr) {
-       uint16_t frame = (1 << 15) |          // Read bit
-                        ((addr & 0x1F) << 10); // 5-bit address
-       uint16_t response;
-       
-       gpio_put(CS_PIN, 0);              // Assert CS̅
-       spi_write16_read16_blocking(spi0, &frame, &response, 1);
-       gpio_put(CS_PIN, 1);              // De-assert CS̅
-       
-       return response & 0x3FF;          // Extract 10-bit data
-   }
-   ```
-
 ### FPGA Side
 
 The FPGA implements an SPI peripheral module that:
 1. Detects CS̅ assertion
 2. Shifts in 16-bit frames on SCK rising edges
 3. Decodes address and R/W̅ flag
-4. Writes data to internal registers on CS̅ rising edge (write operations)
-5. Outputs register data on MISO during read operations
+4. Writes data to internal registers on CS̅ rising edge (write operations only)
+5. Ignores transactions with R/W̅ = 1 (read operations not supported)
 
 Register values are made available to the video processing pipeline through a parallel interface.
+
+**Important:** Application code on the MCU must maintain its own shadow copy of register values since read operations are not supported.
 
 ## Version History
 
