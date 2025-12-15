@@ -103,7 +103,7 @@ When a package is signed, the following components are included:
 │ - SIGNATURE entry (64 bytes)            │  ← Ed25519 signature
 │ - Bitstream entries...                  │
 ├─────────────────────────────────────────┤
-│ Payload: Program Config (7240 bytes)    │
+│ Payload: Program Config (7368 bytes)    │
 ├─────────────────────────────────────────┤
 │ Payload: Signed Descriptor (332 bytes)  │  ← Signed data
 │ - config_sha256                         │

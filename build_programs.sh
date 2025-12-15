@@ -228,7 +228,7 @@ for PROGRAM in $PROGRAMS; do
     cd scripts/toml_to_config_binary
     python3 toml_to_config_binary.py "${PROJECT_ROOT}${PROGRAM}.toml" "${BUILD_ROOT}program_config.bin" --quiet
     cd ../..
-    echo -e "${GREEN}✓ Configuration binary created (7,240 bytes)${NC}"
+    echo -e "${GREEN}✓ Configuration binary created (7,368 bytes)${NC}"
     
     # Clean up intermediate files
     echo -e "${GREEN}Cleaning intermediate files...${NC}"

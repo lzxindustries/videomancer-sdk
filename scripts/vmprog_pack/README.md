@@ -139,12 +139,12 @@ The tool creates a `.vmprog` file with the following structure:
    - Contains type, offset, size, and hash for each payload
 
 3. **Payloads**
-   - Program configuration (7240 bytes)
+   - Program configuration (7368 bytes)
    - Signed descriptor (332 bytes)
    - Ed25519 signature (64 bytes, if signed
 
 **Notes:**
-- `program_config.bin` is **required** and must be exactly 7240 bytes
+- `program_config.bin` is **required** and must be exactly 7368 bytes
 - At least one bitstream file is **required**
 - Bitstream files are automatically detected by filename
 - Bitstream files can be any size (within the 1MB package limit)
@@ -164,7 +164,7 @@ The tool creates a `.vmprog` file with the following structure:
    - Contains type, offset, size, and hash for each payload
 
 3. **Payloads**
-   - Program configuration (7240 bytes)
+   - Program configuration (7368 bytes)
    - FPGA bitstreams (variable size)
 
 ## Validation
@@ -184,7 +184,7 @@ The tool performs comprehensive validation after package creation:
 - ✓ All payload hashes verified
 
 ### Program Config Validation
-- ✓ Size exactly 7240 bytes
+- ✓ Size exactly 7368 bytes
 - ✓ All strings null-terminated
 - ✓ ABI version range valid
 - ✓ Parameter count within limits (≤12)
@@ -207,7 +207,7 @@ Building vmprog package
 Input directory: ./build/programs/passthru
 Output file: ./output/passthru.vmprog
 
-Loaded program config: 7240 bytes
+Loaded program config: 7368 bytes
 Found bitstream: sd_analog.bin (104090 bytes)
 Found bitstream: sd_hdmi.bin (104090 bytes)
 Found bitstream: sd_dual.bin (104090 bytes)
@@ -217,7 +217,7 @@ Found bitstream: hd_dual.bin (104090 bytes)
 
 TOC Entry 0: CONFIG
   Offset: 512
-  Size: 7240
+  Size: 7368
   Hash: a3f2d8e9b1c4...
 
 TOC Entry 1: BITSTREAM_SD_ANALOG
@@ -263,7 +263,7 @@ Entry 0: CONFIG
   Type: 1
   Flags: 0x00000000
   Offset: 512
-  Size: 7240
+  Size: 7368
   Hash: a3f2d8e9b1c4...
   ✓ Payload within file bounds
   ✓ Payload hash verified

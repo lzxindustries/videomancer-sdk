@@ -48,7 +48,7 @@ Binary container for FPGA programs with cryptographic verification (Ed25519 + SH
 │ - N entries × 64 bytes each             │
 │ - Type, offset, size, hash per entry    │
 ├─────────────────────────────────────────┤
-│ Payload: Program Config (7240 bytes)    │
+│ Payload: Program Config (7368 bytes)    │
 │ - Program metadata                      │
 │ - 12 parameter configurations           │
 ├─────────────────────────────────────────┤

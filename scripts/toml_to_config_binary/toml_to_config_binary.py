@@ -13,7 +13,7 @@ Usage:
 
 Structure sizes (bytes):
     - vmprog_parameter_config_v1_0: 572 bytes
-    - vmprog_program_config_v1_0: 7240 bytes
+    - vmprog_program_config_v1_0: 7368 bytes
 """
 
 import struct
@@ -552,7 +552,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     """
     Pack a complete program configuration into binary format.
     
-    Structure layout (7240 bytes):
+    Structure layout (7368 bytes):
         - program_id: char[64] (64 bytes)
         - program_version_major: uint16_t (2 bytes)
         - program_version_minor: uint16_t (2 bytes)
@@ -577,7 +577,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         config: Dictionary containing program configuration from TOML
     
     Returns:
-        7240 bytes of packed binary data
+        7368 bytes of packed binary data
     """
     data = bytearray()
     

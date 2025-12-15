@@ -16,7 +16,7 @@ Usage:
 
 Input directory structure:
     input_dir/
-        program_config.bin          # Required: 7240 bytes
+        program_config.bin          # Required: 7368 bytes
         bitstreams/                 # Required directory
             sd_analog.bin           # Optional: SD analog bitstream
             sd_hdmi.bin             # Optional: SD HDMI bitstream
@@ -59,7 +59,7 @@ VERSION_MINOR = 0
 # Structure sizes
 HEADER_SIZE = 64
 TOC_ENTRY_SIZE = 64
-PROGRAM_CONFIG_SIZE = 7240
+PROGRAM_CONFIG_SIZE = 7368
 SIGNED_DESCRIPTOR_SIZE = 332
 SIGNATURE_SIZE = 64
 ARTIFACT_HASH_SIZE = 36
@@ -823,13 +823,13 @@ def validate_program_config(data: bytes, offset: int) -> int:
         return ValidationResult.INVALID_ABI_RANGE
     
     # Validate parameter count
-    parameter_count = struct.unpack_from('<H', data, offset + 370)[0]
+    parameter_count = struct.unpack_from('<H', data, offset + 498)[0]
     if parameter_count > 12:
         return ValidationResult.INVALID_PARAMETER_COUNT
     
     # Validate reserved fields are zero
-    validate_reserved_zero(data, offset + 372, 2, "config.reserved_pad")
-    validate_reserved_zero(data, offset + 7238, 2, "config.reserved")
+    validate_reserved_zero(data, offset + 500, 2, "config.reserved_pad")
+    validate_reserved_zero(data, offset + 7366, 2, "config.reserved")
     
     return ValidationResult.OK
 
@@ -847,7 +847,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Input directory must contain:
-  - program_config.bin (7240 bytes)
+  - program_config.bin (7368 bytes)
   - bitstreams/ directory with *.bin files
 
 Example:

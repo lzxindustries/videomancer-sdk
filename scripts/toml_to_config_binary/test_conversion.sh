@@ -41,9 +41,9 @@ if [ -f "example_program_config.bin" ]; then
     SIZE=$(stat -f%z "example_program_config.bin" 2>/dev/null || stat -c%s "example_program_config.bin")
     echo "=== Verification ==="
     echo "Output file: example_program_config.bin"
-    echo "Size: $SIZE bytes (expected: 7240)"
+    echo "Size: $SIZE bytes (expected: 7368)"
     
-    if [ "$SIZE" -eq 7240 ]; then
+    if [ "$SIZE" -eq 7368 ]; then
         echo "✓ Size matches!"
     else
         echo "✗ Size mismatch!"
