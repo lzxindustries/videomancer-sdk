@@ -21,20 +21,27 @@ echo ""
 
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-cd "$SCRIPT_DIR"
 
-# Determine which programs to build
-PROGRAMS="${1:-$(find ./programs/ -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)}"
-PROGRAM_COUNT=$(echo "$PROGRAMS" | wc -w)
+# Root paths - can be overridden by environment variables
+SDK_ROOT="${SDK_ROOT:-${SCRIPT_DIR}}"
+PROGRAMS_PROJECT_DIR="${PROGRAMS_PROJECT_DIR:-${SCRIPT_DIR}/programs/}"
+PROGRAMS_BUILD_DIR="${PROGRAMS_BUILD_DIR:-${SCRIPT_DIR}/build/programs/}"
 
+# Hardware configuration
 DEVICE=hx4k
 PACKAGE=tq144
 HARDWARE=videomancer_core_rev_b
 
+cd "${SCRIPT_DIR}"
+
+# Determine which programs to build
+PROGRAMS="${1:-$(find "${PROGRAMS_PROJECT_DIR}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)}"
+PROGRAM_COUNT=$(echo "$PROGRAMS" | wc -w)
+
 if [ -n "$1" ]; then
     echo -e "${CYAN}Building specific program: ${1}${NC}"
 else
-    echo -e "${CYAN}Building all programs (${PROGRAM_COUNT} found)${NC}"
+    echo -e "${CYAN}Building all programs (${PROGRAM_COUNT} found in ${PROGRAMS_PROJECT_DIR})${NC}"
 fi
 echo ""
 
@@ -77,9 +84,11 @@ mkdir -p out
 TOTAL_PROGRAMS=0
 SUCCESSFUL_PROGRAMS=0
 FAILED_PROGRAMS=0
-
+    
 for PROGRAM in $PROGRAMS; do
     TOTAL_PROGRAMS=$((TOTAL_PROGRAMS + 1))
+    PROJECT_ROOT="${PROGRAMS_PROJECT_DIR}${PROGRAM}/"
+    BUILD_ROOT="${PROGRAMS_BUILD_DIR}${PROGRAM}/"
     
     echo ""
     echo -e "${BLUE}====================================${NC}"
@@ -88,15 +97,15 @@ for PROGRAM in $PROGRAMS; do
     echo ""
     
     # Check if program directory exists
-    if [ ! -d "programs/${PROGRAM}" ]; then
-        echo -e "${RED}ERROR: Program directory 'programs/${PROGRAM}' not found${NC}"
+    if [ ! -d "${PROJECT_ROOT}" ]; then
+        echo -e "${RED}ERROR: Program directory '${PROJECT_ROOT}' not found${NC}"
         FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
         continue
     fi
     
     # Create output directories
     echo -e "${GREEN}Creating output directories...${NC}"
-    mkdir -p build/programs/${PROGRAM}/bitstreams
+    mkdir -p "${BUILD_ROOT}bitstreams"
     
     # Synthesize FPGA bitstreams (6 variants)
     echo -e "${GREEN}Synthesizing FPGA bitstreams...${NC}"
@@ -110,7 +119,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [1/6] HD Analog (80 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -124,7 +133,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [2/6] SD Analog (30 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -138,7 +147,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [3/6] HD HDMI (80 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -152,7 +161,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [4/6] SD HDMI (30 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -166,7 +175,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [5/6] HD Dual (80 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -180,7 +189,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [6/6] SD Dual (30 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -202,7 +211,7 @@ for PROGRAM in $PROGRAMS; do
     # Convert TOML configuration to binary
     echo -e "${GREEN}Converting TOML configuration to binary...${NC}"
     cd scripts/toml_to_config_binary
-    python3 toml_to_config_binary.py ../../programs/${PROGRAM}/${PROGRAM}.toml ../../build/programs/${PROGRAM}/program_config.bin --quiet
+    python3 toml_to_config_binary.py "${PROJECT_ROOT}${PROGRAM}.toml" "${BUILD_ROOT}program_config.bin" --quiet
     cd ../..
     echo -e "${GREEN}✓ Configuration binary created (7,240 bytes)${NC}"
     
@@ -219,7 +228,7 @@ for PROGRAM in $PROGRAMS; do
     PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then
         echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-        if ! python3 vmprog_pack.py ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > "$PACK_LOG" 2>&1; then
+        if ! python3 vmprog_pack.py "${BUILD_ROOT%/}" "${SCRIPT_DIR}/out/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
             echo -e "${RED}Packaging failed. Error output:${NC}"
             cat "$PACK_LOG"
             rm -f "$PACK_LOG"
@@ -228,7 +237,7 @@ for PROGRAM in $PROGRAMS; do
             continue
         fi
     else
-        if ! python3 vmprog_pack.py --no-sign ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > "$PACK_LOG" 2>&1; then
+        if ! python3 vmprog_pack.py --no-sign "${BUILD_ROOT%/}" "${SCRIPT_DIR}/out/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
             echo -e "${RED}Packaging failed. Error output:${NC}"
             cat "$PACK_LOG"
             rm -f "$PACK_LOG"

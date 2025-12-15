@@ -2,6 +2,11 @@
 # Copyright (C) 2025 LZX Industries LLC
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Root paths (must be provided by caller)
+SDK_ROOT ?= ..
+PROJECT_ROOT ?= $(SDK_ROOT)/programs/$(PROGRAM)
+BUILD_ROOT ?= $(SDK_ROOT)/build/programs/$(PROGRAM)
+
 PROGRAM = yuv_proc_amp
 CONFIG = analog
 DEVICE = hx4k
@@ -9,15 +14,15 @@ PACKAGE = tq144
 FREQUENCY = 74.25
 HARDWARE = videomancer_core_rev_b
 
-VHD_FILES = $(wildcard ./rtl/*.vhd) \
-	$(wildcard ../programs/$(PROGRAM)/*.vhd) \
-	./rtl/config/$(CONFIG)_pkg.vhd \
-	$(wildcard ../third_party/SiliconBlue/rtl/sb_*.vhd)
+VHD_FILES = $(wildcard $(SDK_ROOT)/fpga/rtl/*.vhd) \
+	$(wildcard $(PROJECT_ROOT)/*.vhd) \
+	$(SDK_ROOT)/fpga/rtl/config/$(CONFIG)_pkg.vhd \
+	$(wildcard $(SDK_ROOT)/third_party/SiliconBlue/rtl/sb_*.vhd)
 
 PCF_FILE = \
-	./constraints/$(HARDWARE)/pin_map.pcf
+	$(SDK_ROOT)/fpga/constraints/$(HARDWARE)/pin_map.pcf
 
-BUILD_PREFIX = ../build/programs/$(PROGRAM)/bitstreams/
+BUILD_PREFIX = $(BUILD_ROOT)/bitstreams/
 BIN_FILE = $(BUILD_PREFIX)$(CONFIG).bin
 JSON_FILE = $(BUILD_PREFIX)$(CONFIG).json
 ASC_FILE = $(BUILD_PREFIX)$(CONFIG).asc
