@@ -252,14 +252,14 @@ inline vmprog_validation_result read_vmprog_config(
  * @param stream Input stream
  * @param entry TOC entry for config
  * @param out_config Output configuration structure
- * @param verify_hash If true, verify hash against TOC entry
+ * @param should_verify_hash If true, verify hash against TOC entry
  * @return Validation result code
  */
 inline vmprog_validation_result read_and_validate_vmprog_config(
     vmprog_stream& stream,
     const vmprog_toc_entry_v1_0& entry,
     vmprog_program_config_v1_0& out_config,
-    bool verify_hash = true
+    bool should_verify_hash = true
 ) {
     auto result = read_vmprog_config(stream, entry, out_config);
     if (result != vmprog_validation_result::ok) {
@@ -273,7 +273,7 @@ inline vmprog_validation_result read_and_validate_vmprog_config(
     }
 
     // Verify hash if requested
-    if (verify_hash) {
+    if (should_verify_hash) {
         if (!verify_hash(reinterpret_cast<const uint8_t*>(&out_config), 
                         sizeof(vmprog_program_config_v1_0), 
                         entry.sha256)) {
