@@ -314,7 +314,7 @@ display_max_value = 100
 
 # Mode selector with discrete options
 [[parameter]]
-parameter_id = "toggle_switch_7"
+parameter_id = "rotary_potentiometer_4"
 name_label = "Color Mode"
 value_labels = ["Normal", "Vibrant", "Pastel", "Monochrome"]
 initial_value_label = "Normal"
