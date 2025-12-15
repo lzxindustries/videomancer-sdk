@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-12-15
+
 ### Added
+
+- **TOML Editor** - Browser-based visual editor for program configuration files
+  - Live JSON Schema validation with detailed error reporting
+  - Dual-view interface: visual form editor and raw TOML text editor
+  - Real-time TOML syntax checking with ACE editor integration
+  - Embedded dependencies (AJV, ACE Editor) for offline use
+  - Light minimal theme optimized for usability
+  - Comprehensive documentation in tools/toml-editor/README.md
+
+- **Tool Documentation** - README files for all development tools
+  - tools/toml-editor/README.md - Visual editor usage and features
+  - tools/toml-converter/README.md - Binary conversion process
+  - tools/toml-validator/README.md - Validation tool documentation
+  - tools/vmprog-packer/README.md - Package creation and signing
 
 - **toml-config-guide.md** - Comprehensive "how-to" guide for creating TOML configuration files
   - Complete documentation of all program metadata fields
@@ -23,6 +39,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deduplicates validation errors for readability
 
 ### Changed
+
+#### Documentation Organization
+
+- **Renamed documentation files** for consistency (lowercase-with-hyphens naming)
+  - signing-guide.md → package-signing-guide.md
+  - toml-program-config-guide.md → toml-config-guide.md
+  - vmprog-ed25519-signing.md → ed25519-signing.md
+  - All cross-references updated across 13 files
+
+- **Updated documentation content**
+  - toml-config-guide.md: Added "Visual Editor (Recommended)" section
+  - README.md: Fixed clean_sdk.sh → clean.sh script reference
+  - keys/README.md: Corrected script paths (scripts/vmprog_pack → tools/vmprog-packer)
+
+#### Repository Maintenance
+
+- **.gitignore improvements** - Added Python cache patterns
+  - `__pycache__/` directories
+  - `*.py[cod]` compiled Python files
+  - `*.so` shared objects
+  - `.Python` metadata
+
+- **Copyright headers** - Added GPL-3.0 license header to tools/toml-editor/toml-editor.html
 
 #### TOML Configuration Format Improvements
 
@@ -88,6 +127,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - No longer user-configurable
 
 ### Fixed
+
+- **TOML Editor bugs**
+  - Fixed input focus loss on every keystroke in text fields
+  - Fixed raw TOML view disappearing after view switching
+  - Improved ACE editor initialization and state management
 
 - **control_mode defaults** - Automatically set to `0` (linear) when omitted or when using `value_labels` mode
 - **Schema validation compatibility** - Simplified `$data` references for broader JSON Schema library support
@@ -250,5 +294,6 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 - Single Ed25519 public key for verification (additional keys require SDK update)
 - Signature generation requires optional `cryptography` Python library
 
+[0.2.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.2.0
 [0.1.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.1.0
 
