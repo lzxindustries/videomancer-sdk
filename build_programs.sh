@@ -45,6 +45,25 @@ if [ ! -d "build/oss-cad-suite" ]; then
     exit 1
 fi
 
+# Check for Ed25519 signing keys BEFORE loading OSS CAD Suite environment
+# (OSS CAD Suite may use its own Python that doesn't see system packages)
+SIGN_PACKAGES=false
+if [ -f "keys/lzx_official_signed_descriptor_priv.bin" ] && [ -f "keys/lzx_official_signed_descriptor_pub.bin" ]; then
+    # Check if cryptography library is available
+    if python3 -c "import cryptography" 2>/dev/null; then
+        SIGN_PACKAGES=true
+        echo -e "${GREEN}✓ Ed25519 signing keys found - packages will be signed${NC}"
+    else
+        echo -e "${YELLOW}⚠ Ed25519 keys found but cryptography library not available${NC}"
+        echo -e "${YELLOW}  Packages will be unsigned. Install with:${NC}"
+        echo -e "${YELLOW}    sudo apt install python3-cryptography${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠ Ed25519 signing keys not found - packages will be unsigned${NC}"
+    echo -e "${YELLOW}  To enable signing, run: ./scripts/setup_ed25519_signing.sh${NC}"
+fi
+echo ""
+
 echo -e "${GREEN}Loading OSS CAD Suite environment...${NC}"
 cd build/oss-cad-suite
 source environment
@@ -120,13 +139,24 @@ for PROGRAM in $PROGRAMS; do
     # Package into .vmprog format
     echo -e "${GREEN}Packaging ${PROGRAM}.vmprog...${NC}"
     cd scripts/vmprog_pack
-    python3 vmprog_pack.py ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > /dev/null 2>&1
+    
+    if [ "$SIGN_PACKAGES" = true ]; then
+        echo -e "${CYAN}  Signing package with Ed25519...${NC}"
+        python3 vmprog_pack.py ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > /dev/null 2>&1
+    else
+        python3 vmprog_pack.py --no-sign ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > /dev/null 2>&1
+    fi
+    
     cd ../..
     
     # Verify output file
     if [ -f "out/${PROGRAM}.vmprog" ]; then
         FILESIZE=$(stat -f%z "out/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "out/${PROGRAM}.vmprog" 2>/dev/null)
-        echo -e "${GREEN}✓ Successfully created: out/${PROGRAM}.vmprog (${FILESIZE} bytes)${NC}"
+        if [ "$SIGN_PACKAGES" = true ]; then
+            echo -e "${GREEN}✓ Successfully created: out/${PROGRAM}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
+        else
+            echo -e "${GREEN}✓ Successfully created: out/${PROGRAM}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
+        fi
         SUCCESSFUL_PROGRAMS=$((SUCCESSFUL_PROGRAMS + 1))
     else
         echo -e "${RED}✗ Failed to create output file${NC}"
@@ -143,6 +173,11 @@ echo -e "${CYAN}Total programs processed:  ${TOTAL_PROGRAMS}${NC}"
 echo -e "${GREEN}Successfully built:        ${SUCCESSFUL_PROGRAMS}${NC}"
 
 if [ $FAILED_PROGRAMS -gt 0 ]; then
+if [ "$SIGN_PACKAGES" = true ]; then
+    echo -e "${GREEN}All packages cryptographically signed with Ed25519${NC}"
+else
+    echo -e "${YELLOW}Packages are unsigned (no Ed25519 keys found)${NC}"
+fi
     echo -e "${RED}Failed:                    ${FAILED_PROGRAMS}${NC}"
 fi
 

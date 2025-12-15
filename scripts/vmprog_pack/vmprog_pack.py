@@ -33,6 +33,15 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 
+try:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+    from cryptography.hazmat.primitives import serialization
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
+    print("WARNING: cryptography library not available - signature generation disabled")
+    print("Install with: pip install cryptography")
+
 
 # =============================================================================
 # Constants from vmprog_format.hpp
@@ -152,6 +161,87 @@ def calculate_sha256(data: bytes) -> bytes:
     return hashlib.sha256(data).digest()
 
 
+def load_ed25519_keys(keys_dir: Path) -> Tuple[Optional[Ed25519PrivateKey], Optional[Ed25519PublicKey]]:
+    """Load Ed25519 private and public keys from binary files
+    
+    Args:
+        keys_dir: Directory containing private and public key files
+        
+    Returns:
+        Tuple of (private_key, public_key) or (None, None) if not available
+    """
+    if not CRYPTO_AVAILABLE:
+        print("WARNING: Cannot load keys - cryptography library not available")
+        return None, None
+    
+    priv_key_path = keys_dir / 'lzx_official_signed_descriptor_priv.bin'
+    pub_key_path = keys_dir / 'lzx_official_signed_descriptor_pub.bin'
+    
+    if not priv_key_path.exists():
+        print(f"WARNING: Private key not found at {priv_key_path}")
+        return None, None
+    
+    if not pub_key_path.exists():
+        print(f"WARNING: Public key not found at {pub_key_path}")
+        return None, None
+    
+    try:
+        # Load private key (32 bytes)
+        priv_key_data = priv_key_path.read_bytes()
+        if len(priv_key_data) != 32:
+            print(f"ERROR: Private key must be 32 bytes, got {len(priv_key_data)}")
+            return None, None
+        
+        private_key = Ed25519PrivateKey.from_private_bytes(priv_key_data)
+        
+        # Load public key (32 bytes)
+        pub_key_data = pub_key_path.read_bytes()
+        if len(pub_key_data) != 32:
+            print(f"ERROR: Public key must be 32 bytes, got {len(pub_key_data)}")
+            return None, None
+        
+        public_key = Ed25519PublicKey.from_public_bytes(pub_key_data)
+        
+        # Verify that the public key matches the private key
+        derived_public_key = private_key.public_key()
+        derived_pub_bytes = derived_public_key.public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw
+        )
+        
+        if derived_pub_bytes != pub_key_data:
+            print("WARNING: Public key does not match private key")
+            # Still return them, but warn the user
+        
+        print(f"✓ Loaded Ed25519 keys from {keys_dir}")
+        return private_key, public_key
+        
+    except Exception as e:
+        print(f"ERROR: Failed to load Ed25519 keys: {e}")
+        return None, None
+
+
+def sign_descriptor(descriptor_data: bytes, private_key: Ed25519PrivateKey) -> bytes:
+    """Sign the descriptor with Ed25519 private key
+    
+    Args:
+        descriptor_data: The 332-byte signed descriptor to sign
+        private_key: Ed25519 private key
+        
+    Returns:
+        64-byte Ed25519 signature
+    """
+    if len(descriptor_data) != SIGNED_DESCRIPTOR_SIZE:
+        raise ValueError(f"Descriptor must be {SIGNED_DESCRIPTOR_SIZE} bytes, got {len(descriptor_data)}")
+    
+    signature = private_key.sign(descriptor_data)
+    
+    if len(signature) != SIGNATURE_SIZE:
+        raise ValueError(f"Signature must be {SIGNATURE_SIZE} bytes, got {len(signature)}")
+    
+    return signature
+
+
 def pack_string(s: str, max_length: int) -> bytes:
     """Pack a string into a fixed-length null-terminated byte array"""
     encoded = s.encode('utf-8')
@@ -222,13 +312,15 @@ def find_bitstreams(input_dir: Path) -> List[BitstreamFile]:
 # Package Building
 # =============================================================================
 
-def build_vmprog_package(input_dir: Path, output_path: Path) -> bool:
+def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, keys_dir: Optional[Path] = None) -> bool:
     """
     Build a complete .vmprog package from input directory.
     
     Args:
         input_dir: Directory containing program_config.bin and bitstreams/
         output_path: Output .vmprog file path
+        sign: If True, sign the package with Ed25519 (default: True)
+        keys_dir: Directory containing Ed25519 keys (default: ./keys relative to script)
     
     Returns:
         True if successful, False otherwise
@@ -259,13 +351,32 @@ def build_vmprog_package(input_dir: Path, output_path: Path) -> bool:
         print("ERROR: No bitstreams found - at least one bitstream is required")
         return False
     
+    # Load Ed25519 keys if signing is requested
+    private_key = None
+    public_key = None
+    will_sign = False
+    
+    if sign:
+        if keys_dir is None:
+            # Default to ./keys relative to the script location
+            script_dir = Path(__file__).parent.parent.parent  # Go up to SDK root
+            keys_dir = script_dir / 'keys'
+        
+        private_key, public_key = load_ed25519_keys(keys_dir)
+        will_sign = private_key is not None and public_key is not None
+        
+        if not will_sign:
+            print("WARNING: Signing requested but keys could not be loaded")
+            print("Package will be created without signature")
+    
     # Build TOC entries and payloads
     toc_entries: List[TOCEntry] = []
     payloads: List[bytes] = []
     
     # Calculate TOC offset and payload start
     toc_offset = HEADER_SIZE
-    toc_count = 1 + 1 + len(bitstreams)  # config + signed_descriptor + bitstreams
+    # config + signed_descriptor + (optional signature) + bitstreams
+    toc_count = 1 + 1 + (1 if will_sign else 0) + len(bitstreams)
     toc_bytes = toc_count * TOC_ENTRY_SIZE
     payload_offset = toc_offset + toc_bytes
     
@@ -338,7 +449,35 @@ def build_vmprog_package(input_dir: Path, output_path: Path) -> bool:
     print(f"  Build ID: 0x{build_id:08X}")
     print(f"  Hash: {descriptor_hash.hex()[:16]}...")
     
+    # Generate and add signature if keys are available
+    if will_sign:
+        print(f"\nGenerating Ed25519 signature...")
+        try:
+            signature = sign_descriptor(bytes(signed_descriptor), private_key)
+            
+            # Add signature entry
+            signature_hash = calculate_sha256(signature)
+            toc_entries.append(TOCEntry(
+                entry_type=TOCEntryType.SIGNATURE,
+                flags=0,
+                offset=current_offset,
+                size=len(signature),
+                sha256=signature_hash
+            ))
+            payloads.append(signature)
+            current_offset += len(signature)
+            
+            print(f"\nTOC Entry 2: SIGNATURE")
+            print(f"  Offset: {toc_entries[2].offset}")
+            print(f"  Size: {toc_entries[2].size}")
+            print(f"  Hash: {signature_hash.hex()[:16]}...")
+            print(f"  Signature: {signature.hex()[:32]}...")
+        except Exception as e:
+            print(f"ERROR: Failed to generate signature: {e}")
+            return False
+    
     # Add bitstream entries
+    bitstream_start_idx = 2 if will_sign else 1
     for i, bitstream in enumerate(bitstreams):
         bitstream_hash = calculate_sha256(bitstream.data)
         toc_entries.append(TOCEntry(
@@ -352,7 +491,8 @@ def build_vmprog_package(input_dir: Path, output_path: Path) -> bool:
         
         entry_type_name = [k for k, v in vars(TOCEntryType).items() 
                           if not k.startswith('_') and v == bitstream.entry_type][0]
-        print(f"\nTOC Entry {i+2}: {entry_type_name}")
+        toc_entry_idx = bitstream_start_idx + 1 + i
+        print(f"\nTOC Entry {toc_entry_idx}: {entry_type_name}")
         print(f"  File: {bitstream.path.name}")
         print(f"  Offset: {current_offset}")
         print(f"  Size: {len(bitstream.data)}")
@@ -379,7 +519,9 @@ def build_vmprog_package(input_dir: Path, output_path: Path) -> bool:
     struct.pack_into('<H', header, 8, HEADER_SIZE)            # header_size
     struct.pack_into('<H', header, 10, 0)                     # reserved_pad
     struct.pack_into('<I', header, 12, file_size)             # file_size
-    struct.pack_into('<I', header, 16, HeaderFlags.NONE)      # flags (unsigned)
+    # Set signed_pkg flag if package is signed
+    flags = HeaderFlags.SIGNED_PKG if will_sign else HeaderFlags.NONE
+    struct.pack_into('<I', header, 16, flags)                 # flags
     struct.pack_into('<I', header, 20, toc_offset)            # toc_offset
     struct.pack_into('<I', header, 24, toc_bytes)             # toc_bytes
     struct.pack_into('<I', header, 28, toc_count)             # toc_count
@@ -414,6 +556,12 @@ def build_vmprog_package(input_dir: Path, output_path: Path) -> bool:
     package[32:64] = package_hash
     
     print(f"\nPackage hash: {package_hash.hex()}")
+    
+    # Print signature status
+    if will_sign:
+        print(f"\n✓ Package is SIGNED with Ed25519")
+    else:
+        print(f"\n⚠ Package is UNSIGNED")
     
     # Write to file
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -690,17 +838,38 @@ def validate_program_config(data: bytes, offset: int) -> int:
 
 def main():
     """Main entry point"""
-    if len(sys.argv) != 3:
-        print("Usage: python vmprog_pack.py <input_dir> <output_file.vmprog>")
-        print("\nExample:")
-        print("  python vmprog_pack.py ./build/programs/passthru ./output/passthru.vmprog")
-        print("\nInput directory must contain:")
-        print("  - program_config.bin (7240 bytes)")
-        print("  - bitstreams/ directory with *.bin files")
-        sys.exit(1)
+    import argparse
     
-    input_dir = Path(sys.argv[1])
-    output_path = Path(sys.argv[2])
+    parser = argparse.ArgumentParser(
+        description='Videomancer Program Package Creator',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Input directory must contain:
+  - program_config.bin (7240 bytes)
+  - bitstreams/ directory with *.bin files
+
+Example:
+  python vmprog_pack.py ./build/programs/passthru ./output/passthru.vmprog
+  python vmprog_pack.py --no-sign ./build/programs/passthru ./output/passthru.vmprog
+  python vmprog_pack.py --keys-dir ./my_keys ./build/programs/passthru ./output/passthru.vmprog
+        """
+    )
+    
+    parser.add_argument('input_dir', type=Path,
+                       help='Input directory containing program_config.bin and bitstreams/')
+    parser.add_argument('output_file', type=Path,
+                       help='Output .vmprog file path')
+    parser.add_argument('--no-sign', action='store_true',
+                       help='Do not sign the package (unsigned package)')
+    parser.add_argument('--keys-dir', type=Path, default=None,
+                       help='Directory containing Ed25519 keys (default: ./keys)')
+    
+    args = parser.parse_args()
+    
+    input_dir = args.input_dir
+    output_path = args.output_file
+    sign = not args.no_sign
+    keys_dir = args.keys_dir
     
     if not input_dir.exists():
         print(f"ERROR: Input directory does not exist: {input_dir}")
@@ -711,7 +880,7 @@ def main():
         sys.exit(1)
     
     # Build package
-    success = build_vmprog_package(input_dir, output_path)
+    success = build_vmprog_package(input_dir, output_path, sign=sign, keys_dir=keys_dir)
     if not success:
         print("\nERROR: Package creation failed")
         sys.exit(1)

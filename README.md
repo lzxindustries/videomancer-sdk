@@ -16,8 +16,9 @@ The Videomancer SDK provides a complete toolchain for creating, building, packag
 
 - **Complete Build Chain:** FPGA synthesis toolchain (OSS CAD Suite) with automated build scripts
 - **Binary Format:** Distribute FPGA programs up to 1 MB with cryptographic signing
+- **Ed25519 Signing:** Complete signing toolchain with key generation and package signing
 - **RTL Libraries:** VHDL components for video processing, sync generation, and YUV conversion
-- **Python Tooling:** TOML converter and `.vmprog` packaging tool
+- **Python Tooling:** TOML converter and `.vmprog` packaging tool with signature support
 - **Cryptographic Security:** Ed25519 signature verification and BLAKE2b-256 hashing
 - **Parameter System:** 12 user-configurable parameters with 36 control modes
 - **Hardware Compatibility:** Rev A/B detection flags and ABI version management
@@ -36,19 +37,23 @@ cd videomancer-sdk
 # 2. One-time setup: Install FPGA toolchain (OSS CAD Suite)
 bash setup.sh
 
-# 3. Build all FPGA programs (synthesizes bitstreams and creates .vmprog packages)
+# 3. (Optional) Set up Ed25519 signing for cryptographically signed packages
+bash scripts/setup_ed25519_signing.sh
+
+# 4. Build all FPGA programs (synthesizes bitstreams and creates .vmprog packages)
 bash build_programs.sh
 
 # Output: All programs packaged in out/ directory
-# Example: out/passthru.vmprog
+# Example: out/passthru.vmprog (signed if keys were generated in step 3)
 ```
 
 **What this does:**
 - `setup.sh` - Downloads and installs OSS CAD Suite (Yosys, nextpnr, GHDL) to `build/oss-cad-suite/`
+- `setup_ed25519_signing.sh` - (Optional) Installs cryptography library and generates Ed25519 keys for signing
 - `build_programs.sh` - For each program in `programs/`:
   - Synthesizes 6 FPGA bitstream variants (SD/HD × analog/HDMI/dual)
   - Converts TOML config to binary format
-  - Packages everything into a signed `.vmprog` file
+  - Packages everything into a signed `.vmprog` file (if keys exist)
 
 ### Prerequisites
 
@@ -56,6 +61,14 @@ bash build_programs.sh
 - **SDK Build:** CMake 3.13+, C++17 compiler (C++20 on non-Windows), Git
 - **FPGA Build:** OSS CAD Suite (installed by `setup.sh`)
 - **Python:** Python 3.7+ (standard library only)
+- **Ed25519 Signing (optional):** `cryptography` library
+  ```bash
+  # Ubuntu/Debian (recommended)
+  sudo apt install python3-cryptography
+  
+  # Or using pip (if system allows)
+  pip3 install cryptography
+  ```
 - **Disk Space:** ~2 GB for OSS CAD Suite toolchain
 
 ### Building SDK Headers Only
@@ -160,8 +173,11 @@ Create complete `.vmprog` packages from bitstreams and configuration:
 ```bash
 cd scripts/vmprog_pack
 
-# Package program with bitstreams
+# Package program with cryptographic signature (default if keys exist)
 python3 vmprog_pack.py ../../build/programs/passthru ../../out/passthru.vmprog
+
+# Or create unsigned package
+python3 vmprog_pack.py --no-sign ../../build/programs/passthru ../../out/passthru.vmprog
 
 # Input directory structure:
 #   build/programs/passthru/
@@ -169,6 +185,35 @@ python3 vmprog_pack.py ../../build/programs/passthru ../../out/passthru.vmprog
 #     bitstreams/
 #       sd_analog.bin, sd_hdmi.bin, sd_dual.bin
 #       hd_analog.bin, hd_hdmi.bin, hd_dual.bin
+```
+
+### Ed25519 Package Signing
+
+Generate Ed25519 keys and sign packages:
+
+```bash
+# Install cryptography library (required for signing)
+# Ubuntu/Debian/WSL2:
+sudo apt install python3-cryptography
+
+# Or if pip is allowed:
+pip3 install cryptography
+
+# One-time setup: Generate Ed25519 key pair
+cd scripts/vmprog_pack
+python3 generate_ed25519_keys.py --output-dir ../../keys
+
+# Keys are created at:
+#   keys/lzx_official_signed_descriptor_priv.bin (32 bytes, keep secret!)
+#   keys/lzx_official_signed_descriptor_pub.bin (32 bytes, safe to share)
+
+# Create signed package (default behavior)
+python3 vmprog_pack.py ../../build/programs/passthru ../../out/passthru.vmprog
+
+# Test signing functionality
+python3 test_ed25519_signing.py
+
+# See docs/vmprog-ed25519-signing.md for complete documentation
 ```
 
 ## SDK Components
@@ -189,7 +234,9 @@ python3 vmprog_pack.py ../../build/programs/passthru ../../out/passthru.vmprog
 ### Python Tools
 
 - **[toml_to_config_binary.py](scripts/toml_to_config_binary/toml_to_config_binary.py)** - Converts TOML configuration files to 7,240-byte binary format with comprehensive validation
-- **[vmprog_pack.py](scripts/vmprog_pack/vmprog_pack.py)** - Creates complete `.vmprog` packages from bitstreams and configuration with SHA-256 verification
+- **[vmprog_pack.py](scripts/vmprog_pack/vmprog_pack.py)** - Creates complete `.vmprog` packages from bitstreams and configuration with SHA-256 verification and Ed25519 signing
+- **[generate_ed25519_keys.py](scripts/vmprog_pack/generate_ed25519_keys.py)** - Generates Ed25519 key pairs for package signing
+- **[test_ed25519_signing.py](scripts/vmprog_pack/test_ed25519_signing.py)** - Test suite for Ed25519 signing functionality
 - **[example_program_config.toml](scripts/toml_to_config_binary/example_program_config.toml)** - Template with 3 parameters demonstrating the configuration format
 
 ### FPGA Build System
@@ -216,7 +263,9 @@ python3 vmprog_pack.py ../../build/programs/passthru ../../out/passthru.vmprog
 ### Documentation
 
 - **[vmprog-format.md](docs/vmprog-format.md)** - Complete binary format specification with diagrams, validation procedures, and implementation guidelines
+- **[vmprog-ed25519-signing.md](docs/vmprog-ed25519-signing.md)** - Ed25519 signing implementation, key management, and security guidelines
 - **[vmprog_pack README](scripts/vmprog_pack/README.md)** - Detailed documentation for the program packaging tool
+- **[SIGNING_GUIDE.md](scripts/vmprog_pack/SIGNING_GUIDE.md)** - Quick reference for Ed25519 signing
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and development information
 - **[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** - Monocypher and SiliconBlue ICE40 licensing information
@@ -278,20 +327,30 @@ videomancer-sdk/
 │       ├── passthru.vhd                   # FPGA implementation
 │       └── passthru.toml                  # Configuration
 ├── scripts/
+│   ├── setup_ed25519_signing.sh           # Ed25519 signing setup (Linux/Mac)
+│   ├── setup_ed25519_signing.bat          # Ed25519 signing setup (Windows)
 │   ├── toml_to_config_binary/             # TOML → binary converter
 │   │   ├── toml_to_config_binary.py       # Converter (443 lines)
 │   │   ├── example_program_config.toml
 │   │   └── test_conversion.sh
 │   ├── vmprog_pack/                       # .vmprog packager
-│   │   ├── vmprog_pack.py                 # Packager (731 lines)
+│   │   ├── vmprog_pack.py                 # Packager (900 lines, with signing)
+│   │   ├── generate_ed25519_keys.py       # Key generation utility
+│   │   ├── test_ed25519_signing.py        # Signing test suite
 │   │   ├── README.md                      # Tool documentation
+│   │   ├── SIGNING_GUIDE.md               # Quick reference
 │   │   └── test_vmprog_pack.sh
 │   └── videomancer_sdk_version/           # CMake version generation
 ├── third_party/
 │   ├── monocypher/                        # Cryptography (BSD-2-Clause OR CC0-1.0)
 │   └── SiliconBlue/                       # ICE40 FPGA primitives (Lattice)
 ├── docs/
-│   └── vmprog-format.md                   # Format specification (1,167 lines)
+│   ├── vmprog-format.md                   # Format specification (1,167 lines)
+│   └── vmprog-ed25519-signing.md          # Ed25519 signing documentation
+├── keys/                                  # Ed25519 signing keys (user-generated)
+│   ├── README.md                          # Key management guide
+│   ├── .gitignore                         # Protects private keys
+│   └── *.bin                              # Keys (generated by setup script)
 ├── build/                                 # Build output (created by scripts)
 │   ├── oss-cad-suite/                     # FPGA toolchain (Yosys, nextpnr, GHDL)
 │   └── programs/                          # Built program artifacts
@@ -310,14 +369,14 @@ videomancer-sdk/
 ✅ **Complete:**
 - `.vmprog` format specification and SDK headers
 - Full FPGA build chain (OSS CAD Suite integration)
+- Ed25519 signature generation and verification toolchain
 - RTL VHDL component libraries for video processing
-- Python packaging tools (TOML converter, vmprog_pack)
+- Python packaging tools (TOML converter, vmprog_pack with signing)
 - Automated build scripts for complete workflow
 - Example program (passthru) demonstrating full development cycle
 
 🔄 **In Progress:**
 - Additional example programs demonstrating video effects
-- Ed25519 signature generation tools
 
 **Current capabilities:** Complete FPGA program development from VHDL → bitstream → signed `.vmprog` package.
 

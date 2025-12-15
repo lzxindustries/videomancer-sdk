@@ -8,6 +8,7 @@
 
 - ✅ Creates complete `.vmprog` package files from input directory
 - ✅ Supports all six bitstream variants (SD/HD × Analog/HDMI/Dual)
+- ✅ **Ed25519 cryptographic signing** with automatic key loading
 - ✅ Calculates SHA-256 hashes for all payloads
 - ✅ Generates proper TOC (Table of Contents) entries
 - ✅ Validates package structure against format specification
@@ -18,39 +19,130 @@
 ## Requirements
 
 - Python 3.7 or higher
-- No external dependencies (uses only standard library)
+- Standard library (no dependencies for basic functionality)
+- **Optional:** `cryptography` library for Ed25519 signing
+  ```bash
+  # Ubuntu/Debian/WSL2 (recommended)
+  sudo apt install python3-cryptography
+  
+  # macOS or if system allows pip
+  pip3 install cryptography
+  
+  # If you get "externally-managed-environment" error
+  pip3 install --user cryptography
+  ```
 
 ## Usage
+
+### Basic Usage
 
 ```bash
 python vmprog_pack.py <input_dir> <output_file.vmprog>
 ```
 
-### Example
+### Command-Line Options
 
 ```bash
-# Create passthru.vmprog from build output
+python vmprog_pack.py [-h] [--no-sign] [--keys-dir KEYS_DIR] input_dir output_file
+
+positional arguments:
+  input_dir             Input directory containing program_config.bin and bitstreams/
+  output_file           Output .vmprog file path
+
+optional arguments:
+  -h, --help            Show help message
+  --no-sign             Do not sign the package (create unsigned package)
+  --keys-dir KEYS_DIR   Directory containing Ed25519 keys (default: ./keys)
+```
+
+### Examples
+
+```bash
+# Create signed package (default behavior)
 python vmprog_pack.py ./build/programs/passthru ./output/passthru.vmprog
+
+# Create unsigned package
+python vmprog_pack.py --no-sign ./build/programs/passthru ./output/passthru.vmprog
+
+# Use keys from custom directory
+python vmprog_pack.py --keys-dir ./my_keys ./build/programs/passthru ./output/passthru.vmprog
 
 # Create yuv_amplifier.vmprog
 python vmprog_pack.py ./build/programs/yuv_amplifier ./output/yuv_amplifier.vmprog
 ```
+Ed25519 Cryptographic Signing
 
-## Input Directory Structure
+The tool supports Ed25519 digital signatures for package authentication and integrity verification.
 
-The input directory must have the following structure:
+### Key Management
 
+Ed25519 keys are stored as raw binary files (32 bytes each):
+- `lzx_official_signed_descriptor_priv.bin` - Private key (keep secret!)
+- `lzx_official_signed_descriptor_pub.bin` - Public key (safe to share)
+
+Default key location: `./keys/` (relative to SDK root)
+
+### Generating Keys
+
+Use the provided key generation script:
+
+```bash
+# Generate keys in default location (../../keys from vmprog_pack)
+python generate_ed25519_keys.py --output-dir ../../keys
+
+# Or use the setup script
+cd ../
+./setup_ed25519_signing.sh   # Linux/Mac
+# or
+setup_ed25519_signing.bat    # Windows
 ```
-input_dir/
-├── program_config.bin          # Required: 7240 bytes
-└── bitstreams/                 # Required directory
-    ├── sd_analog.bin           # Optional: SD analog input bitstream
-    ├── sd_hdmi.bin             # Optional: SD HDMI input bitstream
-    ├── sd_dual.bin             # Optional: SD dual input bitstream
-    ├── hd_analog.bin           # Optional: HD analog input bitstream
-    ├── hd_hdmi.bin             # Optional: HD HDMI input bitstream
-    └── hd_dual.bin             # Optional: HD dual input bitstream
-```
+
+⚠️ **Security Notice:** Keep private keys secure. Do NOT commit them to version control!
+
+### Signing Process
+
+When signing is enabled (default), the tool:
+1. Loads the private key from the keys directory
+2. Creates a signed descriptor containing hashes of all package contents
+3. Generates an Ed25519 signature over the descriptor
+4. Includes the signature as a TOC entry in the package
+5. Sets the `signed_pkg` flag in the package header
+
+The signature is verified by Videomancer firmware using the embedded public key.
+
+### Signed vs. Unsigned Packages
+
+**Signed packages** (default):
+- Include a SIGNATURE TOC entry (64 bytes)
+- Have the `signed_pkg` flag set in header
+- Can be verified by firmware for authenticity
+- Recommended for production use
+
+**Unsigned packages** (`--no-sign`):
+- Do not include a signature
+- Do not have the `signed_pkg` flag set
+- Useful for testing and development
+- Will work on firmware that accepts unsigned packages
+
+## Output Format
+
+The tool creates a `.vmprog` file with the following structure:
+
+1. **Header** (64 bytes)
+   - Magic number: 'VMPG' (0x47504D56)
+   - Version: 1.0
+   - File size, TOC metadata
+   - Package SHA-256 hash
+   - Flags (including `signed_pkg` if signed)
+
+2. **Table of Contents (TOC)**
+   - One entry per payload (64 bytes each)
+   - Contains type, offset, size, and hash for each payload
+
+3. **Payloads**
+   - Program configuration (7240 bytes)
+   - Signed descriptor (332 bytes)
+   - Ed25519 signature (64 bytes, if signed
 
 **Notes:**
 - `program_config.bin` is **required** and must be exactly 7240 bytes

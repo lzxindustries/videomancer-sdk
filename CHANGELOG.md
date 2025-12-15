@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Ed25519 Package Signing
+
+- **generate_ed25519_keys.py** - Generate Ed25519 key pairs for package signing (32-byte raw keys)
+- **test_ed25519_signing.py** - Test suite for Ed25519 signing functionality
+- **vmprog_pack.py signing support** - Integrated Ed25519 signature generation
+  - Automatic key loading from `keys/` directory
+  - `--no-sign` flag for unsigned packages
+  - `--keys-dir` option for custom key locations
+  - Graceful fallback when `cryptography` library unavailable
+- **setup_ed25519_signing.sh / .bat** - One-step signing setup scripts (cross-platform)
+- **SIGNING_GUIDE.md** - Quick reference for daily Ed25519 usage
+- **vmprog-ed25519-signing.md** - Complete implementation documentation
+- **keys/README.md** - Key management and security guidelines
+- Python `cryptography` library integration for Ed25519 operations
+- Signature generation over 332-byte signed descriptor structure
+- `signed_pkg` header flag automatically set for signed packages
+
+### Changed
+
+- **vmprog_pack.py** - Enhanced with Ed25519 signing capability (default behavior)
+- **vmprog_pack README.md** - Updated with signing documentation and examples
+
+### Security
+
+- Private keys protected by `.gitignore` in `keys/` directory
+- Automatic file permissions (600) set on private keys (Unix-like systems)
+- Interactive confirmation required before overwriting existing keys
+- Clear security warnings and documentation throughout
+
 ## [0.1.0] - 2025-12-14
 
 Initial public release of the Videomancer SDK. Complete FPGA development toolchain including format specification, C++ SDK, FPGA build chain, RTL libraries, and automated packaging workflow for cryptographically signed `.vmprog` packages.
@@ -139,8 +170,8 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 **Known Limitations:**
 - 1 MB file size limit (sufficient for ICE40HX4K bitstreams + metadata)
 - 12 parameter maximum (matches Videomancer hardware interface)
-- Single Ed25519 public key (additional keys require SDK update)
-- Signature generation not included (verification only)
+- Single Ed25519 public key for verification (additional keys require SDK update)
+- Signature generation requires optional `cryptography` Python library
 
 [Unreleased]: https://github.com/lzxindustries/videomancer-sdk/compare/0.1.0...HEAD
 [0.1.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.1.0
