@@ -6,61 +6,50 @@
 
 [program]
 program_id = "com.lzxindustries.example.waveform_generator"
-program_version_major = 1
-program_version_minor = 2
-program_version_patch = 3
-abi_min_major = 1
-abi_min_minor = 0
-abi_max_major = 2
-abi_max_minor = 0
-hw_mask = 0x00000003                                                                                                  # videomancer_core_rev_a | videomancer_core_rev_b
+# Program version in SemVer format (major.minor.patch)
+program_version = "1.2.3"
+
+# ABI version compatibility range (>=min_version,<max_version)
+# This program is compatible with ABI versions 1.0 (inclusive) to 2.0 (exclusive)
+abi_version = ">=1.0,<2.0"
 program_name = "Waveform Generator"
 author = "LZX Industries LLC"
 license = "GPL-3.0"
 category = "Signal Generation"
 description = "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation."
+url = "https://github.com/lzxindustries/videomancer-sdk"
 
 # Parameter 1: Frequency Control
 [[parameter]]
 parameter_id = "rotary_potentiometer_1"
 control_mode = "linear"
 min_value = 0
-max_value = 4095
-initial_value = 2048
+max_value = 1023
+initial_value = 512
 display_min_value = 0
 display_max_value = 1000
 display_float_digits = 1
 name_label = "Frequency"
 suffix_label = "Hz"
-value_labels = []
 
 # Parameter 2: Amplitude Control
 [[parameter]]
 parameter_id = "rotary_potentiometer_2"
 control_mode = "linear"
 min_value = 0
-max_value = 4095
-initial_value = 4095
+max_value = 1023
+initial_value = 1023
 display_min_value = 0
 display_max_value = 100
-display_float_digits = 0
 name_label = "Amplitude"
 suffix_label = "%"
-value_labels = []
 
 # Parameter 3: Waveform Shape Selector
 [[parameter]]
 parameter_id = "rotary_potentiometer_3"
-control_mode = "steps_4"
-min_value = 0
-max_value = 3
-initial_value = 0
-display_min_value = 0
-display_max_value = 3
-display_float_digits = 0
 name_label = "Waveform"
-suffix_label = ""
 value_labels = ["Sine", "Triangle", "Sawtooth", "Square"]
+initial_value_label = "Sine"
 
 # Note: The structure supports up to 12 parameters total.
 # Unused parameters (4-12) will be zeroed in the binary output.

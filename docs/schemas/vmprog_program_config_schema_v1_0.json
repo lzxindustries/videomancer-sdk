@@ -13,19 +13,7 @@
       "description": "Main program metadata and configuration",
       "required": [
         "program_id",
-        "program_version_major",
-        "program_version_minor",
-        "program_version_patch",
-        "abi_min_major",
-        "abi_min_minor",
-        "abi_max_major",
-        "abi_max_minor",
-        "hw_mask",
-        "program_name",
-        "author",
-        "license",
-        "category",
-        "description"
+        "program_name"
       ],
       "properties": {
         "program_id": {
@@ -41,68 +29,45 @@
         },
         "program_version_major": {
           "type": "integer",
-          "description": "Program major version number",
+          "description": "DEPRECATED: Use program_version string field instead. Program major version number",
           "minimum": 0,
           "maximum": 65535
         },
         "program_version_minor": {
           "type": "integer",
-          "description": "Program minor version number",
+          "description": "DEPRECATED: Use program_version string field instead. Program minor version number",
           "minimum": 0,
           "maximum": 65535
         },
         "program_version_patch": {
           "type": "integer",
-          "description": "Program patch version number",
+          "description": "DEPRECATED: Use program_version string field instead. Program patch version number",
           "minimum": 0,
           "maximum": 65535
         },
         "abi_min_major": {
           "type": "integer",
-          "description": "Minimum ABI major version (inclusive)",
+          "description": "DEPRECATED: Use abi_version string field instead. Minimum ABI major version (inclusive)",
           "minimum": 1,
           "maximum": 65535
         },
         "abi_min_minor": {
           "type": "integer",
-          "description": "Minimum ABI minor version (inclusive)",
+          "description": "DEPRECATED: Use abi_version string field instead. Minimum ABI minor version (inclusive)",
           "minimum": 0,
           "maximum": 65535
         },
         "abi_max_major": {
           "type": "integer",
-          "description": "Maximum ABI major version (exclusive)",
+          "description": "DEPRECATED: Use abi_version string field instead. Maximum ABI major version (exclusive)",
           "minimum": 1,
           "maximum": 65535
         },
         "abi_max_minor": {
           "type": "integer",
-          "description": "Maximum ABI minor version (exclusive)",
+          "description": "DEPRECATED: Use abi_version string field instead. Maximum ABI minor version (exclusive)",
           "minimum": 0,
           "maximum": 65535
-        },
-        "hw_mask": {
-          "description": "Hardware compatibility flags bitmask",
-          "oneOf": [
-            {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 4294967295,
-              "description": "Decimal hardware mask value"
-            },
-            {
-              "type": "string",
-              "pattern": "^0x[0-9A-Fa-f]{1,8}$",
-              "description": "Hexadecimal hardware mask (e.g., 0x00000003)"
-            }
-          ],
-          "examples": [
-            1,
-            2,
-            3,
-            "0x00000001",
-            "0x00000003"
-          ]
         },
         "program_name": {
           "type": "string",
@@ -116,9 +81,9 @@
         },
         "author": {
           "type": "string",
-          "description": "Program author or organization name",
+          "description": "Program author or organization name. Optional: defaults to empty string if not specified.",
           "maxLength": 63,
-          "minLength": 1,
+          "minLength": 0,
           "examples": [
             "LZX Industries LLC",
             "Jane Doe"
@@ -126,9 +91,9 @@
         },
         "license": {
           "type": "string",
-          "description": "License identifier (SPDX format recommended)",
+          "description": "License identifier (SPDX format recommended). Optional: defaults to empty string if not specified.",
           "maxLength": 31,
-          "minLength": 1,
+          "minLength": 0,
           "examples": [
             "GPL-3.0",
             "MIT",
@@ -138,7 +103,7 @@
         },
         "category": {
           "type": "string",
-          "description": "Program category for organization",
+          "description": "Program category for organization. Optional: defaults to empty string if not specified.",
           "maxLength": 31,
           "minLength": 0,
           "examples": [
@@ -150,11 +115,23 @@
         },
         "description": {
           "type": "string",
-          "description": "Detailed program description",
+          "description": "Detailed program description. Optional: defaults to empty string if not specified.",
           "maxLength": 127,
           "minLength": 0,
           "examples": [
             "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation."
+          ]
+        },
+        "url": {
+          "type": "string",
+          "description": "Project or documentation URL. Optional: defaults to empty string if not specified.",
+          "maxLength": 127,
+          "minLength": 0,
+          "pattern": "^(https?://|).*$",
+          "examples": [
+            "https://lzxindustries.com",
+            "https://github.com/user/project",
+            ""
           ]
         },
         "parameter_count": {
@@ -162,9 +139,50 @@
           "description": "Number of active parameters (0-12)",
           "minimum": 0,
           "maximum": 12
+        },
+        "program_version": {
+          "type": "string",
+          "description": "Program version in SemVer format (e.g., '1.2.3')",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+          "examples": [
+            "1.0.0",
+            "0.1.0",
+            "2.3.4"
+          ]
+        },
+        "abi_version": {
+          "type": "string",
+          "description": "ABI version compatibility range (e.g., '>=1.0,<2.0' means 1.0 <= version < 2.0)",
+          "pattern": "^>=?(0|[1-9]\\d*)\\.(0|[1-9]\\d*),<(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+          "examples": [
+            ">=1.0,<2.0",
+            ">=1.5,<2.0",
+            ">=2.0,<3.0"
+          ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "description": "New format: use program_version and abi_version strings",
+          "required": [
+            "program_version",
+            "abi_version"
+          ]
+        },
+        {
+          "description": "Legacy format: use individual numeric version fields",
+          "required": [
+            "program_version_major",
+            "program_version_minor",
+            "program_version_patch",
+            "abi_min_major",
+            "abi_min_minor",
+            "abi_max_major",
+            "abi_max_minor"
+          ]
+        }
+      ]
     },
     "parameter": {
       "type": "array",
@@ -176,16 +194,7 @@
         "description": "Individual parameter configuration (vmprog_parameter_config_v1_0)",
         "required": [
           "parameter_id",
-          "control_mode",
-          "min_value",
-          "max_value",
-          "initial_value",
-          "display_min_value",
-          "display_max_value",
-          "display_float_digits",
-          "name_label",
-          "suffix_label",
-          "value_labels"
+          "name_label"
         ],
         "properties": {
           "parameter_id": {
@@ -262,37 +271,37 @@
           },
           "min_value": {
             "type": "integer",
-            "description": "Minimum raw hardware value",
+            "description": "Minimum raw hardware value. Optional: defaults to 0 if not specified.",
             "minimum": 0,
-            "maximum": 65535
+            "maximum": 1023
           },
           "max_value": {
             "type": "integer",
-            "description": "Maximum raw hardware value",
+            "description": "Maximum raw hardware value. Optional: defaults to 1023 if not specified.",
             "minimum": 0,
-            "maximum": 65535
+            "maximum": 1023
           },
           "initial_value": {
             "type": "integer",
-            "description": "Initial/default value (must be between min_value and max_value)",
+            "description": "Initial/default value (must be between min_value and max_value). Optional: defaults to 512 if not specified.",
             "minimum": 0,
-            "maximum": 65535
+            "maximum": 1023
           },
           "display_min_value": {
             "type": "integer",
-            "description": "Minimum value for display purposes",
-            "minimum": 0,
-            "maximum": 65535
+            "description": "Minimum value for display purposes (signed). Optional: defaults to min_value if not specified.",
+            "minimum": -32768,
+            "maximum": 32767
           },
           "display_max_value": {
             "type": "integer",
-            "description": "Maximum value for display purposes",
-            "minimum": 0,
-            "maximum": 65535
+            "description": "Maximum value for display purposes (signed). Optional: defaults to max_value if not specified.",
+            "minimum": -32768,
+            "maximum": 32767
           },
           "display_float_digits": {
             "type": "integer",
-            "description": "Number of decimal places to show when displaying value",
+            "description": "Number of decimal places to show when displaying value. Optional: defaults to 0 if not specified.",
             "minimum": 0,
             "maximum": 255
           },
@@ -316,13 +325,13 @@
           },
           "suffix_label": {
             "type": "string",
-            "description": "Unit suffix for display (e.g., Hz, %, \u00b0)",
+            "description": "Unit suffix for display (e.g., Hz, %, °)",
             "maxLength": 3,
             "minLength": 0,
             "examples": [
               "Hz",
               "%",
-              "\u00b0",
+              "°",
               "dB",
               ""
             ]
@@ -330,7 +339,7 @@
           "value_labels": {
             "type": "array",
             "description": "Discrete value labels for stepped parameters (maximum 16)",
-            "minItems": 0,
+            "minItems": 2,
             "maxItems": 16,
             "items": {
               "type": "string",
@@ -348,24 +357,38 @@
                 "Square"
               ]
             }
+          },
+          "initial_value_label": {
+            "type": "string",
+            "description": "Label identifying the initial value when using value_labels. Must match one of the strings in value_labels array.",
+            "maxLength": 31,
+            "minLength": 0
           }
         },
         "additionalProperties": false,
         "allOf": [
           {
-            "description": "initial_value must be between min_value and max_value",
+            "description": "min_value must be less than max_value",
             "if": {
+              "required": [
+                "min_value",
+                "max_value"
+              ]
+            },
+            "then": {
               "properties": {
                 "min_value": {
-                  "type": "integer"
-                },
-                "max_value": {
-                  "type": "integer"
-                },
-                "initial_value": {
-                  "type": "integer"
+                  "type": "integer",
+                  "exclusiveMaximum": {
+                    "$data": "1/max_value"
+                  }
                 }
-              },
+              }
+            }
+          },
+          {
+            "description": "initial_value must be between min_value and max_value",
+            "if": {
               "required": [
                 "min_value",
                 "max_value",
@@ -386,52 +409,149 @@
             }
           },
           {
-            "description": "min_value must not exceed max_value",
+            "description": "When value_labels is defined, numeric value fields and control_mode must not be defined",
             "if": {
-              "properties": {
-                "min_value": {
-                  "type": "integer"
-                },
-                "max_value": {
-                  "type": "integer"
-                }
-              },
               "required": [
-                "min_value",
-                "max_value"
+                "value_labels"
               ]
             },
             "then": {
-              "properties": {
-                "min_value": {
-                  "maximum": {
-                    "$data": "1/max_value"
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "min_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "max_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "initial_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "display_min_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "display_max_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "suffix_label"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "display_float_digits"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "control_mode"
+                    ]
                   }
-                }
+                ]
               }
             }
           },
           {
-            "description": "display_min_value must not exceed display_max_value",
+            "description": "When numeric mode is used (no value_labels), control_mode is required",
             "if": {
-              "properties": {
-                "display_min_value": {
-                  "type": "integer"
-                },
-                "display_max_value": {
-                  "type": "integer"
-                }
-              },
+              "not": {
+                "required": [
+                  "value_labels"
+                ]
+              }
+            },
+            "then": {
               "required": [
-                "display_min_value",
-                "display_max_value"
+                "control_mode"
+              ]
+            }
+          },
+          {
+            "description": "When any numeric value field is defined, value_labels must not be defined",
+            "if": {
+              "anyOf": [
+                {
+                  "required": [
+                    "min_value"
+                  ]
+                },
+                {
+                  "required": [
+                    "max_value"
+                  ]
+                },
+                {
+                  "required": [
+                    "initial_value"
+                  ]
+                },
+                {
+                  "required": [
+                    "display_min_value"
+                  ]
+                },
+                {
+                  "required": [
+                    "display_max_value"
+                  ]
+                },
+                {
+                  "required": [
+                    "suffix_label"
+                  ]
+                },
+                {
+                  "required": [
+                    "display_float_digits"
+                  ]
+                }
+              ]
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "value_labels"
+                ]
+              }
+            }
+          },
+          {
+            "description": "initial_value_label can only be used with value_labels",
+            "if": {
+              "required": [
+                "initial_value_label"
+              ]
+            },
+            "then": {
+              "required": [
+                "value_labels"
+              ]
+            }
+          },
+          {
+            "description": "initial_value_label must match one of the value_labels",
+            "if": {
+              "required": [
+                "initial_value_label",
+                "value_labels"
               ]
             },
             "then": {
               "properties": {
-                "display_min_value": {
-                  "maximum": {
-                    "$data": "1/display_max_value"
+                "initial_value_label": {
+                  "enum": {
+                    "$data": "1/value_labels"
                   }
                 }
               }
@@ -698,19 +818,14 @@
     {
       "program": {
         "program_id": "com.lzxindustries.example.waveform_generator",
-        "program_version_major": 1,
-        "program_version_minor": 2,
-        "program_version_patch": 3,
-        "abi_min_major": 1,
-        "abi_min_minor": 0,
-        "abi_max_major": 2,
-        "abi_max_minor": 0,
         "hw_mask": "0x00000003",
         "program_name": "Waveform Generator",
         "author": "LZX Industries LLC",
         "license": "GPL-3.0",
         "category": "Signal Generation",
-        "description": "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation."
+        "description": "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation.",
+        "program_version": "1.2.3",
+        "abi_version": ">=1.0,<2.0"
       },
       "parameter": [
         {

@@ -376,8 +376,8 @@ Configures one user-controllable parameter:
 | 8 | uint16_t | min_value | 2 | Minimum raw value |
 | 10 | uint16_t | max_value | 2 | Maximum raw value |
 | 12 | uint16_t | initial_value | 2 | Initial/default value |
-| 14 | uint16_t | display_min_value | 2 | Display range minimum |
-| 16 | uint16_t | display_max_value | 2 | Display range maximum |
+| 14 | int16_t | display_min_value | 2 | Display range minimum |
+| 16 | int16_t | display_max_value | 2 | Display range maximum |
 | 18 | uint8_t | display_float_digits | 1 | Decimal places for display |
 | 19 | uint8_t | value_label_count | 1 | Number of value labels |
 | 20 | uint8_t[2] | reserved_pad | 2 | Reserved padding |
@@ -398,7 +398,7 @@ Configures one user-controllable parameter:
 
 ### 4.6 Program Configuration
 
-**Structure:** `vmprog_program_config_v1_0` (7240 bytes)
+**Structure:** `vmprog_program_config_v1_0` (7368 bytes)
 
 Main program metadata structure:
 
@@ -418,10 +418,11 @@ Main program metadata structure:
 | 178 | char[32] | license | 32 | License identifier |
 | 210 | char[32] | category | 32 | Program category |
 | 242 | char[128] | description | 128 | Program description |
-| 370 | uint16_t | parameter_count | 2 | Number of parameters |
-| 372 | uint16_t | reserved_pad | 2 | Reserved padding |
-| 374 | param[12] | parameters | 6864 | Parameter configs (12×572) |
-| 7238 | uint8_t[2] | reserved | 2 | Reserved |
+| 370 | char[128] | url | 128 | Project or documentation URL |
+| 498 | uint16_t | parameter_count | 2 | Number of parameters |
+| 500 | uint16_t | reserved_pad | 2 | Reserved padding |
+| 502 | param[12] | parameters | 6864 | Parameter configs (12×572) |
+| 7366 | uint8_t[2] | reserved | 2 | Reserved |
 
 **Constants:**
 
@@ -431,8 +432,9 @@ Main program metadata structure:
 - `license_max_length` = 32
 - `category_max_length` = 32
 - `description_max_length` = 128
+- `url_max_length` = 128
 - `num_parameters` = 12
-- `struct_size` = 7240
+- `struct_size` = 7368
 
 
 

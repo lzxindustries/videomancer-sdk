@@ -343,8 +343,8 @@ namespace lzx {
         uint16_t min_value; // Minimum raw value (hardware-dependent)
         uint16_t max_value; // Maximum raw value (hardware-dependent)
         uint16_t initial_value; // Must be between min_value and max_value
-        uint16_t display_min_value;
-        uint16_t display_max_value;
+        int16_t display_min_value;
+        int16_t display_max_value;
         uint8_t display_float_digits;
         uint8_t value_label_count; // Number of valid value labels (0 to max_value_labels)
         uint8_t  reserved_pad[2];     // Reserved padding
@@ -366,8 +366,9 @@ namespace lzx {
         static constexpr uint32_t license_max_length = 32;
         static constexpr uint32_t category_max_length = 32;
         static constexpr uint32_t description_max_length = 128;
+        static constexpr uint32_t url_max_length = 128;
         static constexpr uint32_t num_parameters = 12;
-        static constexpr uint32_t struct_size = 7240;
+        static constexpr uint32_t struct_size = 7368;
 
         // All string fields must be null-terminated
         char program_id[program_id_max_length];      // Unique program identifier
@@ -384,6 +385,7 @@ namespace lzx {
         char license[license_max_length];
         char category[category_max_length];
         char description[description_max_length];
+        char url[url_max_length];
         uint16_t parameter_count;  // Number of valid parameters (0 to num_parameters)
         uint16_t reserved_pad;  // Padding
         vmprog_parameter_config_v1_0 parameters[num_parameters];

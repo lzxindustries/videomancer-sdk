@@ -18,8 +18,9 @@ Structure sizes (bytes):
 
 import struct
 import sys
+import re
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
 try:
     import tomli as tomllib  # Python 3.10 and below
@@ -45,8 +46,9 @@ AUTHOR_MAX_LENGTH = 64
 LICENSE_MAX_LENGTH = 32
 CATEGORY_MAX_LENGTH = 32
 DESCRIPTION_MAX_LENGTH = 128
+URL_MAX_LENGTH = 128
 NUM_PARAMETERS = 12
-CONFIG_STRUCT_SIZE = 7240
+CONFIG_STRUCT_SIZE = 7368
 
 # Enum value bounds
 MAX_PARAMETER_ID = 12  # linear_potentiometer_12
@@ -116,6 +118,52 @@ QUIET = False
 # Helper Functions
 # =============================================================================
 
+def parse_semver(version_str: str) -> Tuple[int, int, int]:
+    """
+    Parse a semantic version string into major, minor, patch integers.
+    
+    Args:
+        version_str: Version string in format "major.minor.patch" (e.g., "1.2.3")
+    
+    Returns:
+        Tuple of (major, minor, patch) as integers
+    
+    Raises:
+        ValueError: If version string is invalid
+    """
+    match = re.match(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$', version_str)
+    if not match:
+        raise ValueError(f"Invalid SemVer format: '{version_str}' (expected 'major.minor.patch')")
+    
+    major, minor, patch = match.groups()
+    return int(major), int(minor), int(patch)
+
+
+def parse_abi_version_range(range_str: str) -> Tuple[int, int, int, int]:
+    """
+    Parse ABI version range string into min/max major/minor integers.
+    
+    Args:
+        range_str: Range string in format ">=min_major.min_minor,<max_major.max_minor"
+                  (e.g., ">=1.0,<2.0")
+    
+    Returns:
+        Tuple of (min_major, min_minor, max_major, max_minor) as integers
+    
+    Raises:
+        ValueError: If range string is invalid
+    """
+    match = re.match(r'^>=?(0|[1-9]\d*)\.(0|[1-9]\d*),<(0|[1-9]\d*)\.(0|[1-9]\d*)$', range_str)
+    if not match:
+        raise ValueError(
+            f"Invalid ABI version range: '{range_str}' "
+            f"(expected '>=major.minor,<major.minor')"
+        )
+    
+    min_major, min_minor, max_major, max_minor = match.groups()
+    return int(min_major), int(min_minor), int(max_major), int(max_minor)
+
+
 def pack_string(s: str, max_length: int) -> bytes:
     """
     Pack a string into a fixed-length null-terminated byte array.
@@ -177,29 +225,83 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
             f"Parameter {index}: invalid control_mode {control_mode} (max: {MAX_CONTROL_MODE})"
         )
     
-    # Check value ranges
-    min_val = param.get('min_value', 0)
-    max_val = param.get('max_value', 0)
-    init_val = param.get('initial_value', 0)
-    
-    if min_val > max_val:
-        raise ValueError(
-            f"Parameter {index}: min_value ({min_val}) > max_value ({max_val})"
-        )
-    
-    if init_val < min_val or init_val > max_val:
-        raise ValueError(
-            f"Parameter {index}: initial_value ({init_val}) not in range [{min_val}, {max_val}]"
-        )
-    
-    # Auto-calculate value_label_count from value_labels array
+    # Check for value_labels vs numeric fields mutual exclusivity
     value_labels = param.get('value_labels', [])
-    auto_count = len(value_labels)
+    has_value_labels = len(value_labels) > 0
+    numeric_fields = ['min_value', 'max_value', 'initial_value', 'display_min_value', 
+                      'display_max_value', 'suffix_label', 'display_float_digits']
+    has_numeric_fields = any(field in param for field in numeric_fields)
     
-    if auto_count > PARAM_MAX_VALUE_LABELS:
+    if has_value_labels and has_numeric_fields:
+        present_fields = [f for f in numeric_fields if f in param]
         raise ValueError(
-            f"Parameter {index}: too many value_labels ({auto_count}, max: {PARAM_MAX_VALUE_LABELS})"
+            f"Parameter {index}: value_labels cannot be used with numeric fields. "
+            f"Remove these fields: {', '.join(present_fields)}"
         )
+    
+    # Check control_mode mutual exclusivity with value_labels
+    if has_value_labels and 'control_mode' in param:
+        raise ValueError(
+            f"Parameter {index}: control_mode should not be defined when value_labels are present. "
+            f"Remove control_mode field."
+        )
+    
+    if has_value_labels:
+        # Validate value_labels requirements
+        if len(value_labels) < 2:
+            raise ValueError(
+                f"Parameter {index}: value_labels must have at least 2 items (got {len(value_labels)})"
+            )
+        
+        if len(value_labels) > PARAM_MAX_VALUE_LABELS:
+            raise ValueError(
+                f"Parameter {index}: too many value_labels ({len(value_labels)}, max: {PARAM_MAX_VALUE_LABELS})"
+            )
+        
+        # Validate initial_value_label if present
+        if 'initial_value_label' in param:
+            initial_label = param['initial_value_label']
+            if initial_label not in value_labels:
+                raise ValueError(
+                    f"Parameter {index}: initial_value_label '{initial_label}' not found in value_labels"
+                )
+    else:
+        # Numeric mode validation
+        if 'initial_value_label' in param:
+            raise ValueError(
+                f"Parameter {index}: initial_value_label can only be used with value_labels"
+            )
+        
+        # Check value ranges for numeric mode
+        min_val = param.get('min_value', 0)
+        max_val = param.get('max_value', 1023)
+        init_val = param.get('initial_value', 512)
+        
+        # Validate ranges
+        if min_val < 0:
+            raise ValueError(
+                f"Parameter {index}: min_value ({min_val}) cannot be negative"
+            )
+        
+        if max_val > 1023:
+            raise ValueError(
+                f"Parameter {index}: max_value ({max_val}) cannot exceed 1023"
+            )
+        
+        if init_val < 0 or init_val > 1023:
+            raise ValueError(
+                f"Parameter {index}: initial_value ({init_val}) must be in range [0, 1023]"
+            )
+        
+        if min_val >= max_val:
+            raise ValueError(
+                f"Parameter {index}: min_value ({min_val}) must be less than max_value ({max_val})"
+            )
+        
+        if init_val < min_val or init_val > max_val:
+            raise ValueError(
+                f"Parameter {index}: initial_value ({init_val}) not in range [{min_val}, {max_val}]"
+            )
     
     # Warn if value_label_count is specified (deprecated)
     if 'value_label_count' in param:
@@ -219,8 +321,8 @@ def pack_parameter_config(param: Dict[str, Any]) -> bytes:
         - min_value: uint16_t (2 bytes)
         - max_value: uint16_t (2 bytes)
         - initial_value: uint16_t (2 bytes)
-        - display_min_value: uint16_t (2 bytes)
-        - display_max_value: uint16_t (2 bytes)
+        - display_min_value: int16_t (2 bytes)
+        - display_max_value: int16_t (2 bytes)
         - display_float_digits: uint8_t (1 byte)
         - value_label_count: uint8_t (1 byte)
         - reserved_pad: uint8_t[2] (2 bytes)
@@ -242,24 +344,69 @@ def pack_parameter_config(param: Dict[str, Any]) -> bytes:
     if isinstance(param_id, str):
         param_id = PARAMETER_ID_MAP.get(param_id, 0)
     
-    control_mode = param.get('control_mode', 0)
-    if isinstance(control_mode, str):
-        control_mode = CONTROL_MODE_MAP.get(control_mode, 0)
+    # Handle control_mode: default to linear (0) if not defined or if value_labels present
+    value_labels = param.get('value_labels', [])
+    has_value_labels = len(value_labels) > 0
     
-    # Pack integer fields (22 bytes)
+    if has_value_labels or 'control_mode' not in param:
+        control_mode = 0  # linear
+    else:
+        control_mode = param.get('control_mode', 0)
+        if isinstance(control_mode, str):
+            control_mode = CONTROL_MODE_MAP.get(control_mode, 0)
+    
+    # Pack parameter ID and control mode
     data += struct.pack('<I', param_id)
     data += struct.pack('<I', control_mode)
-    data += struct.pack('<H', param.get('min_value', 0))
-    data += struct.pack('<H', param.get('max_value', 0))
-    data += struct.pack('<H', param.get('initial_value', 0))
-    data += struct.pack('<H', param.get('display_min_value', 0))
-    data += struct.pack('<H', param.get('display_max_value', 0))
-    data += struct.pack('<B', param.get('display_float_digits', 0))
     
-    # Auto-calculate value label count from array length
+    # Handle value_labels mode vs numeric mode
     value_labels = param.get('value_labels', [])
-    value_label_count = min(len(value_labels), PARAM_MAX_VALUE_LABELS)
-    data += struct.pack('<B', value_label_count)
+    has_value_labels = len(value_labels) > 0
+    
+    if has_value_labels:
+        # Value labels mode - auto-calculate all numeric values
+        num_labels = len(value_labels)
+        min_val = 0
+        max_val = num_labels - 1
+        
+        # Determine initial_value from initial_value_label if present
+        if 'initial_value_label' in param:
+            initial_label = param['initial_value_label']
+            init_val = value_labels.index(initial_label)
+        else:
+            init_val = 0
+        
+        # Value range (uint16_t x 3)
+        data += struct.pack('<H', min_val)
+        data += struct.pack('<H', max_val)
+        data += struct.pack('<H', init_val)
+        
+        # Display range (int16_t x 2) - same as value range for labels
+        data += struct.pack('<h', min_val)
+        data += struct.pack('<h', max_val)
+        
+        # Display float digits (uint8_t) - 0 for label mode
+        data += struct.pack('<B', 0)
+        
+        # Value label count (uint8_t)
+        data += struct.pack('<B', num_labels)
+    else:
+        # Numeric mode - use provided values or defaults
+        min_val = param.get('min_value', 0)
+        max_val = param.get('max_value', 1023)
+        init_val = param.get('initial_value', 512)
+        
+        data += struct.pack('<H', min_val)
+        data += struct.pack('<H', max_val)
+        data += struct.pack('<H', init_val)
+        
+        # Display fields default to min/max values if not specified
+        data += struct.pack('<h', param.get('display_min_value', min_val))
+        data += struct.pack('<h', param.get('display_max_value', max_val))
+        data += struct.pack('<B', param.get('display_float_digits', 0))
+        
+        # Value label count (uint8_t) - 0 for numeric mode
+        data += struct.pack('<B', 0)
     
     # Reserved padding (2 bytes)
     data += b'\x00' * 2
@@ -309,25 +456,66 @@ def validate_program_config(config: Dict[str, Any]) -> None:
     
     program = config['program']
     
-    # Check required fields
-    required_fields = ['program_id', 'program_name', 'author']
+    # Check required fields (only program_id and program_name are mandatory)
+    required_fields = ['program_id', 'program_name']
     for field in required_fields:
         if field not in program or not program[field]:
             raise ValueError(f"Missing or empty required field: program.{field}")
     
-    # Validate ABI version ranges
-    abi_min_major = program.get('abi_min_major', 1)
-    abi_min_minor = program.get('abi_min_minor', 0)
-    abi_max_major = program.get('abi_max_major', 2)
-    abi_max_minor = program.get('abi_max_minor', 0)
+    # Check version format (support both old and new formats)
+    has_semver = 'program_version' in program
+    has_numeric = all(f in program for f in ['program_version_major', 'program_version_minor', 'program_version_patch'])
     
-    abi_min = (abi_min_major << 16) | abi_min_minor
-    abi_max = (abi_max_major << 16) | abi_max_minor
-    
-    if abi_min >= abi_max:
+    if not has_semver and not has_numeric:
         raise ValueError(
-            f"Invalid ABI range: min ({abi_min_major}.{abi_min_minor}) >= max ({abi_max_major}.{abi_max_minor})"
+            "Program version must be specified using either:\n"
+            "  - program_version (SemVer string, e.g., '1.2.3'), or\n"
+            "  - program_version_major, program_version_minor, program_version_patch (integers)"
         )
+    
+    if has_semver:
+        try:
+            parse_semver(program['program_version'])
+        except ValueError as e:
+            raise ValueError(f"Invalid program_version: {e}")
+    
+    # Check ABI version format (support both old and new formats)
+    has_abi_range = 'abi_version' in program
+    has_abi_numeric = all(f in program for f in ['abi_min_major', 'abi_min_minor', 'abi_max_major', 'abi_max_minor'])
+    
+    if not has_abi_range and not has_abi_numeric:
+        raise ValueError(
+            "ABI version must be specified using either:\n"
+            "  - abi_version (range string, e.g., '>=1.0,<2.0'), or\n"
+            "  - abi_min_major, abi_min_minor, abi_max_major, abi_max_minor (integers)"
+        )
+    
+    if has_abi_range:
+        try:
+            min_maj, min_min, max_maj, max_min = parse_abi_version_range(program['abi_version'])
+            # Validate range
+            abi_min = (min_maj << 16) | min_min
+            abi_max = (max_maj << 16) | max_min
+            if abi_min >= abi_max:
+                raise ValueError(
+                    f"Invalid ABI range: min ({min_maj}.{min_min}) >= max ({max_maj}.{max_min})"
+                )
+        except ValueError as e:
+            raise ValueError(f"Invalid abi_version: {e}")
+    else:
+        # Validate numeric ABI version ranges
+        abi_min_major = program.get('abi_min_major', 1)
+        abi_min_minor = program.get('abi_min_minor', 0)
+        abi_max_major = program.get('abi_max_major', 2)
+        abi_max_minor = program.get('abi_max_minor', 0)
+        
+        abi_min = (abi_min_major << 16) | abi_min_minor
+        abi_max = (abi_max_major << 16) | abi_max_minor
+        
+        if abi_min >= abi_max:
+            raise ValueError(
+                f"Invalid ABI range: min ({abi_min_major}.{abi_min_minor}) >= max ({abi_max_major}.{abi_max_minor})"
+            )
     
     # Validate parameter count
     parameters = config.get('parameter', [])
@@ -343,6 +531,17 @@ def validate_program_config(config: Dict[str, Any]) -> None:
         raise ValueError(
             f"Too many parameters ({actual_count}, maximum: {NUM_PARAMETERS})"
         )
+    
+    # Check for unique parameter_ids
+    param_ids = []
+    for i, param in enumerate(parameters):
+        param_id = param.get('parameter_id')
+        if param_id and param_id != 'none' and param_id != 'No parameter assigned':
+            if param_id in param_ids:
+                raise ValueError(
+                    f"Duplicate parameter_id '{param_id}' found. Each parameter must have a unique parameter_id."
+                )
+            param_ids.append(param_id)
     
     # Validate each parameter
     for i, param in enumerate(parameters):
@@ -368,6 +567,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         - license: char[32] (32 bytes)
         - category: char[32] (32 bytes)
         - description: char[128] (128 bytes)
+        - url: char[128] (128 bytes)
         - parameter_count: uint16_t (2 bytes)
         - reserved_pad: uint16_t (2 bytes)
         - parameters: vmprog_parameter_config_v1_0[12] (6864 bytes)
@@ -386,20 +586,36 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     # Program ID (64 bytes)
     data += pack_string(program.get('program_id', ''), PROGRAM_ID_MAX_LENGTH)
     
-    # Version fields (12 bytes)
-    data += struct.pack('<H', program.get('program_version_major', 0))
-    data += struct.pack('<H', program.get('program_version_minor', 0))
-    data += struct.pack('<H', program.get('program_version_patch', 0))
-    data += struct.pack('<H', program.get('abi_min_major', 1))
-    data += struct.pack('<H', program.get('abi_min_minor', 0))
-    data += struct.pack('<H', program.get('abi_max_major', 2))
-    data += struct.pack('<H', program.get('abi_max_minor', 0))
+    # Version fields (12 bytes) - support both old and new formats
+    if 'program_version' in program:
+        # Parse SemVer string
+        major, minor, patch = parse_semver(program['program_version'])
+        data += struct.pack('<H', major)
+        data += struct.pack('<H', minor)
+        data += struct.pack('<H', patch)
+    else:
+        # Use individual numeric fields
+        data += struct.pack('<H', program.get('program_version_major', 0))
+        data += struct.pack('<H', program.get('program_version_minor', 0))
+        data += struct.pack('<H', program.get('program_version_patch', 0))
     
-    # Hardware mask (4 bytes) - handle hex string or integer
-    hw_mask = program.get('hw_mask', 0)
-    if isinstance(hw_mask, str):
-        hw_mask = int(hw_mask, 0)  # Auto-detect base (0x for hex)
-    data += struct.pack('<I', hw_mask)
+    # ABI version fields (8 bytes) - support both old and new formats
+    if 'abi_version' in program:
+        # Parse range string
+        min_maj, min_min, max_maj, max_min = parse_abi_version_range(program['abi_version'])
+        data += struct.pack('<H', min_maj)
+        data += struct.pack('<H', min_min)
+        data += struct.pack('<H', max_maj)
+        data += struct.pack('<H', max_min)
+    else:
+        # Use individual numeric fields
+        data += struct.pack('<H', program.get('abi_min_major', 1))
+        data += struct.pack('<H', program.get('abi_min_minor', 0))
+        data += struct.pack('<H', program.get('abi_max_major', 2))
+        data += struct.pack('<H', program.get('abi_max_minor', 0))
+    
+    # Hardware mask (4 bytes) - always set to 0x00000003
+    data += struct.pack('<I', 0x00000003)
     
     # String metadata fields (288 bytes)
     data += pack_string(program.get('program_name', ''), PROGRAM_NAME_MAX_LENGTH)
@@ -407,6 +623,9 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     data += pack_string(program.get('license', ''), LICENSE_MAX_LENGTH)
     data += pack_string(program.get('category', ''), CATEGORY_MAX_LENGTH)
     data += pack_string(program.get('description', ''), DESCRIPTION_MAX_LENGTH)
+    
+    # URL field (128 bytes)
+    data += pack_string(program.get('url', ''), URL_MAX_LENGTH)
     
     # Parameter count and padding (4 bytes) - auto-calculated from array
     parameters = config.get('parameter', [])
@@ -471,9 +690,19 @@ def convert_toml_to_binary(toml_path: Path, output_path: Path) -> None:
     if not QUIET:
         program = config['program']
         param_count = len(config.get('parameter', []))
+        
+        # Display version - support both new and old formats
+        if 'program_version' in program:
+            version_str = program['program_version']
+        else:
+            major = program.get('program_version_major', 0)
+            minor = program.get('program_version_minor', 0)
+            patch = program.get('program_version_patch', 0)
+            version_str = f"{major}.{minor}.{patch}"
+        
         print(f"✓ Successfully converted {toml_path.name} → {output_path.name}")
         print(f"  Program: {program.get('program_name', 'Unknown')}")
-        print(f"  Version: {program.get('program_version_major', 0)}.{program.get('program_version_minor', 0)}.{program.get('program_version_patch', 0)}")
+        print(f"  Version: {version_str}")
         print(f"  Parameters: {param_count}/{NUM_PARAMETERS}")
         print(f"  Binary size: {len(binary_data)} bytes")
 
