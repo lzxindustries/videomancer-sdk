@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 # Root paths (must be provided by caller)
-SDK_ROOT ?= ..
-PROJECT_ROOT ?= $(SDK_ROOT)/programs/$(PROGRAM)
-BUILD_ROOT ?= $(SDK_ROOT)/build/programs/$(PROGRAM)
+VIDEOMANCER_SDK_ROOT ?= ..
+PROJECT_ROOT ?= $(VIDEOMANCER_SDK_ROOT)/programs/$(PROGRAM)
+BUILD_ROOT ?= $(VIDEOMANCER_SDK_ROOT)/build/programs/$(PROGRAM)
 
 PROGRAM = yuv_proc_amp
 CONFIG = analog
@@ -14,13 +14,13 @@ PACKAGE = tq144
 FREQUENCY = 74.25
 HARDWARE = videomancer_core_rev_b
 
-VHD_FILES = $(wildcard $(SDK_ROOT)/fpga/rtl/*.vhd) \
+VHD_FILES = $(wildcard $(VIDEOMANCER_SDK_ROOT)/fpga/rtl/*.vhd) \
 	$(wildcard $(PROJECT_ROOT)/*.vhd) \
-	$(SDK_ROOT)/fpga/rtl/config/$(CONFIG)_pkg.vhd \
-	$(wildcard $(SDK_ROOT)/third_party/SiliconBlue/rtl/sb_*.vhd)
+	$(VIDEOMANCER_SDK_ROOT)/fpga/rtl/config/$(CONFIG)_pkg.vhd \
+	$(wildcard $(VIDEOMANCER_SDK_ROOT)/third_party/SiliconBlue/rtl/sb_*.vhd)
 
 PCF_FILE = \
-	$(SDK_ROOT)/fpga/constraints/$(HARDWARE)/pin_map.pcf
+	$(VIDEOMANCER_SDK_ROOT)/fpga/constraints/$(HARDWARE)/pin_map.pcf
 
 BUILD_PREFIX = $(BUILD_ROOT)/bitstreams/
 BIN_FILE = $(BUILD_PREFIX)$(CONFIG).bin

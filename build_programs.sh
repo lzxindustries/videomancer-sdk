@@ -23,9 +23,10 @@ echo ""
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Root paths - can be overridden by environment variables
-SDK_ROOT="${SDK_ROOT:-${SCRIPT_DIR}}"
-PROGRAMS_PROJECT_DIR="${PROGRAMS_PROJECT_DIR:-${SCRIPT_DIR}/programs/}"
-PROGRAMS_BUILD_DIR="${PROGRAMS_BUILD_DIR:-${SCRIPT_DIR}/build/programs/}"
+VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT:-${SCRIPT_DIR}}"
+VIDEOMANCER_PROGRAMS_DIR="${VIDEOMANCER_PROGRAMS_DIR:-${SCRIPT_DIR}/programs/}"
+VIDEOMANCER_BUILD_DIR="${VIDEOMANCER_BUILD_DIR:-${SCRIPT_DIR}/build/programs/}"
+VIDEOMANCER_OUT_DIR="${VIDEOMANCER_OUT_DIR:-${SCRIPT_DIR}/out/}"
 
 # Hardware configuration
 DEVICE=hx4k
@@ -35,13 +36,13 @@ HARDWARE=videomancer_core_rev_b
 cd "${SCRIPT_DIR}"
 
 # Determine which programs to build
-PROGRAMS="${1:-$(find "${PROGRAMS_PROJECT_DIR}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)}"
+PROGRAMS="${1:-$(find "${VIDEOMANCER_PROGRAMS_DIR}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)}"
 PROGRAM_COUNT=$(echo "$PROGRAMS" | wc -w)
 
 if [ -n "$1" ]; then
     echo -e "${CYAN}Building specific program: ${1}${NC}"
 else
-    echo -e "${CYAN}Building all programs (${PROGRAM_COUNT} found in ${PROGRAMS_PROJECT_DIR})${NC}"
+    echo -e "${CYAN}Building all programs (${PROGRAM_COUNT} found in ${VIDEOMANCER_PROGRAMS_DIR})${NC}"
 fi
 echo ""
 
@@ -87,8 +88,8 @@ FAILED_PROGRAMS=0
     
 for PROGRAM in $PROGRAMS; do
     TOTAL_PROGRAMS=$((TOTAL_PROGRAMS + 1))
-    PROJECT_ROOT="${PROGRAMS_PROJECT_DIR}${PROGRAM}/"
-    BUILD_ROOT="${PROGRAMS_BUILD_DIR}${PROGRAM}/"
+    PROJECT_ROOT="${VIDEOMANCER_PROGRAMS_DIR}${PROGRAM}/"
+    BUILD_ROOT="${VIDEOMANCER_BUILD_DIR}${PROGRAM}/"
     
     echo ""
     echo -e "${BLUE}====================================${NC}"
@@ -119,7 +120,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [1/6] HD Analog (80 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -133,7 +134,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [2/6] SD Analog (30 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -147,7 +148,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [3/6] HD HDMI (80 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -161,7 +162,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [4/6] SD HDMI (30 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -175,7 +176,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [5/6] HD Dual (80 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -189,7 +190,7 @@ for PROGRAM in $PROGRAMS; do
     
     echo -e "${CYAN}  [6/6] SD Dual (30 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make SDK_ROOT="${SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -228,7 +229,7 @@ for PROGRAM in $PROGRAMS; do
     PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then
         echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-        if ! python3 vmprog_pack.py "${BUILD_ROOT%/}" "${SCRIPT_DIR}/out/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+        if ! python3 vmprog_pack.py "${BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
             echo -e "${RED}Packaging failed. Error output:${NC}"
             cat "$PACK_LOG"
             rm -f "$PACK_LOG"
@@ -237,7 +238,7 @@ for PROGRAM in $PROGRAMS; do
             continue
         fi
     else
-        if ! python3 vmprog_pack.py --no-sign "${BUILD_ROOT%/}" "${SCRIPT_DIR}/out/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+        if ! python3 vmprog_pack.py --no-sign "${BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
             echo -e "${RED}Packaging failed. Error output:${NC}"
             cat "$PACK_LOG"
             rm -f "$PACK_LOG"
@@ -252,11 +253,11 @@ for PROGRAM in $PROGRAMS; do
     
     # Verify output file
     if [ -f "out/${PROGRAM}.vmprog" ]; then
-        FILESIZE=$(stat -f%z "out/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "out/${PROGRAM}.vmprog" 2>/dev/null)
+        FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" 2>/dev/null)
         if [ "$SIGN_PACKAGES" = true ]; then
-            echo -e "${GREEN}✓ Successfully created: out/${PROGRAM}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
+            echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
         else
-            echo -e "${GREEN}✓ Successfully created: out/${PROGRAM}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
+            echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
         fi
         SUCCESSFUL_PROGRAMS=$((SUCCESSFUL_PROGRAMS + 1))
     else
