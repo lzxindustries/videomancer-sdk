@@ -21,6 +21,7 @@
 - Python 3.7 or higher
 - Standard library (no dependencies for basic functionality)
 - **Optional:** `cryptography` library for Ed25519 signing
+- **Configuration:** TOML files defining program parameters (see [TOML Configuration Guide](../../docs/toml-program-config-guide.md))
   ```bash
   # Ubuntu/Debian/WSL2 (recommended)
   sudo apt install python3-cryptography

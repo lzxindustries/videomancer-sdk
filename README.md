@@ -83,7 +83,9 @@ Each program needs:
 
 Place in `programs/myprogram/` directory.
 
-### Example Program Configuration
+### Program Configuration
+
+Program parameters are defined in TOML files. See the [TOML Program Configuration Guide](docs/toml-program-config-guide.md) for complete documentation.
 
 ```bash
 cd scripts/toml_to_config_binary
@@ -110,11 +112,13 @@ VHDL components for video processing (in `fpga/rtl/`):
 
 ### Documentation
 
+- **[toml-program-config-guide.md](docs/toml-program-config-guide.md)** - Complete guide to creating TOML configuration files
 - **[vmprog-format.md](docs/vmprog-format.md)** - Binary format specification
+- **[vmprog-ed25519-signing.md](docs/vmprog-ed25519-signing.md)** - Package signing with Ed25519
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 
-For advanced topics (package signing, SDK integration), see additional documentation in `docs/` and `scripts/`.
+For advanced topics (SDK integration, format details), see additional documentation in `docs/` and `scripts/`.
 
 ## Project Structure
 

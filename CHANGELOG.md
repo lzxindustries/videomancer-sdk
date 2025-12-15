@@ -5,6 +5,99 @@ All notable changes to the Videomancer SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **toml-program-config-guide.md** - Comprehensive "how-to" guide for creating TOML configuration files
+  - Complete documentation of all program metadata fields
+  - Detailed explanation of numeric and label parameter modes
+  - All 36 control modes with categorization (linear, stepped, polar, easing)
+  - Working examples and validation instructions
+  - Tips and best practices for program development
+
+- **toml_schema_validator.py** - Standalone TOML schema validation tool
+  - Validates TOML files against JSON Schema
+  - Simplifies complex schema patterns for compatibility
+  - Clear error reporting with locations and allowed values
+  - Deduplicates validation errors for readability
+
+### Changed
+
+#### TOML Configuration Format Improvements
+
+- **String enums** - `parameter_id` and `control_mode` now use descriptive strings instead of numeric values
+  - Example: `"rotary_potentiometer_1"` instead of `1`
+  - Example: `"linear"` instead of `0`
+  - More readable and self-documenting configurations
+
+- **Version string formats** - Simplified version specification
+  - `program_version` now uses SemVer format (e.g., `"1.2.3"`)
+  - `abi_version` uses range notation (e.g., `">=1.0,<2.0"`)
+  - Replaces individual numeric fields (`program_version_major`, etc.)
+  - Legacy numeric format still supported for backward compatibility
+
+- **Auto-calculated fields** - Reduced manual bookkeeping
+  - `parameter_count` automatically calculated from number of `[[parameter]]` sections
+  - `value_label_count` automatically calculated from `value_labels` array length
+  - These fields should no longer be manually specified in TOML files
+
+- **Signed integer display values** - Support for negative display ranges
+  - `display_min_value` and `display_max_value` changed from `uint16_t` to `int16_t`
+  - Range: -32768 to 32767 (previously 0 to 65535)
+  - Enables display of negative values (e.g., -100 to +100 for brightness)
+
+- **Optional fields with defaults** - Reduced TOML verbosity
+  - Program fields: `author`, `license`, `category`, `description`, `url` now optional (default: empty string)
+  - Parameter numeric fields: `min_value` (default: 0), `max_value` (default: 1023), `initial_value` (default: 512)
+  - Parameter display fields: `display_min_value` (default: `min_value`), `display_max_value` (default: `max_value`), `display_float_digits` (default: 0)
+  - Minimal valid configuration requires only `program_id`, `program_name`, version fields
+
+#### Binary Format Changes
+
+- **vmprog_program_config_v1_0** structure increased from 7240 to 7368 bytes
+  - Added `url` field (128 bytes) for project/documentation links
+  - Adjusted offsets: parameters now start at byte 502 (previously 374)
+  - Updated `struct_size` constant to 7368
+
+- **Display value storage** - Changed to signed integers
+  - `display_min_value` and `display_max_value` use `int16_t` (signed)
+  - Struct packing format changed from `'<H'` (unsigned) to `'<h'` (signed)
+
+#### Validation and Constraints
+
+- **Enhanced validation** in `toml_to_config_binary.py`
+  - Unique `parameter_id` enforcement across all parameters
+  - Mutual exclusivity: `value_labels` mode vs numeric fields
+  - Mutual exclusivity: `value_labels` mode vs `control_mode`
+  - Constraint: `min_value` < `max_value` (strictly less than)
+  - Constraint: `min_value`, `max_value`, `initial_value` within 0-1023 range
+  - Automatic default application for optional fields
+
+- **JSON Schema updates** in `vmprog_program_config_schema_v1_0.json`
+  - Enum validation for string-based `parameter_id` and `control_mode`
+  - Pattern validation for SemVer and range notation version strings
+  - Removed `hw_mask` from required fields (static value in converter)
+  - Updated field descriptions to document optional fields and defaults
+  - Added mutual exclusivity constraints using `if`/`then`/`not` patterns
+
+#### Removed Fields
+
+- **hw_mask** removed from TOML format
+  - Static value `0x00000003` (rev A/B support) set automatically in converter
+  - No longer user-configurable
+
+### Fixed
+
+- **control_mode defaults** - Automatically set to `0` (linear) when omitted or when using `value_labels` mode
+- **Schema validation compatibility** - Simplified `$data` references for broader JSON Schema library support
+
+### Documentation
+
+- Updated **vmprog-format.md** with new structure size, offsets, and signed integer types
+- Updated **example_program_config.toml** demonstrating all new features
+- Updated **passthru.toml** to use new string formats
+
 ## [0.1.0] - 2025-12-14
 
 Initial public release of the Videomancer SDK. Complete FPGA development toolchain including format specification, C++ SDK, FPGA build chain, RTL libraries, Ed25519 package signing, and automated packaging workflow for cryptographically signed `.vmprog` packages.

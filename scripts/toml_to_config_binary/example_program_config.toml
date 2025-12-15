@@ -3,6 +3,8 @@
 #
 # Example Videomancer Program Configuration (TOML)
 # This file defines a complete vmprog_program_config_v1_0 structure
+#
+# For complete documentation, see: docs/toml-program-config-guide.md
 
 [program]
 program_id = "com.lzxindustries.example.waveform_generator"

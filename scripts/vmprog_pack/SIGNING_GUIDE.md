@@ -1,5 +1,7 @@
 # Ed25519 Signing Quick Reference
 
+This guide covers package signing. For TOML configuration details, see [TOML Program Configuration Guide](../../docs/toml-program-config-guide.md).
+
 ## Installation
 
 ```bash
