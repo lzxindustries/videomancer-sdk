@@ -1,7 +1,7 @@
 # Copyright (C) 2025 LZX Industries LLC
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Example Videomancer Program Configuration (TOML)
+# Videomancer Program Configuration Template
 # This file defines a complete vmprog_program_config_v1_0 structure
 #
 # For complete documentation, see: docs/toml-program-config-guide.md

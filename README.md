@@ -22,7 +22,7 @@ git clone https://github.com/lzxindustries/videomancer-sdk.git
 cd videomancer-sdk
 
 # 2. One-time setup: Install FPGA toolchain (OSS CAD Suite)
-bash setup.sh
+bash scripts/setup.sh
 
 # 3. Build all FPGA programs
 bash build_programs.sh
@@ -88,19 +88,18 @@ Place in `programs/myprogram/` directory.
 Program parameters are defined in TOML files. See the [TOML Program Configuration Guide](docs/toml-program-config-guide.md) for complete documentation.
 
 ```bash
-cd scripts/toml_to_config_binary
+cd examples/templates
 
-# See example_program_config.toml for a complete template
-cat example_program_config.toml
+# See template.toml for a complete example
+cat template.toml
 ```
 
 ## SDK Components
 
 ### Build Scripts
 
-- **[setup.sh](setup.sh)** - Downloads and installs OSS CAD Suite (Yosys, nextpnr, GHDL)
+- **[scripts/setup.sh](scripts/setup.sh)** - Downloads and installs OSS CAD Suite (Yosys, nextpnr, GHDL)
 - **[build_programs.sh](build_programs.sh)** - Builds all programs (FPGA synthesis → packaging)
-
 - **[clean_sdk.sh](clean_sdk.sh)** - Removes build artifacts
 
 ### RTL Libraries
@@ -114,26 +113,40 @@ VHDL components for video processing (in `fpga/rtl/`):
 
 - **[toml-program-config-guide.md](docs/toml-program-config-guide.md)** - Complete guide to creating TOML configuration files
 - **[vmprog-format.md](docs/vmprog-format.md)** - Binary format specification
-- **[vmprog-ed25519-signing.md](docs/vmprog-ed25519-signing.md)** - Package signing with Ed25519
+- **[signing-guide.md](docs/signing-guide.md)** - Package signing with Ed25519
+- **[vmprog-ed25519-signing.md](docs/vmprog-ed25519-signing.md)** - Detailed Ed25519 implementation
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 
-For advanced topics (SDK integration, format details), see additional documentation in `docs/` and `scripts/`.
+For tools and examples, see `tools/` and `examples/` directories.
 
 ## Project Structure
 
 ```
 videomancer-sdk/
-├── fpga/                  # FPGA synthesis and RTL libraries
-│   ├── Makefile          # Build system
-│   └── rtl/              # VHDL components
-├── programs/             # Example FPGA programs
-│   └── passthru/
-├── scripts/              # Build utilities
-│   ├── toml_to_config_binary/
-│   └── vmprog_pack/
-├── setup.sh              # Install FPGA toolchain
-└── build_programs.sh     # Build all programs
+├── docs/                  # Documentation
+│   ├── toml-program-config-guide.md
+│   ├── vmprog-format.md
+│   ├── signing-guide.md
+│   └── schemas/
+├── examples/             # Example programs and templates
+│   ├── passthru/
+│   └── templates/
+├── tools/                # Development tools
+│   ├── toml-converter/
+│   ├── toml-validator/
+│   └── vmprog-packer/
+├── scripts/              # Build automation
+│   ├── setup.sh
+│   ├── setup_ed25519_signing.sh
+│   └── internal/
+├── tests/                # Test suite
+├── fpga/                 # FPGA synthesis and RTL
+│   ├── Makefile
+│   └── rtl/
+├── programs/             # Your programs go here
+├── src/                  # C++ SDK headers
+└── build_programs.sh     # Main build script
 ```
 
 ## Contributing

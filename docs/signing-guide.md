@@ -1,6 +1,6 @@
 # Ed25519 Signing Quick Reference
 
-This guide covers package signing. For TOML configuration details, see [TOML Program Configuration Guide](../../docs/toml-program-config-guide.md).
+This guide covers package signing. For TOML configuration details, see [TOML Program Configuration Guide](toml-program-config-guide.md).
 
 ## Installation
 
@@ -23,11 +23,11 @@ pip3 install --user cryptography       # User installation
 ## Generate Keys (One-time Setup)
 
 ```bash
-# From scripts/vmprog_pack directory
+# From tools/vmprog-packer directory
 python generate_ed25519_keys.py --output-dir ../../keys
 
-# Or use the setup script from scripts/ directory
-cd ../
+# Or use the setup script
+cd scripts/
 ./setup_ed25519_signing.sh   # Linux/macOS/WSL2
 ```
 
@@ -37,14 +37,14 @@ cd ../
 ```bash
 python vmprog_pack.py \
   ../../build/programs/passthru \
-  ../../output/passthru.vmprog
+  ../../out/passthru.vmprog
 ```
 
 ### Unsigned Package
 ```bash
 python vmprog_pack.py --no-sign \
   ../../build/programs/passthru \
-  ../../output/passthru.vmprog
+  ../../out/passthru.vmprog
 ```
 
 ### Custom Key Directory

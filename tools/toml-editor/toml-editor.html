@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Videomancer TOML Program Config Editor</title>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --panel: #111520;
+      --text: #e8ecff;
+      --muted: #aab3d6;
+      --accent: #7aa2ff;
+      --bad: #ff6b6b;
+      --warn: #ffd166;
+      --good: #3ddc97;
+      --border: rgba(255,255,255,0.10);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,0.18), transparent 60%),
+                  radial-gradient(900px 500px at 80% 20%, rgba(61,220,151,0.12), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 14px 16px;
+      position: sticky; top:0;
+      background: linear-gradient(to bottom, rgba(11,13,18,0.92), rgba(11,13,18,0.75));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .title { display:flex; gap:10px; align-items:baseline; }
+    .title h1 { margin:0; font-size: 16px; letter-spacing: 0.3px; font-weight: 650; }
+    .title .sub { font-size: 12px; color: var(--muted); }
+    .btns { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-end; }
+    button, .btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+    }
+    button:hover, .btn:hover { background: rgba(122,162,255,0.10); border-color: rgba(122,162,255,0.35); }
+    button:active { transform: translateY(1px); }
+    .btn.primary { background: rgba(122,162,255,0.18); border-color: rgba(122,162,255,0.45); }
+    .pill {
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+    }
+    .dot { width: 8px; height:8px; border-radius: 50%; background: var(--muted); }
+    .dot.good { background: var(--good); }
+    .dot.bad { background: var(--bad); }
+    .dot.warn { background: var(--warn); }
+
+    .layout {
+      display:grid;
+      grid-template-columns: 280px 1fr 380px;
+      gap: 12px;
+      padding: 12px;
+      height: calc(100% - 62px);
+      box-sizing: border-box;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 280px 1fr; grid-template-rows: 1fr 340px; }
+      .right { grid-column: 1 / -1; }
+    }
+    @media (max-width: 740px) {
+      .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr 320px; }
+      .nav { order: 1; }
+      .main { order: 2; }
+      .right { order: 3; }
+    }
+
+    .panel {
+      background: rgba(17,21,32,0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
+    }
+    .panel .hdr {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      background: rgba(255,255,255,0.02);
+    }
+    .panel .hdr .h {
+      font-weight: 650;
+      font-size: 12px;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .panel .body { padding: 12px; overflow:auto; }
+
+    .navlist { display:flex; flex-direction:column; gap:6px; }
+    .navitem {
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor:pointer;
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px;
+    }
+    .navitem:hover { background: rgba(122,162,255,0.08); border-color: rgba(122,162,255,0.25); }
+    .navitem.active { background: rgba(122,162,255,0.14); border-color: rgba(122,162,255,0.38); }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: rgba(0,0,0,0.15);
+      white-space: nowrap;
+    }
+
+    .form { display:flex; flex-direction:column; gap: 12px; }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      overflow:hidden;
+    }
+    .card .cardhdr {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center;
+      gap: 12px;
+      background: rgba(255,255,255,0.015);
+    }
+    .card .cardhdr .t { font-weight: 650; }
+    .card .cardhdr .desc { font-size: 12px; color: var(--muted); }
+    .card .cardbody { padding: 12px; }
+
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+
+    label { display:flex; flex-direction:column; gap: 6px; font-size: 12px; color: var(--muted); }
+    input[type="text"], input[type="number"], textarea, select {
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 13px;
+      outline: none;
+    }
+    textarea { resize: vertical; min-height: 80px; font-family: var(--mono); font-size: 12px; line-height: 1.35; }
+
+    .help { font-size: 11px; color: var(--muted); opacity: 0.9; }
+    .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .row .spacer { flex: 1; }
+
+    .toggle {
+      display:inline-flex; align-items:center; gap: 8px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.15);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .toggle input { width: 16px; height: 16px; }
+
+    .errors { display:flex; flex-direction:column; gap:10px; }
+    .err {
+      border: 1px solid rgba(255,107,107,0.35);
+      background: rgba(255,107,107,0.08);
+      border-radius: 12px;
+      padding: 10px 10px;
+    }
+    .warn {
+      border: 1px solid rgba(255,209,102,0.35);
+      background: rgba(255,209,102,0.07);
+      border-radius: 12px;
+      padding: 10px 10px;
+    }
+    .err .p, .warn .p { font-family: var(--mono); font-size: 11px; color: rgba(232,236,255,0.95); }
+    .err .m, .warn .m { margin-top: 6px; font-size: 12px; color: rgba(232,236,255,0.92); }
+
+    .mono { font-family: var(--mono); }
+    .small { font-size: 12px; color: var(--muted); }
+    .k { font-family: var(--mono); color: rgba(232,236,255,0.92); }
+    .hr { height:1px; background: var(--border); margin: 10px 0; }
+
+    .editorwrap {
+      height: 460px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow:hidden;
+      background: rgba(0,0,0,0.18);
+    }
+    #ace { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="title">
+      <h1>Videomancer TOML Program Config Editor</h1>
+      <div class="sub mono">vmprog_program_config_v1_0</div>
+    </div>
+    <div class="btns">
+      <span class="pill"><span id="statusDot" class="dot"></span><span id="statusText">…</span></span>
+      <button id="btnReset" class="btn">Reset to Example</button>
+      <button id="btnImport" class="btn">Import TOML</button>
+      <button id="btnExport" class="btn primary">Export TOML</button>
+      <button id="btnCopy" class="btn">Copy TOML</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel nav">
+      <div class="hdr"><div class="h">Sections</div></div>
+      <div class="body">
+        <div class="navlist" id="nav">
+          <div class="navitem active" data-view="program">Program <span class="badge">[program]</span></div>
+          <div class="navitem" data-view="parameters">Parameters <span class="badge">[[parameter]]</span></div>
+          <div class="navitem" data-view="toml">Raw TOML <span class="badge">text</span></div>
+          <div class="navitem" data-view="help">Help <span class="badge">guide</span></div>
+        </div>
+        <div class="hr"></div>
+        <div class="small">
+          Schema-driven editor (fixed keys). Validation uses Ajv (draft-07) + your schema.
+          <div class="hr"></div>
+          <div><span class="k">Tip:</span> Use <span class="k">Label mode</span> for <span class="k">value_labels</span>; use <span class="k">Numeric mode</span> otherwise.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel main">
+      <div class="hdr">
+        <div class="h" id="mainTitle">Program</div>
+        <div class="row">
+          <span class="small mono" id="mainSubtitle"></span>
+          <span class="spacer"></span>
+        </div>
+      </div>
+      <div class="body" id="mainBody"></div>
+    </div>
+
+    <div class="panel right">
+      <div class="hdr"><div class="h">Validation</div></div>
+      <div class="body">
+        <div class="errors" id="errors"></div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" accept=".toml,text/plain" style="display:none" />
+
+  <!-- Browser-friendly UMD builds -->
+  <script src="https://cdn.jsdelivr.net/npm/ajv@6.12.6/dist/ajv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ajv-keywords@3.5.2/dist/ajv-keywords.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.32.6/src-min-noconflict/ace.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.32.6/src-min-noconflict/mode-toml.js"></script>
+
+  <script type="module">
+  // TOML parsing/stringifying via ESM wrapper (works in modern browsers)
+  import * as TOML from "https://cdn.jsdelivr.net/npm/@iarna/toml@2.2.5/+esm";
+  const SCHEMA = {"$schema": "http://json-schema.org/draft-07/schema#", "$id": "https://lzxindustries.com/schemas/vmprog_program_config_v1_0.json", "title": "Videomancer Program Configuration", "description": "Schema for vmprog_program_config_v1_0 structure defined in vmprog_format.hpp", "type": "object", "required": ["program"], "properties": {"program": {"type": "object", "description": "Main program metadata and configuration", "required": ["program_id", "program_name"], "properties": {"program_id": {"type": "string", "description": "Unique program identifier (e.g., reverse DNS notation)", "maxLength": 63, "minLength": 1, "pattern": "^[a-zA-Z0-9._-]+$", "examples": ["com.lzxindustries.example.waveform_generator", "org.example.video.chromakey"]}, "program_version_major": {"type": "integer", "description": "DEPRECATED: Use program_version string field instead. Program major version number", "minimum": 0, "maximum": 65535}, "program_version_minor": {"type": "integer", "description": "DEPRECATED: Use program_version string field instead. Program minor version number", "minimum": 0, "maximum": 65535}, "program_version_patch": {"type": "integer", "description": "DEPRECATED: Use program_version string field instead. Program patch version number", "minimum": 0, "maximum": 65535}, "abi_min_major": {"type": "integer", "description": "DEPRECATED: Use abi_version string field instead. Minimum ABI major version (inclusive)", "minimum": 1, "maximum": 65535}, "abi_min_minor": {"type": "integer", "description": "DEPRECATED: Use abi_version string field instead. Minimum ABI minor version (inclusive)", "minimum": 0, "maximum": 65535}, "abi_max_major": {"type": "integer", "description": "DEPRECATED: Use abi_version string field instead. Maximum ABI major version (exclusive)", "minimum": 1, "maximum": 65535}, "abi_max_minor": {"type": "integer", "description": "DEPRECATED: Use abi_version string field instead. Maximum ABI minor version (exclusive)", "minimum": 0, "maximum": 65535}, "program_name": {"type": "string", "description": "Human-readable program name for display", "maxLength": 31, "minLength": 1, "examples": ["Waveform Generator", "Video Colorizer"]}, "author": {"type": "string", "description": "Program author or organization name. Optional: defaults to empty string if not specified.", "maxLength": 63, "minLength": 0, "examples": ["LZX Industries LLC", "Jane Doe"]}, "license": {"type": "string", "description": "License identifier (SPDX format recommended). Optional: defaults to empty string if not specified.", "maxLength": 31, "minLength": 0, "examples": ["GPL-3.0", "MIT", "Apache-2.0", "Proprietary"]}, "category": {"type": "string", "description": "Program category for organization. Optional: defaults to empty string if not specified.", "maxLength": 31, "minLength": 0, "examples": ["Signal Generation", "Video Processing", "Effects", "Utilities"]}, "description": {"type": "string", "description": "Detailed program description. Optional: defaults to empty string if not specified.", "maxLength": 127, "minLength": 0, "examples": ["A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation."]}, "url": {"type": "string", "description": "Project or documentation URL. Optional: defaults to empty string if not specified.", "maxLength": 127, "minLength": 0, "pattern": "^(https?://|).*$", "examples": ["https://lzxindustries.com", "https://github.com/user/project", ""]}, "parameter_count": {"type": "integer", "description": "Number of active parameters (0-12)", "minimum": 0, "maximum": 12}, "program_version": {"type": "string", "description": "Program version in SemVer format (e.g., '1.2.3')", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$", "examples": ["1.0.0", "0.1.0", "2.3.4"]}, "abi_version": {"type": "string", "description": "ABI version compatibility range (e.g., '>=1.0,<2.0' means 1.0 <= version < 2.0)", "pattern": "^>=?(0|[1-9]\\d*)\\.(0|[1-9]\\d*),<(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$", "examples": [">=1.0,<2.0", ">=1.5,<2.0", ">=2.0,<3.0"]}}, "additionalProperties": false, "oneOf": [{"description": "New format: use program_version and abi_version strings", "required": ["program_version", "abi_version"]}, {"description": "Legacy format: use individual numeric version fields", "required": ["program_version_major", "program_version_minor", "program_version_patch", "abi_min_major", "abi_min_minor", "abi_max_major", "abi_max_minor"]}]}, "parameter": {"type": "array", "description": "Array of parameter configurations (maximum 12)", "minItems": 0, "maxItems": 12, "items": {"type": "object", "description": "Individual parameter configuration (vmprog_parameter_config_v1_0)", "required": ["parameter_id", "name_label"], "properties": {"parameter_id": {"type": "string", "description": "Physical hardware control mapping", "enum": ["No parameter assigned", "rotary_potentiometer_1", "rotary_potentiometer_2", "rotary_potentiometer_3", "rotary_potentiometer_4", "rotary_potentiometer_5", "rotary_potentiometer_6", "toggle_switch_7", "toggle_switch_8", "toggle_switch_9", "toggle_switch_10", "toggle_switch_11", "linear_potentiometer_12"], "examples": ["rotary_potentiometer_1", "linear_potentiometer_12", "toggle_switch_7"]}, "control_mode": {"type": "string", "description": "How parameter values are interpreted and displayed", "enum": ["linear", "linear_half", "linear_quarter", "linear_double", "boolean", "steps_4", "steps_8", "steps_16", "steps_32", "steps_64", "steps_128", "steps_256", "polar_degs_90", "polar_degs_180", "polar_degs_360", "polar_degs_720", "polar_degs_1440", "polar_degs_2880", "quad_in", "quad_out", "quad_in_out", "sine_in", "sine_out", "sine_in_out", "circ_in", "circ_out", "circ_in_out", "quint_in", "quint_out", "quint_in_out", "quart_in", "quart_out", "quart_in_out", "expo_in", "expo_out", "expo_in_out"], "examples": ["linear", "steps_4", "boolean", "quad_in"]}, "min_value": {"type": "integer", "description": "Minimum raw hardware value. Optional: defaults to 0 if not specified.", "minimum": 0, "maximum": 1023}, "max_value": {"type": "integer", "description": "Maximum raw hardware value. Optional: defaults to 1023 if not specified.", "minimum": 0, "maximum": 1023}, "initial_value": {"type": "integer", "description": "Initial/default value (must be between min_value and max_value). Optional: defaults to 512 if not specified.", "minimum": 0, "maximum": 1023}, "display_min_value": {"type": "integer", "description": "Minimum value for display purposes (signed). Optional: defaults to min_value if not specified.", "minimum": -32768, "maximum": 32767}, "display_max_value": {"type": "integer", "description": "Maximum value for display purposes (signed). Optional: defaults to max_value if not specified.", "minimum": -32768, "maximum": 32767}, "display_float_digits": {"type": "integer", "description": "Number of decimal places to show when displaying value. Optional: defaults to 0 if not specified.", "minimum": 0, "maximum": 255}, "value_label_count": {"type": "integer", "description": "DEPRECATED: Auto-calculated from value_labels array length. Do not include in TOML files.", "minimum": 0, "maximum": 16}, "name_label": {"type": "string", "description": "Parameter name displayed to user", "maxLength": 31, "minLength": 0, "examples": ["Frequency", "Amplitude", "Brightness", "Contrast"]}, "suffix_label": {"type": "string", "description": "Unit suffix for display (e.g., Hz, %, \u00b0)", "maxLength": 3, "minLength": 0, "examples": ["Hz", "%", "\u00b0", "dB", ""]}, "value_labels": {"type": "array", "description": "Discrete value labels for stepped parameters (maximum 16)", "minItems": 2, "maxItems": 16, "items": {"type": "string", "description": "Label for a specific discrete value", "maxLength": 31, "minLength": 0, "examples": ["Off", "Low", "Medium", "High", "Sine", "Triangle", "Sawtooth", "Square"]}}, "initial_value_label": {"type": "string", "description": "Label identifying the initial value when using value_labels. Must match one of the strings in value_labels array.", "maxLength": 31, "minLength": 0}}, "additionalProperties": false, "allOf": [{"description": "min_value must be less than max_value", "if": {"required": ["min_value", "max_value"]}, "then": {"properties": {"min_value": {"type": "integer", "exclusiveMaximum": {"$data": "1/max_value"}}}}}, {"description": "initial_value must be between min_value and max_value", "if": {"required": ["min_value", "max_value", "initial_value"]}, "then": {"properties": {"initial_value": {"minimum": {"$data": "1/min_value"}, "maximum": {"$data": "1/max_value"}}}}}, {"description": "When value_labels is defined, numeric value fields and control_mode must not be defined", "if": {"required": ["value_labels"]}, "then": {"not": {"anyOf": [{"required": ["min_value"]}, {"required": ["max_value"]}, {"required": ["initial_value"]}, {"required": ["display_min_value"]}, {"required": ["display_max_value"]}, {"required": ["suffix_label"]}, {"required": ["display_float_digits"]}, {"required": ["control_mode"]}]}}}, {"description": "When numeric mode is used (no value_labels), control_mode is required", "if": {"not": {"required": ["value_labels"]}}, "then": {"required": ["control_mode"]}}, {"description": "When any numeric value field is defined, value_labels must not be defined", "if": {"anyOf": [{"required": ["min_value"]}, {"required": ["max_value"]}, {"required": ["initial_value"]}, {"required": ["display_min_value"]}, {"required": ["display_max_value"]}, {"required": ["suffix_label"]}, {"required": ["display_float_digits"]}]}, "then": {"not": {"required": ["value_labels"]}}}, {"description": "initial_value_label can only be used with value_labels", "if": {"required": ["initial_value_label"]}, "then": {"required": ["value_labels"]}}, {"description": "initial_value_label must match one of the value_labels", "if": {"required": ["initial_value_label", "value_labels"]}, "then": {"properties": {"initial_value_label": {"enum": {"$data": "1/value_labels"}}}}}]}}}, "additionalProperties": false, "allOf": [{"description": "abi_min must not exceed abi_max (major.minor comparison)", "if": {"properties": {"program": {"properties": {"abi_min_major": {"type": "integer"}, "abi_min_minor": {"type": "integer"}, "abi_max_major": {"type": "integer"}, "abi_max_minor": {"type": "integer"}}, "required": ["abi_min_major", "abi_min_minor", "abi_max_major", "abi_max_minor"]}}, "required": ["program"]}, "then": {"anyOf": [{"properties": {"program": {"properties": {"abi_min_major": {"maximum": {"$data": "2/program/abi_max_major"}}}}}}, {"properties": {"program": {"allOf": [{"properties": {"abi_min_major": {"const": {"$data": "2/program/abi_max_major"}}}}, {"properties": {"abi_min_minor": {"maximum": {"$data": "2/program/abi_max_minor"}}}}]}}}]}}], "definitions": {"hardware_flags": {"description": "Hardware compatibility flags", "type": "object", "properties": {"videomancer_core_rev_a": {"const": 1, "description": "0x00000001 - Videomancer Core Rev A"}, "videomancer_core_rev_b": {"const": 2, "description": "0x00000002 - Videomancer Core Rev B"}}}, "parameter_ids": {"description": "Parameter ID to hardware control mapping", "type": "object", "properties": {"none": {"const": 0}, "rotary_potentiometer_1": {"const": 1}, "rotary_potentiometer_2": {"const": 2}, "rotary_potentiometer_3": {"const": 3}, "rotary_potentiometer_4": {"const": 4}, "rotary_potentiometer_5": {"const": 5}, "rotary_potentiometer_6": {"const": 6}, "toggle_switch_7": {"const": 7}, "toggle_switch_8": {"const": 8}, "toggle_switch_9": {"const": 9}, "toggle_switch_10": {"const": 10}, "toggle_switch_11": {"const": 11}, "linear_potentiometer_12": {"const": 12}}}, "control_modes": {"description": "Parameter control mode enumerations", "type": "object", "properties": {"linear": {"const": 0}, "linear_half": {"const": 1}, "linear_quarter": {"const": 2}, "linear_double": {"const": 3}, "boolean": {"const": 4}, "steps_4": {"const": 5}, "steps_8": {"const": 6}, "steps_16": {"const": 7}, "steps_32": {"const": 8}, "steps_64": {"const": 9}, "steps_128": {"const": 10}, "steps_256": {"const": 11}, "polar_degs_90": {"const": 12}, "polar_degs_180": {"const": 13}, "polar_degs_360": {"const": 14}, "polar_degs_720": {"const": 15}, "polar_degs_1440": {"const": 16}, "polar_degs_2880": {"const": 17}, "quad_in": {"const": 18}, "quad_out": {"const": 19}, "quad_in_out": {"const": 20}, "sine_in": {"const": 21}, "sine_out": {"const": 22}, "sine_in_out": {"const": 23}, "circ_in": {"const": 24}, "circ_out": {"const": 25}, "circ_in_out": {"const": 26}, "quint_in": {"const": 27}, "quint_out": {"const": 28}, "quint_in_out": {"const": 29}, "quart_in": {"const": 30}, "quart_out": {"const": 31}, "quart_in_out": {"const": 32}, "expo_in": {"const": 33}, "expo_out": {"const": 34}, "expo_in_out": {"const": 35}}}}, "examples": [{"program": {"program_id": "com.lzxindustries.example.waveform_generator", "hw_mask": "0x00000003", "program_name": "Waveform Generator", "author": "LZX Industries LLC", "license": "GPL-3.0", "category": "Signal Generation", "description": "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation.", "program_version": "1.2.3", "abi_version": ">=1.0,<2.0"}, "parameter": [{"parameter_id": "rotary_potentiometer_1", "control_mode": 0, "min_value": 0, "max_value": 4095, "initial_value": 2048, "display_min_value": 0, "display_max_value": 1000, "display_float_digits": 1, "name_label": "Frequency", "suffix_label": "Hz", "value_labels": [], "parameter": "linear"}, {"parameter_id": "rotary_potentiometer_2", "control_mode": 0, "min_value": 0, "max_value": 4095, "initial_value": 4095, "display_min_value": 0, "display_max_value": 100, "display_float_digits": 0, "name_label": "Amplitude", "suffix_label": "%", "value_labels": [], "parameter": "linear"}]}]};
+  const EXAMPLE_TOML = "# Copyright (C) 2025 LZX Industries LLC\n# SPDX-License-Identifier: GPL-3.0-only\n#\n# Example Videomancer Program Configuration (TOML)\n# This file defines a complete vmprog_program_config_v1_0 structure\n#\n# For complete documentation, see: docs/toml-program-config-guide.md\n\n[program]\nprogram_id = \"com.lzxindustries.example.waveform_generator\"\n# Program version in SemVer format (major.minor.patch)\nprogram_version = \"1.2.3\"\n\n# ABI version compatibility range (>=min_version,<max_version)\n# This program is compatible with ABI versions 1.0 (inclusive) to 2.0 (exclusive)\nabi_version = \">=1.0,<2.0\"\nprogram_name = \"Waveform Generator\"\nauthor = \"LZX Industries LLC\"\nlicense = \"GPL-3.0\"\ncategory = \"Signal Generation\"\ndescription = \"A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation.\"\nurl = \"https://github.com/lzxindustries/videomancer-sdk\"\n\n# Parameter 1: Frequency Control\n[[parameter]]\nparameter_id = \"rotary_potentiometer_1\"\ncontrol_mode = \"linear\"\nmin_value = 0\nmax_value = 1023\ninitial_value = 512\ndisplay_min_value = 0\ndisplay_max_value = 1000\ndisplay_float_digits = 1\nname_label = \"Frequency\"\nsuffix_label = \"Hz\"\n\n# Parameter 2: Amplitude Control\n[[parameter]]\nparameter_id = \"rotary_potentiometer_2\"\ncontrol_mode = \"linear\"\nmin_value = 0\nmax_value = 1023\ninitial_value = 1023\ndisplay_min_value = 0\ndisplay_max_value = 100\nname_label = \"Amplitude\"\nsuffix_label = \"%\"\n\n# Parameter 3: Waveform Shape Selector\n[[parameter]]\nparameter_id = \"rotary_potentiometer_3\"\nname_label = \"Waveform\"\nvalue_labels = [\"Sine\", \"Triangle\", \"Sawtooth\", \"Square\"]\ninitial_value_label = \"Sine\"\n\n# Note: The structure supports up to 12 parameters total.\n# Unused parameters (4-12) will be zeroed in the binary output.\n";
+  const HIDDEN_PROGRAM_FIELDS = new Set(["program_version_major", "program_version_minor", "program_version_patch", "abi_min_major", "abi_min_minor", "abi_max_major", "abi_max_minor"]);
+
+  let state = {
+    obj: null,
+    tomlText: EXAMPLE_TOML,
+    view: "program",
+    lastParseError: null,
+    warnings: [],
+  };
+
+  // Ajv v6 (draft-07) + $data support
+  function makeAjv() {
+    const ajv = new window.Ajv({
+      allErrors: true,
+      jsonPointers: true,
+      $data: true,
+      schemaId: "auto"
+    });
+    // ajv-keywords v3 exports a global function `ajvKeywords`
+    if (typeof window.ajvKeywords === "function") {
+      window.ajvKeywords(ajv, ["$data"]);
+    }
+    return ajv;
+  }
+  const ajv = makeAjv();
+  const validate = ajv.compile(SCHEMA);
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  function setStatus(kind, text) {
+    const dot = $("#statusDot");
+    dot.classList.remove("good","bad","warn");
+    if (kind === "good") dot.classList.add("good");
+    else if (kind === "bad") dot.classList.add("bad");
+    else if (kind === "warn") dot.classList.add("warn");
+    $("#statusText").textContent = text;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  }
+
+  function safeParseToml(text) {
+    try {
+      const obj = TOML.parse(text);
+      return { ok: true, obj };
+    } catch (e) {
+      return { ok: false, err: e };
+    }
+  }
+
+  function toToml(obj) {
+    try {
+      return TOML.stringify(obj);
+    } catch (e) {
+      console.error(e);
+      return state.tomlText;
+    }
+  }
+
+  function deepClone(x) {
+    return JSON.parse(JSON.stringify(x));
+  }
+
+  function ensureDefaults(obj) {
+    if (!obj.program) obj.program = {};
+    if (obj.program.author === undefined) obj.program.author = "";
+    if (obj.program.license === undefined) obj.program.license = "";
+    if (obj.program.category === undefined) obj.program.category = "";
+    if (obj.program.description === undefined) obj.program.description = "";
+    if (obj.program.url === undefined) obj.program.url = "";
+    if (!Array.isArray(obj.parameter)) obj.parameter = [];
+    return obj;
+  }
+
+  function computeWarnings(obj) {
+    const warnings = [];
+    if (obj && Array.isArray(obj.parameter)) {
+      const seen = new Map();
+      obj.parameter.forEach((p, idx) => {
+        const id = p && p.parameter_id;
+        if (!id) return;
+        if (seen.has(id)) {
+          warnings.push({
+            path: `/parameter[${idx}]/parameter_id`,
+            message: `Duplicate parameter_id '${id}' also used at index ${seen.get(id)} (hardware assignment should be unique).`
+          });
+        } else {
+          seen.set(id, idx);
+        }
+      });
+    }
+    if (obj && obj.program && typeof obj.program.parameter_count === "number") {
+      warnings.push({
+        path: "/program/parameter_count",
+        message: "parameter_count is typically derived from [[parameter]] count during conversion; consider omitting it in TOML."
+      });
+    }
+    return warnings;
+  }
+
+  function validateAndRender() {
+    state.warnings = computeWarnings(state.obj);
+
+    const ok = validate(state.obj);
+    const errs = (validate.errors || []).map(e => {
+      const p = (e.dataPath && e.dataPath.length) ? e.dataPath : "/";
+      const k = e.keyword;
+      const msg = e.message || "invalid";
+      return { path: p, message: msg, keyword: k };
+    });
+
+    const el = $("#errors");
+    el.innerHTML = "";
+
+    if (state.lastParseError) {
+      const d = document.createElement("div");
+      d.className = "err";
+      d.innerHTML = `<div class="p">TOML parse</div><div class="m">${escapeHtml(state.lastParseError.message || state.lastParseError)}</div>`;
+      el.appendChild(d);
+    }
+
+    state.warnings.forEach(w => {
+      const d = document.createElement("div");
+      d.className = "warn";
+      d.innerHTML = `<div class="p">${escapeHtml(w.path)}</div><div class="m">${escapeHtml(w.message)}</div>`;
+      el.appendChild(d);
+    });
+
+    errs.forEach(er => {
+      const d = document.createElement("div");
+      d.className = "err";
+      d.innerHTML = `<div class="p">${escapeHtml(er.path)}</div>
+                     <div class="m">${escapeHtml(er.message)} <span class="mono" style="opacity:.75">(${escapeHtml(er.keyword)})</span></div>`;
+      el.appendChild(d);
+    });
+
+    if (state.lastParseError) setStatus("bad", "TOML parse error");
+    else if (!ok) setStatus("bad", `${errs.length} schema error${errs.length===1?"":"s"}`);
+    else if (state.warnings.length) setStatus("warn", `${state.warnings.length} warning${state.warnings.length===1?"":"s"}`);
+    else setStatus("good", "Valid");
+
+    const pid = state.obj && state.obj.program ? (state.obj.program.program_id || "") : "";
+    const pname = state.obj && state.obj.program ? (state.obj.program.program_name || "") : "";
+    $("#mainSubtitle").textContent = pid ? `${pid}${pname ? " — " + pname : ""}` : "";
+
+    renderView(state.view);
+  }
+
+  function setView(view) {
+    state.view = view;
+    $$("#nav .navitem").forEach(n => n.classList.toggle("active", n.dataset.view === view));
+    renderView(view);
+  }
+
+  function isRequired(schemaNode, key) {
+    if (!schemaNode || !Array.isArray(schemaNode.required)) return false;
+    return schemaNode.required.includes(key);
+  }
+
+  function makeInput({type="text", value="", min=null, max=null, step=null}) {
+    const i = document.createElement("input");
+    i.type = type;
+    if (value !== undefined && value !== null) i.value = value;
+    if (min !== null && min !== undefined) i.min = String(min);
+    if (max !== null && max !== undefined) i.max = String(max);
+    if (step !== null && step !== undefined) i.step = String(step);
+    return i;
+  }
+
+  function makeSelect(options, value) {
+    const s = document.createElement("select");
+    options.forEach(opt => {
+      const o = document.createElement("option");
+      o.value = opt;
+      o.textContent = opt;
+      if (String(opt) === String(value)) o.selected = true;
+      s.appendChild(o);
+    });
+    return s;
+  }
+
+  function wrapField(key, parentSchema, fieldSchema, inputEl, onChange) {
+    const lab = document.createElement("label");
+    const title = (fieldSchema && fieldSchema.title) ? fieldSchema.title : key;
+    const required = isRequired(parentSchema, key);
+    lab.innerHTML = `<div>${escapeHtml(title)}${required ? ' <span style="color:var(--accent)">*</span>' : ''}</div>`;
+    lab.appendChild(inputEl);
+    const h = (fieldSchema && fieldSchema.description) ? fieldSchema.description : "";
+    if (h) {
+      const d = document.createElement("div");
+      d.className = "help";
+      d.textContent = h;
+      lab.appendChild(d);
+    }
+    if (onChange) {
+      inputEl.addEventListener("input", onChange);
+      inputEl.addEventListener("change", onChange);
+    }
+    return lab;
+  }
+
+  function renderProgramForm(container) {
+    const programSchema = SCHEMA.properties.program;
+    const props = programSchema.properties;
+    const obj = state.obj.program;
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="cardhdr">
+        <div>
+          <div class="t">Program</div>
+          <div class="desc">Main program metadata and configuration</div>
+        </div>
+      </div>
+      <div class="cardbody"></div>
+    `;
+    const body = card.querySelector(".cardbody");
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    const orderedKeys = [
+      "program_id","program_name","program_version","abi_version",
+      "author","license","category","description","url","parameter_count"
+    ].filter(k => !HIDDEN_PROGRAM_FIELDS.has(k) && props[k]);
+
+    orderedKeys.forEach(key => {
+      const s = props[key];
+      let input;
+      if (s.enum) {
+        input = makeSelect(s.enum, obj[key] || "");
+      } else if (s.type === "integer" || s.type === "number") {
+        input = makeInput({
+          type: "number",
+          value: (obj[key] !== undefined) ? obj[key] : "",
+          min: (s.minimum !== undefined) ? s.minimum : null,
+          max: (s.maximum !== undefined) ? s.maximum : null,
+          step: (s.type === "integer") ? 1 : "any"
+        });
+      } else {
+        input = makeInput({ type: "text", value: (obj[key] !== undefined) ? obj[key] : "" });
+      }
+
+      const field = wrapField(key, programSchema, s, input, () => {
+        const v = (s.type === "integer") ? (input.value === "" ? undefined : parseInt(input.value, 10))
+                : (s.type === "number") ? (input.value === "" ? undefined : parseFloat(input.value))
+                : input.value;
+
+        if (v === undefined || (typeof v === "number" && isNaN(v))) delete obj[key];
+        else obj[key] = v;
+
+        state.tomlText = toToml(state.obj);
+        setEditorText(state.tomlText, true);
+        validateAndRender();
+      });
+      grid.appendChild(field);
+    });
+
+    body.appendChild(grid);
+
+    const note = document.createElement("div");
+    note.className = "help";
+    note.style.marginTop = "10px";
+    note.textContent = "Legacy numeric version fields are hidden by design; use program_version + abi_version strings.";
+    body.appendChild(note);
+
+    container.appendChild(card);
+  }
+
+  function parseLabelList(text) {
+    return text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  }
+
+  function renderParameterCard(p, idx) {
+    const paramSchema = SCHEMA.properties.parameter.items;
+    const props = paramSchema.properties;
+
+    const card = document.createElement("div");
+    card.className = "card";
+    const title = p.name_label ? `${p.name_label}` : `Parameter ${idx+1}`;
+    card.innerHTML = `
+      <div class="cardhdr">
+        <div>
+          <div class="t">${escapeHtml(title)}</div>
+          <div class="desc">Hardware mapping + display/interpretation</div>
+        </div>
+        <div class="row">
+          <span class="badge">#${idx+1}</span>
+          <button class="btn" data-act="dup">Duplicate</button>
+          <button class="btn" data-act="del" style="border-color: rgba(255,107,107,0.35); background: rgba(255,107,107,0.06)">Delete</button>
+        </div>
+      </div>
+      <div class="cardbody"></div>
+    `;
+    const body = card.querySelector(".cardbody");
+
+    const labelMode = Array.isArray(p.value_labels) && p.value_labels.length > 0;
+
+    const modeRow = document.createElement("div");
+    modeRow.className = "row";
+    const toggle = document.createElement("label");
+    toggle.className = "toggle";
+    toggle.innerHTML = `<input type="checkbox" ${labelMode ? "checked": ""} /> Label mode (value_labels)`;
+    const cb = toggle.querySelector("input");
+    modeRow.appendChild(toggle);
+
+    const hint = document.createElement("div");
+    hint.className = "small";
+    hint.textContent = labelMode ? "Numeric fields hidden (schema forbids mixing modes)." : "Label fields hidden (schema forbids mixing modes).";
+    modeRow.appendChild(hint);
+    body.appendChild(modeRow);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    body.appendChild(grid);
+
+    ["parameter_id","name_label"].forEach(key => {
+      const s = props[key];
+      let input;
+      if (s.enum) input = makeSelect(s.enum, p[key] || s.enum[0]);
+      else input = makeInput({ type:"text", value: (p[key] !== undefined) ? p[key] : "" });
+
+      const field = wrapField(key, paramSchema, s, input, () => {
+        p[key] = input.value;
+        state.tomlText = toToml(state.obj);
+        setEditorText(state.tomlText, true);
+        validateAndRender();
+      });
+      grid.appendChild(field);
+    });
+
+    function renderModeFields() {
+      while (grid.children.length > 2) grid.removeChild(grid.lastChild);
+
+      const isLabel = cb.checked;
+
+      if (isLabel) {
+        delete p.control_mode;
+        delete p.min_value; delete p.max_value; delete p.initial_value;
+        delete p.display_min_value; delete p.display_max_value;
+        delete p.display_float_digits; delete p.suffix_label;
+
+        if (!Array.isArray(p.value_labels)) p.value_labels = [];
+
+        const ta = document.createElement("textarea");
+        ta.value = (p.value_labels || []).join("\n");
+        const fieldVL = wrapField("value_labels", paramSchema, props.value_labels, ta, () => {
+          p.value_labels = parseLabelList(ta.value);
+          if (p.initial_value_label && !p.value_labels.includes(p.initial_value_label)) delete p.initial_value_label;
+          state.tomlText = toToml(state.obj);
+          setEditorText(state.tomlText, true);
+          validateAndRender();
+        });
+        grid.appendChild(fieldVL);
+
+        const sel = makeSelect(["", ...(p.value_labels || [])], p.initial_value_label || "");
+        const fieldIVL = wrapField("initial_value_label", paramSchema, props.initial_value_label, sel, () => {
+          const v = sel.value;
+          if (!v) delete p.initial_value_label;
+          else p.initial_value_label = v;
+          state.tomlText = toToml(state.obj);
+          setEditorText(state.tomlText, true);
+          validateAndRender();
+        });
+        grid.appendChild(fieldIVL);
+
+      } else {
+        delete p.value_labels;
+        delete p.initial_value_label;
+
+        if (!p.control_mode) p.control_mode = "linear";
+
+        const sel = makeSelect(props.control_mode.enum, p.control_mode);
+        const fieldCM = wrapField("control_mode", paramSchema, props.control_mode, sel, () => {
+          p.control_mode = sel.value;
+          state.tomlText = toToml(state.obj);
+          setEditorText(state.tomlText, true);
+          validateAndRender();
+        });
+        grid.appendChild(fieldCM);
+
+        const numericKeys = ["min_value","max_value","initial_value","display_min_value","display_max_value","display_float_digits","suffix_label"];
+        numericKeys.forEach(key => {
+          const s = props[key];
+          if (!s) return;
+
+          let input;
+          if (s.type === "integer" || s.type === "number") {
+            input = makeInput({
+              type: "number",
+              value: (p[key] !== undefined) ? p[key] : "",
+              min: (s.minimum !== undefined) ? s.minimum : null,
+              max: (s.maximum !== undefined) ? s.maximum : null,
+              step: (s.type === "integer") ? 1 : "any"
+            });
+          } else {
+            input = makeInput({ type:"text", value: (p[key] !== undefined) ? p[key] : "" });
+          }
+
+          const field = wrapField(key, paramSchema, s, input, () => {
+            let v;
+            if (s.type === "integer") v = (input.value === "" ? undefined : parseInt(input.value, 10));
+            else if (s.type === "number") v = (input.value === "" ? undefined : parseFloat(input.value));
+            else v = input.value;
+
+            if (v === undefined || (typeof v === "number" && isNaN(v)) || v === "") delete p[key];
+            else p[key] = v;
+
+            state.tomlText = toToml(state.obj);
+            setEditorText(state.tomlText, true);
+            validateAndRender();
+          });
+          grid.appendChild(field);
+        });
+      }
+    }
+
+    cb.addEventListener("change", () => {
+      if (cb.checked) {
+        if (!Array.isArray(p.value_labels) || p.value_labels.length === 0) p.value_labels = ["Option 1", "Option 2"];
+      } else {
+        if (!p.control_mode) p.control_mode = "linear";
+      }
+      state.tomlText = toToml(state.obj);
+      setEditorText(state.tomlText, true);
+      validateAndRender();
+      renderModeFields();
+    });
+
+    renderModeFields();
+
+    card.querySelector('[data-act="del"]').addEventListener("click", () => {
+      state.obj.parameter.splice(idx, 1);
+      state.tomlText = toToml(state.obj);
+      setEditorText(state.tomlText, true);
+      validateAndRender();
+    });
+    card.querySelector('[data-act="dup"]').addEventListener("click", () => {
+      if (state.obj.parameter.length >= 12) return;
+      const copy = deepClone(p);
+      state.obj.parameter.splice(idx+1, 0, copy);
+      state.tomlText = toToml(state.obj);
+      setEditorText(state.tomlText, true);
+      validateAndRender();
+    });
+
+    return card;
+  }
+
+  function renderParametersForm(container) {
+    const wrap = document.createElement("div");
+    wrap.className = "form";
+
+    const header = document.createElement("div");
+    header.className = "row";
+    header.innerHTML = `
+      <div class="small">Define up to 12 parameters. Each <span class="k">parameter_id</span> should be unique.</div>
+      <span class="spacer"></span>
+      <button class="btn primary" id="btnAddParam">Add Parameter</button>
+    `;
+    wrap.appendChild(header);
+
+    const list = document.createElement("div");
+    list.className = "form";
+    wrap.appendChild(list);
+
+    function rerenderList() {
+      list.innerHTML = "";
+      const params = state.obj.parameter || [];
+      if (!params.length) {
+        const empty = document.createElement("div");
+        empty.className = "small";
+        empty.textContent = "No parameters defined yet.";
+        list.appendChild(empty);
+      } else {
+        params.forEach((p, idx) => list.appendChild(renderParameterCard(p, idx)));
+      }
+    }
+    rerenderList();
+
+    header.querySelector("#btnAddParam").addEventListener("click", () => {
+      if (state.obj.parameter.length >= 12) return;
+      state.obj.parameter.push({
+        parameter_id: "rotary_potentiometer_1",
+        control_mode: "linear",
+        name_label: "New Param"
+      });
+      state.tomlText = toToml(state.obj);
+      setEditorText(state.tomlText, true);
+      validateAndRender();
+      rerenderList();
+    });
+
+    container.appendChild(wrap);
+  }
+
+  // TOML editor (Ace)
+  let aceEditor = null;
+  let suppressEditorEvent = false;
+  let editorInitialized = false;
+
+  function initEditor(el) {
+    if (editorInitialized) return;
+    editorInitialized = true;
+
+    if (window.ace) {
+      aceEditor = ace.edit(el);
+      aceEditor.session.setMode("ace/mode/toml");
+      aceEditor.setOptions({
+        fontSize: "12px",
+        showPrintMargin: false,
+        tabSize: 2,
+        useSoftTabs: true,
+        wrap: true
+      });
+      aceEditor.session.setValue(state.tomlText);
+
+      let timer = null;
+      aceEditor.session.on("change", () => {
+        if (suppressEditorEvent) return;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          const text = aceEditor.session.getValue();
+          onEditorTextChanged(text);
+        }, 180);
+      });
+    } else {
+      const ta = document.createElement("textarea");
+      ta.style.height = "100%";
+      ta.style.width = "100%";
+      ta.style.border = "0";
+      ta.style.borderRadius = "0";
+      ta.value = state.tomlText;
+      el.replaceWith(ta);
+
+      let timer = null;
+      ta.addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => onEditorTextChanged(ta.value), 220);
+      });
+    }
+  }
+
+  function setEditorText(text, preserveCursor) {
+    if (!aceEditor) return;
+    suppressEditorEvent = true;
+    const pos = preserveCursor ? aceEditor.getCursorPosition() : null;
+    aceEditor.session.setValue(text);
+    if (pos) aceEditor.moveCursorToPosition(pos);
+    suppressEditorEvent = false;
+  }
+
+  function onEditorTextChanged(text) {
+    state.tomlText = text;
+    const parsed = safeParseToml(text);
+    if (!parsed.ok) {
+      state.lastParseError = parsed.err;
+      validateAndRender();
+      return;
+    }
+    state.lastParseError = null;
+    state.obj = ensureDefaults(parsed.obj);
+    validateAndRender();
+  }
+
+  function renderTomlView(container) {
+    const note = document.createElement("div");
+    note.className = "small";
+    note.textContent = "Text editor parses TOML → validates → updates Form when valid. Form edits regenerate TOML (formatting/comments may change).";
+    container.appendChild(note);
+
+    const wrap = document.createElement("div");
+    wrap.className = "editorwrap";
+    wrap.style.marginTop = "10px";
+    const aceDiv = document.createElement("div");
+    aceDiv.id = "ace";
+    wrap.appendChild(aceDiv);
+    container.appendChild(wrap);
+    initEditor(aceDiv);
+  }
+
+  function renderHelp(container) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="cardhdr">
+        <div>
+          <div class="t">Guide</div>
+          <div class="desc">How to write vmprog program config TOML</div>
+        </div>
+      </div>
+      <div class="cardbody">
+        <div class="small">
+          This app enforces your schema’s key rules:
+          <ul>
+            <li><span class="k">[program]</span> requires <span class="k">program_id</span> and <span class="k">program_name</span>, plus modern version strings (<span class="k">program_version</span>, <span class="k">abi_version</span>).</li>
+            <li>Each <span class="k">[[parameter]]</span> must choose exactly one mode: <span class="k">Label mode</span> with <span class="k">value_labels</span> OR <span class="k">Numeric mode</span> with <span class="k">control_mode</span> and optional numeric fields.</li>
+          </ul>
+          For full docs, see your repo guide: <span class="k">docs/toml-program-config-guide.md</span>.
+        </div>
+        <div class="hr"></div>
+        <details>
+          <summary class="small" style="cursor:pointer">Show embedded example TOML</summary>
+          <pre class="mono" style="white-space:pre-wrap; font-size:11px; color:rgba(232,236,255,0.92)"></pre>
+        </details>
+      </div>
+    `;
+    card.querySelector("pre").textContent = EXAMPLE_TOML;
+    container.appendChild(card);
+  }
+
+  function renderView(view) {
+    const body = $("#mainBody");
+    body.innerHTML = "";
+
+    const titleMap = { program: "Program", parameters: "Parameters", toml: "Raw TOML", help: "Help" };
+    $("#mainTitle").textContent = titleMap[view] || "Editor";
+
+    if (view === "program") renderProgramForm(body);
+    else if (view === "parameters") renderParametersForm(body);
+    else if (view === "toml") renderTomlView(body);
+    else if (view === "help") renderHelp(body);
+  }
+
+  function downloadText(filename, text) {
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  $("#btnReset").addEventListener("click", () => {
+    state.tomlText = EXAMPLE_TOML;
+    const parsed = safeParseToml(state.tomlText);
+    state.lastParseError = parsed.ok ? null : parsed.err;
+    state.obj = ensureDefaults(parsed.ok ? parsed.obj : {});
+    if (aceEditor) setEditorText(state.tomlText, false);
+    validateAndRender();
+  });
+
+  $("#btnExport").addEventListener("click", () => downloadText("program_config.toml", state.tomlText));
+
+  $("#btnCopy").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(state.tomlText);
+      setStatus("good", "Copied TOML");
+      setTimeout(() => validateAndRender(), 700);
+    } catch (e) {
+      alert("Clipboard copy failed (browser permissions). Use Export instead.");
+    }
+  });
+
+  $("#btnImport").addEventListener("click", () => {
+    $("#fileInput").value = "";
+    $("#fileInput").click();
+  });
+
+  $("#fileInput").addEventListener("change", async (ev) => {
+    const f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    const text = await f.text();
+    state.tomlText = text;
+    if (aceEditor) setEditorText(text, false);
+    onEditorTextChanged(text);
+  });
+
+  $$("#nav .navitem").forEach(n => n.addEventListener("click", () => setView(n.dataset.view)));
+
+  (function boot() {
+    const parsed = safeParseToml(state.tomlText);
+    state.lastParseError = parsed.ok ? null : parsed.err;
+    state.obj = ensureDefaults(parsed.ok ? parsed.obj : {});
+    validateAndRender();
+  })();
+  </script>
+</body>
+</html>

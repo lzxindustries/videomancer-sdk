@@ -225,7 +225,7 @@ for PROGRAM in $PROGRAMS; do
     
     # Convert TOML configuration to binary
     echo -e "${GREEN}Converting TOML configuration to binary...${NC}"
-    cd scripts/toml_to_config_binary
+    cd tools/toml-converter
     python3 toml_to_config_binary.py "${PROJECT_ROOT}${PROGRAM}.toml" "${BUILD_ROOT}program_config.bin" --quiet
     cd ../..
     echo -e "${GREEN}✓ Configuration binary created (7,368 bytes)${NC}"
@@ -238,7 +238,7 @@ for PROGRAM in $PROGRAMS; do
     
     # Package into .vmprog format
     echo -e "${GREEN}Packaging ${PROGRAM}.vmprog...${NC}"
-    cd scripts/vmprog_pack
+    cd tools/vmprog-packer
     
     PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then

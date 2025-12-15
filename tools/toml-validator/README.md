@@ -15,8 +15,8 @@ python toml_schema_validator.py <input.toml> <schema.json>
 ## Examples
 
 ```bash
-# Validate the example program config
-python toml_schema_validator.py ../../scripts/toml_to_config_binary/example_program_config.toml
+# Validate the example template
+python toml_schema_validator.py ../../examples/templates/template.toml
 
 # Validate with explicit schema path
 python toml_schema_validator.py my_program.toml ../../docs/schemas/vmprog_program_config_schema_v1_0.json

@@ -37,10 +37,10 @@ python3 toml_to_config_binary.py example_program_config.toml example_program_con
 echo
 
 # Verify output
-if [ -f "example_program_config.bin" ]; then
-    SIZE=$(stat -f%z "example_program_config.bin" 2>/dev/null || stat -c%s "example_program_config.bin")
+if [ -f "template_test.bin" ]; then
+    SIZE=$(stat -f%z "template_test.bin" 2>/dev/null || stat -c%s "template_test.bin")
     echo "=== Verification ==="
-    echo "Output file: example_program_config.bin"
+    echo "Output file: template_test.bin"
     echo "Size: $SIZE bytes (expected: 7368)"
     
     if [ "$SIZE" -eq 7368 ]; then
@@ -52,7 +52,7 @@ if [ -f "example_program_config.bin" ]; then
     
     echo
     echo "First 128 bytes (hex dump):"
-    xxd -l 128 example_program_config.bin
+    xxd -l 128 template_test.bin
     
     echo
     echo "=== Test Passed ==="
