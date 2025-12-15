@@ -57,13 +57,13 @@ The `vmprog_pack.py` script automatically looks for keys in this directory and s
 
 ```bash
 # Sign package (default behavior)
-python scripts/vmprog_pack/vmprog_pack.py ./build/programs/passthru ./output/passthru.vmprog
+python tools/vmprog-packer/vmprog_pack.py ./build/programs/passthru ./output/passthru.vmprog
 
 # Create unsigned package
-python scripts/vmprog_pack/vmprog_pack.py --no-sign ./build/programs/passthru ./output/passthru.vmprog
+python tools/vmprog-packer/vmprog_pack.py --no-sign ./build/programs/passthru ./output/passthru.vmprog
 
 # Use keys from different directory
-python scripts/vmprog_pack/vmprog_pack.py --keys-dir ./my_keys ./build/programs/passthru ./output/passthru.vmprog
+python tools/vmprog-packer/vmprog_pack.py --keys-dir ./my_keys ./build/programs/passthru ./output/passthru.vmprog
 ```
 
 ## Key Format

@@ -100,7 +100,7 @@ cat template.toml
 
 - **[scripts/setup.sh](scripts/setup.sh)** - Downloads and installs OSS CAD Suite (Yosys, nextpnr, GHDL)
 - **[build_programs.sh](build_programs.sh)** - Builds all programs (FPGA synthesis → packaging)
-- **[clean_sdk.sh](clean_sdk.sh)** - Removes build artifacts
+- **[clean.sh](clean.sh)** - Removes build artifacts
 
 ### RTL Libraries
 
