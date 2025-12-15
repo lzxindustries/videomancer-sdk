@@ -8,38 +8,30 @@
 
 Header-only C++ SDK for the `.vmprog` file format - cryptographically signed FPGA program packages for Videomancer hardware. Includes complete format specification, Ed25519/BLAKE2b cryptography, CMake build system, and Python TOML converter.
 
-## Quick Start
+## ⚠️ Repository Status - Partial Release
 
-```bash
-git clone https://github.com/lzxindustries/videomancer-sdk.git
-cd videomancer-sdk
-mkdir build && cd build
-cmake .. && cmake --build .
-```
+**This repository is currently incomplete.** Version 0.1.0 provides the core `.vmprog` format specification and packaging tools, but additional components are under development and will be released in future versions.
 
-Include in your C++ project:
+**Currently Available:**
+- ✅ `.vmprog` binary format specification
+- ✅ C++ SDK with cryptographic verification
+- ✅ Python TOML to binary converter
+- ✅ Documentation and build system
 
-```cpp
-#include <lzx/sdk/vmprog_format.hpp>
-#include <lzx/sdk/vmprog_crypto.hpp>
+**Coming in Future Releases:**
+- ⏳ **FPGA Build Chain** - Toolchain integration for ICE40HX4K
+- ⏳ **Example FPGA Programs** - Reference designs and templates
+- ⏳ **RTL VHDL Libraries** - Reusable hardware components
+- ⏳ **RTL Constraints** - Timing and pin constraints for Videomancer hardware
+- ⏳ **VMProg Packaging Tools** - Complete workflow from bitstream to signed package
 
-using namespace lzx;
+**Current Use Cases:**
+- Understanding the `.vmprog` format
+- Building tools that read/validate `.vmprog` files
+- Preparing program configurations in TOML format
+- Contributing to format specification discussions
 
-// Validate a .vmprog file header
-auto* header = reinterpret_cast<const vmprog_header_v1_0*>(file_data);
-auto result = validate_vmprog_header(*header, file_size);
-```
-
-## Features
-
-- **Cryptographic Signing** - Ed25519 signatures, BLAKE2b-256 hashing via Monocypher
-- **Hardware Detection** - Compatibility flags for Videomancer Core revisions
-- **ABI Management** - Version range specification for forward/backward compatibility
-- **Parameter System** - 12 configurable inputs with 36 control modes
-- **Multiple Bitstreams** - Support for SD/HD, analog/HDMI, and dual-output variants
-- **1 MB Packages** - Efficient binary format for ICE40HX4K FPGA programs
-- **Python Tooling** - TOML to binary converter with comprehensive validation
-- **Header-Only** - Zero runtime dependencies, easy integration
+For FPGA development, check back for future releases.
 
 ## What's Inside
 
@@ -52,7 +44,29 @@ auto result = validate_vmprog_header(*header, file_size);
 
 **Python Tools**
 - `toml_to_config_binary.py` - TOML to binary converter (443 lines)
-- Examplrepository
+- Example TOML with 3 parameters (frequency, amplitude, waveform)
+- Test suite with shell and Python verification scripts
+- Python 3.10+ and 3.11+ compatible (tomli/tomllib)
+
+**Documentation**
+- [vmprog-format.md](docs/vmprog-format.md) - 1,167-line format specification
+- Complete API documentation in header files
+- Usage examples and code snippets
+- Third-party license documentation
+
+## Getting Started
+
+### Prerequisites
+
+- CMake 3.13+
+- C++17 compiler (C++20 on non-Windows)
+- Git (for version extraction)
+- Python 3.10+ (for TOML converter)
+
+### Building the SDK
+
+```bash
+# Clone repository
 git clone https://github.com/lzxindustries/videomancer-sdk.git
 cd videomancer-sdk
 
@@ -119,7 +133,30 @@ cd scripts/toml_to_config_binary
 # Create/edit TOML configuration
 cat > my_program.toml << 'EOF'
 [program]
-pr**[vmprog-format.md](docs/vmprog-format.md)** - Complete binary format specification
+program_id = "com.example.myprogram"
+program_name = "My FPGA Program"
+author = "Your Name"
+program_version_major = 1
+program_version_minor = 0
+program_version_patch = 0
+# ... (see example_program_config.toml)
+
+[[parameter]]
+parameter_id = 1  # rotary_potentiometer_1
+name_label = "Frequency"
+# ...
+EOF
+
+# Convert to binary
+python3 toml_to_config_binary.py my_program.toml my_program_config.bin
+
+# Verify output (7,240 bytes)
+ls -lh my_program_config.bin
+```
+
+## Documentation
+
+- **[vmprog-format.md](docs/vmprog-format.md)** - Complete binary format specification
 - **API Documentation** - Inline in header files (`vmprog_format.hpp`, `vmprog_crypto.hpp`)
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
@@ -164,13 +201,12 @@ pr**[vmprog-format.md](docs/vmprog-format.md)** - Complete binary format specifi
 - `bitstream_hd_analog` - HD resolution, analog output
 - `bitstream_hd_hdmi` - HD resolution, HDMI output
 - `bitstream_hd_dual` - HD resolution, dual output
-author = "Your Name"
-program_version_major = 1
-program_version_minor = 0
-program_version_patch = 0
-# ... (see example_program_config.toml)
 
-[[paramelzx/sdk/                         # Core SDK headers
+## Project Structure
+
+```text
+videomancer-sdk/
+├── src/lzx/sdk/                         # Core SDK headers
 │   ├── vmprog_format.hpp                # Format specification (1,746 lines)
 │   ├── vmprog_crypto.hpp                # Crypto wrappers (248 lines)
 │   ├── vmprog_public_keys.hpp           # Ed25519 keys (41 lines)
@@ -189,10 +225,12 @@ program_version_patch = 0
 │   └── vmprog-format.md                 # Format spec (1,167 lines)
 ├── CMakeLists.txt                       # Build configuration
 ├── build.sh / clean.sh                  # Build automation
-├── README.md                            # This file
-├── LICENSE                              # GPL-3.0
 ├── CHANGELOG.md                         # Version history
 ├── CONTRIBUTING.md                      # Contribution policy
+└── THIRD_PARTY_LICENSES.md              # Third-party licenses
+```
+
+## ContributiCONTRIBUTING.md                      # Contribution policy
 └── THIRD_PARTY_LICENSES.md rog file header
 void validate_program_file(const uint8_t* file_data, size_t file_size) {
     auto* header = reinterpret_cast<const vmprog_header_v1_0*>(file_data);
@@ -211,50 +249,7 @@ See [LICENSE](LICENSE) for full terms.
 **Third-Party:**
 - Monocypher 4.0.2: BSD-2-Clause OR CC0-1.0 (see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md))
 
----
-
 **Videomancer** is a trademark of LZX Industries LLC.  
 For hardware, support, and more: [lzxindustries.net](https://lzxindustries.net)
-
-## Documentation
-
-- [Program Package Format](docs/vmprog-format.md) - `.vmprog` file format specification
-- [Third Party Licenses](THIRD_PARTY_LICENSES.md) - Monocypher (BSD-2-Clause OR CC0-1.0)
-
-## Project Structure
-
-```text
-videomancer-sdk/
-├── src/
-│   └── lzx/
-│       └── sdk/                        # Core SDK headers
-│           ├── vmprog_format.hpp       # Program package format
-│           ├── vmprog_crypto.hpp       # Cryptographic wrappers
-│           ├── vmprog_public_keys.hpp  # Key management
-│           └── videomancer_sdk_version.hpp     # Version info (auto-generated)
-├── third_party/
-│   └── monocypher/                     # Cryptographic library
-│       ├── src/                        # Monocypher source files
-│       └── CMakeLists.txt
-├── docs/
-│   └── vmprog-format.md                # Complete format specification
-├── scripts/
-│   └── videomancer_sdk_version.hpp.in  # Version generation template
-├── CMakeLists.txt                      # Build configuration
-├── build.sh                            # Build automation script
-├── clean.sh                            # Clean build artifacts script
-├── .gitignore                          # Git ignore rules
-├── README.md                           # This file
-├── LICENSE                             # GPL-3.0 license
-├── CHANGELOG.md                        # Version history
-├── CONTRIBUTING.md                     # Contribution guidelines
-└── THIRD_PARTY_LICENSES.md             # Third-party licenses
-```
-
-## Contributions
-
-Maintained by LZX Industries. Bug reports welcome. External contributions reviewed case-by-case. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
 
 GPL-3.0 - Copyright (C) 2025 LZX Industries LLC. See [LICENSE](LICENSE).
