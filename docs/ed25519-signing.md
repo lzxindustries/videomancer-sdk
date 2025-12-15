@@ -81,7 +81,7 @@ Ed25519 cryptographic signing has been integrated into the Videomancer SDK to en
 - Security guidelines
 - Key generation instructions
 
-**`docs/vmprog-ed25519-signing.md`** (this document)
+**`docs/ed25519-signing.md`** (this document)
 - Comprehensive implementation documentation
 
 ---

@@ -85,7 +85,7 @@ Place in `programs/myprogram/` directory.
 
 ### Program Configuration
 
-Program parameters are defined in TOML files. See the [TOML Program Configuration Guide](docs/toml-program-config-guide.md) for complete documentation.
+Program parameters are defined in TOML files. See the [TOML Configuration Guide](docs/toml-config-guide.md) for complete documentation.
 
 ```bash
 cd examples/templates
@@ -111,10 +111,10 @@ VHDL components for video processing (in `fpga/rtl/`):
 
 ### Documentation
 
-- **[toml-program-config-guide.md](docs/toml-program-config-guide.md)** - Complete guide to creating TOML configuration files
+- **[toml-config-guide.md](docs/toml-config-guide.md)** - Complete guide to creating TOML configuration files
 - **[vmprog-format.md](docs/vmprog-format.md)** - Binary format specification
-- **[signing-guide.md](docs/signing-guide.md)** - Package signing with Ed25519
-- **[vmprog-ed25519-signing.md](docs/vmprog-ed25519-signing.md)** - Detailed Ed25519 implementation
+- **[package-signing-guide.md](docs/package-signing-guide.md)** - Package signing with Ed25519
+- **[ed25519-signing.md](docs/ed25519-signing.md)** - Detailed Ed25519 implementation
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 
@@ -125,17 +125,20 @@ For tools and examples, see `tools/` and `examples/` directories.
 ```
 videomancer-sdk/
 ├── docs/                  # Documentation
-│   ├── toml-program-config-guide.md
+│   ├── toml-config-guide.md
 │   ├── vmprog-format.md
-│   ├── signing-guide.md
+│   ├── package-signing-guide.md
+│   ├── ed25519-signing.md
+│   ├── abi-format.md
 │   └── schemas/
 ├── examples/             # Example programs and templates
 │   ├── passthru/
 │   └── templates/
 ├── tools/                # Development tools
-│   ├── toml-converter/
-│   ├── toml-validator/
-│   └── vmprog-packer/
+│   ├── toml-editor/      # Visual TOML configuration editor (HTML)
+│   ├── toml-converter/   # TOML to binary converter
+│   ├── toml-validator/   # Schema validation tool
+│   └── vmprog-packer/    # Package creation tool
 ├── scripts/              # Build automation
 │   ├── setup.sh
 │   ├── setup_ed25519_signing.sh

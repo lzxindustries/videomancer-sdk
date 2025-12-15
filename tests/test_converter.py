@@ -26,7 +26,7 @@ try:
     import toml_to_config_binary
 except ImportError:
     print("Error: Could not import toml_to_config_binary.py")
-    print("Make sure you're running this from the scripts/toml_to_config_binary directory")
+    print("Make sure you're running this from the tools/toml-converter directory")
     sys.exit(1)
 
 def verify_binary_output(binary_path: Path):

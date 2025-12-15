@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **toml-program-config-guide.md** - Comprehensive "how-to" guide for creating TOML configuration files
+- **toml-config-guide.md** - Comprehensive "how-to" guide for creating TOML configuration files
   - Complete documentation of all program metadata fields
   - Detailed explanation of numeric and label parameter modes
   - All 36 control modes with categorization (linear, stepped, polar, easing)
@@ -203,7 +203,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 #### Documentation
 
 - **vmprog-format.md** - Complete binary format specification with diagrams and validation procedures
-- **vmprog-ed25519-signing.md** - Complete Ed25519 signing implementation documentation
+- **ed25519-signing.md** - Complete Ed25519 signing implementation documentation
 - **vmprog_pack README.md** - Detailed documentation for packaging tool with Ed25519 signing examples
 - **SIGNING_GUIDE.md** - Quick reference for daily Ed25519 usage
 - **keys/README.md** - Key management and security guidelines

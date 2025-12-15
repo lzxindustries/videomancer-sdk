@@ -189,6 +189,6 @@ Register values are made available to the video processing pipeline through a pa
 ## References
 
 - [VMPROG Format Specification](vmprog-format.md)
-- [ED25519 Signing Guide](vmprog-ed25519-signing.md)
+- [ED25519 Signing Guide](ed25519-signing.md)
 - SPI peripheral RTL: `fpga/rtl/spi_peripheral.vhd`
 - Core integration: `fpga/rtl/core.vhd`

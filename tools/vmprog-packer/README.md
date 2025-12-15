@@ -21,7 +21,7 @@
 - Python 3.7 or higher
 - Standard library (no dependencies for basic functionality)
 - **Optional:** `cryptography` library for Ed25519 signing
-- **Configuration:** TOML files defining program parameters (see [TOML Configuration Guide](../../docs/toml-program-config-guide.md))
+- **Configuration:** TOML files defining program parameters (see [TOML Configuration Guide](../../docs/toml-config-guide.md))
   ```bash
   # Ubuntu/Debian/WSL2 (recommended)
   sudo apt install python3-cryptography
@@ -302,12 +302,12 @@ This tool can be easily integrated into build scripts:
 make -C fpga/programs/myprogram
 
 # Convert TOML to binary config
-python scripts/toml_to_config_binary/toml_to_config_binary.py \
+python tools/toml-converter/toml_to_config_binary.py \
     fpga/programs/myprogram/myprogram.toml \
     build/programs/myprogram/program_config.bin
 
 # Package everything into .vmprog
-python scripts/vmprog_pack/vmprog_pack.py \
+python tools/vmprog-packer/vmprog_pack.py \
     build/programs/myprogram \
     output/myprogram.vmprog
 

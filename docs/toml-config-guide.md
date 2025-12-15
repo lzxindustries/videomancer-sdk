@@ -322,15 +322,48 @@ initial_value_label = "Normal"
 
 ## Validation and Conversion
 
-After creating your TOML file, validate it using the schema validator:
+### Visual Editor (Recommended)
+
+The easiest way to create and validate TOML configuration files is using the **TOML Editor** web application:
 
 ```bash
+# Open the editor in your browser (from the SDK root directory)
+open tools/toml-editor/toml-editor.html
+# or on Linux:
+xdg-open tools/toml-editor/toml-editor.html
+```
+
+**Features:**
+- **Live validation** - Errors and warnings appear as you type
+- **Visual form interface** - Edit all fields through an intuitive UI
+- **Import/Export** - Load existing TOML files or export your configuration
+- **Offline capable** - Works without internet connection (all dependencies embedded)
+- **Syntax highlighting** - View and edit raw TOML with syntax highlighting
+- **Schema-aware** - Automatically enforces all validation rules and constraints
+
+The editor provides instant feedback on:
+- Required fields and data types
+- String length limits (with character counts)
+- Numeric ranges and control modes
+- Parameter mode conflicts (label vs numeric)
+- Duplicate parameter IDs
+- ABI version compatibility
+
+### Command-Line Tools
+
+For automated workflows or CI/CD integration, use the command-line tools:
+
+**Validate a TOML file:**
+
+```bash
+cd tools/toml-validator
 python3 toml_schema_validator.py your_program.toml
 ```
 
-Convert it to binary format for use with the SDK:
+**Convert to binary format:**
 
 ```bash
+cd tools/toml-converter
 python3 toml_to_config_binary.py your_program.toml output.bin
 ```
 

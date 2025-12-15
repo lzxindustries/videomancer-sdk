@@ -1,6 +1,6 @@
 # Ed25519 Signing Quick Reference
 
-This guide covers package signing. For TOML configuration details, see [TOML Program Configuration Guide](toml-program-config-guide.md).
+This guide covers package signing. For TOML configuration details, see [TOML Configuration Guide](toml-config-guide.md).
 
 ## Installation
 
@@ -102,7 +102,7 @@ python generate_ed25519_keys.py --output-dir ../../keys
 
 ## Documentation
 
-- **Full Documentation:** `../../docs/vmprog-ed25519-signing.md`
-- **Key Management:** `../../keys/README.md`
-- **Package Format:** `../../docs/vmprog-format.md`
+- **Full Documentation:** [ed25519-signing.md](ed25519-signing.md)
+- **Key Management:** [../keys/README.md](../keys/README.md)
+- **Package Format:** [vmprog-format.md](vmprog-format.md)
 - **Tool Usage:** `README.md` (this directory)
