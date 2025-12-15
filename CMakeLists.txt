@@ -15,46 +15,46 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-  execute_process(
-        COMMAND git describe --tags --abbrev=7
-        OUTPUT_VARIABLE GIT_DESCRIBE
-        ERROR_QUIET
-    )
-    string(REGEX MATCH "([^-]+)-([0-9]+)-(g[0-9a-f]+)" GIT_VERSION_DATA "${GIT_DESCRIBE}")
+execute_process(
+    COMMAND git describe --tags --abbrev=7
+    OUTPUT_VARIABLE GIT_DESCRIBE
+    ERROR_QUIET
+)
+string(REGEX MATCH "([^-]+)-([0-9]+)-(g[0-9a-f]+)" GIT_VERSION_DATA "${GIT_DESCRIBE}")
 
-    if(GIT_VERSION_DATA)
-        set(PROJECT_VERSION_TAG "${CMAKE_MATCH_1}")
-        set(PROJECT_VERSION_COMMITS "${CMAKE_MATCH_2}")
-        set(PROJECT_VERSION_HASH "${CMAKE_MATCH_3}")
-    else()
-        set(PROJECT_VERSION_TAG "${GIT_DESCRIBE}")
-        set(PROJECT_VERSION_COMMITS "0")
-        set(PROJECT_VERSION_HASH "")
-    endif()
+if(GIT_VERSION_DATA)
+    set(PROJECT_VERSION_TAG "${CMAKE_MATCH_1}")
+    set(PROJECT_VERSION_COMMITS "${CMAKE_MATCH_2}")
+    set(PROJECT_VERSION_HASH "${CMAKE_MATCH_3}")
+else()
+    set(PROJECT_VERSION_TAG "${GIT_DESCRIBE}")
+    set(PROJECT_VERSION_COMMITS "0")
+    set(PROJECT_VERSION_HASH "")
+endif()
 
-    # Extract major, minor, and bugfix from tag (expects format vMAJOR.MINOR.BUGFIX or MAJOR.MINOR.BUGFIX)
-    string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ver "${PROJECT_VERSION_TAG}")
-    if(_ver)
-        set(PROJECT_VERSION_MAJOR "${CMAKE_MATCH_1}")
-        set(PROJECT_VERSION_MINOR "${CMAKE_MATCH_2}")
-        set(PROJECT_VERSION_PATCH "${CMAKE_MATCH_3}")
-    else()
-        set(PROJECT_VERSION_MAJOR "0")
-        set(PROJECT_VERSION_MINOR "0")
-        set(PROJECT_VERSION_PATCH "0")
-    endif()
+# Extract major, minor, and bugfix from tag (expects format vMAJOR.MINOR.BUGFIX or MAJOR.MINOR.BUGFIX)
+string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ver "${PROJECT_VERSION_TAG}")
+if(_ver)
+    set(PROJECT_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(PROJECT_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(PROJECT_VERSION_PATCH "${CMAKE_MATCH_3}")
+else()
+    set(PROJECT_VERSION_MAJOR "0")
+    set(PROJECT_VERSION_MINOR "0")
+    set(PROJECT_VERSION_PATCH "0")
+endif()
 
-    # Set CMake project version
-    set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-    project(videomancer-sdk VERSION ${PROJECT_VERSION} LANGUAGES C CXX ASM)
-    
-    message(STATUS "Project Version Tag:     ${PROJECT_VERSION_TAG}")
-    message(STATUS "Project Version Commits: ${PROJECT_VERSION_COMMITS}")
-    message(STATUS "Project Version Hash:    ${PROJECT_VERSION_HASH}")
-    message(STATUS "Project Version Major:   ${PROJECT_VERSION_MAJOR}")
-    message(STATUS "Project Version Minor:   ${PROJECT_VERSION_MINOR}")
-    message(STATUS "Project Version Patch:   ${PROJECT_VERSION_PATCH}")
-    message(STATUS "Project Version:         ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+# Set CMake project version
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+project(videomancer-sdk VERSION ${PROJECT_VERSION} LANGUAGES C CXX ASM)
+
+message(STATUS "Project Version Tag:     ${PROJECT_VERSION_TAG}")
+message(STATUS "Project Version Commits: ${PROJECT_VERSION_COMMITS}")
+message(STATUS "Project Version Hash:    ${PROJECT_VERSION_HASH}")
+message(STATUS "Project Version Major:   ${PROJECT_VERSION_MAJOR}")
+message(STATUS "Project Version Minor:   ${PROJECT_VERSION_MINOR}")
+message(STATUS "Project Version Patch:   ${PROJECT_VERSION_PATCH}")
+message(STATUS "Project Version:         ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/videomancer_sdk_version/videomancer_sdk_version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lzx/videomancer/videomancer_sdk_version.hpp)
 

@@ -1,8 +1,11 @@
 // Videomancer SDK - Open source FPGA-based video effects development kit
 // Copyright (C) 2025 LZX Industries LLC
-// File: videomancer_fpga_controller.hpp - Videomancer SPI Controller
+// File: videomancer_fpga_controller.hpp - Videomancer FPGA Controller
 // License: GNU General Public License v3.0
 // https://github.com/lzxindustries/videomancer-sdk
+//
+// High-level C++ interface for Videomancer FPGA SPI control.
+// For protocol specification, see: docs/abi-format.md
 //
 // This file is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

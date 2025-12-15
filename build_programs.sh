@@ -53,6 +53,19 @@ if [ ! -d "build/oss-cad-suite" ]; then
     exit 1
 fi
 
+# Validate OSS CAD Suite installation
+if [ ! -f "build/oss-cad-suite/environment" ]; then
+    echo -e "${RED}ERROR: OSS CAD Suite installation is incomplete or corrupted!${NC}"
+    echo -e "${RED}Missing environment setup script. Please run ./setup.sh again.${NC}"
+    exit 1
+fi
+
+if [ ! -d "build/oss-cad-suite/bin" ]; then
+    echo -e "${RED}ERROR: OSS CAD Suite binaries not found!${NC}"
+    echo -e "${RED}Installation appears incomplete. Please run ./setup.sh again.${NC}"
+    exit 1
+fi
+
 # Check for Ed25519 signing keys BEFORE loading OSS CAD Suite environment
 # (OSS CAD Suite may use its own Python that doesn't see system packages)
 SIGN_PACKAGES=false
@@ -78,6 +91,7 @@ source environment
 cd ../..
 
 # Create output directories
+mkdir -p build
 mkdir -p build/programs
 mkdir -p out
 

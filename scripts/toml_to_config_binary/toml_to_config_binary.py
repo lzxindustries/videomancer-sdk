@@ -52,6 +52,62 @@ CONFIG_STRUCT_SIZE = 7240
 MAX_PARAMETER_ID = 12  # linear_potentiometer_12
 MAX_CONTROL_MODE = 35  # expo_in_out
 
+# Enum string to integer mappings
+PARAMETER_ID_MAP = {
+    'none': 0,
+    'rotary_potentiometer_1': 1,
+    'rotary_potentiometer_2': 2,
+    'rotary_potentiometer_3': 3,
+    'rotary_potentiometer_4': 4,
+    'rotary_potentiometer_5': 5,
+    'rotary_potentiometer_6': 6,
+    'toggle_switch_7': 7,
+    'toggle_switch_8': 8,
+    'toggle_switch_9': 9,
+    'toggle_switch_10': 10,
+    'toggle_switch_11': 11,
+    'linear_potentiometer_12': 12
+}
+
+CONTROL_MODE_MAP = {
+    'linear': 0,
+    'linear_half': 1,
+    'linear_quarter': 2,
+    'linear_double': 3,
+    'boolean': 4,
+    'steps_4': 5,
+    'steps_8': 6,
+    'steps_16': 7,
+    'steps_32': 8,
+    'steps_64': 9,
+    'steps_128': 10,
+    'steps_256': 11,
+    'polar_degs_90': 12,
+    'polar_degs_180': 13,
+    'polar_degs_360': 14,
+    'polar_degs_720': 15,
+    'polar_degs_1440': 16,
+    'polar_degs_2880': 17,
+    'quad_in': 18,
+    'quad_out': 19,
+    'quad_in_out': 20,
+    'sine_in': 21,
+    'sine_out': 22,
+    'sine_in_out': 23,
+    'circ_in': 24,
+    'circ_out': 25,
+    'circ_in_out': 26,
+    'quint_in': 27,
+    'quint_out': 28,
+    'quint_in_out': 29,
+    'quart_in': 30,
+    'quart_out': 31,
+    'quart_in_out': 32,
+    'expo_in': 33,
+    'expo_out': 34,
+    'expo_in_out': 35
+}
+
 # Global flag for quiet mode
 QUIET = False
 
@@ -93,15 +149,29 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
     Raises:
         ValueError: If validation fails
     """
-    # Check parameter_id
+    # Check parameter_id (convert string to int if needed)
     param_id = param.get('parameter_id', 0)
+    if isinstance(param_id, str):
+        if param_id not in PARAMETER_ID_MAP:
+            raise ValueError(
+                f"Parameter {index}: invalid parameter_id '{param_id}' (must be one of: {', '.join(PARAMETER_ID_MAP.keys())})"
+            )
+        param_id = PARAMETER_ID_MAP[param_id]
+    
     if param_id > MAX_PARAMETER_ID:
         raise ValueError(
             f"Parameter {index}: invalid parameter_id {param_id} (max: {MAX_PARAMETER_ID})"
         )
     
-    # Check control_mode
+    # Check control_mode (convert string to int if needed)
     control_mode = param.get('control_mode', 0)
+    if isinstance(control_mode, str):
+        if control_mode not in CONTROL_MODE_MAP:
+            raise ValueError(
+                f"Parameter {index}: invalid control_mode '{control_mode}' (must be one of: {', '.join(CONTROL_MODE_MAP.keys())})"
+            )
+        control_mode = CONTROL_MODE_MAP[control_mode]
+    
     if control_mode > MAX_CONTROL_MODE:
         raise ValueError(
             f"Parameter {index}: invalid control_mode {control_mode} (max: {MAX_CONTROL_MODE})"
@@ -122,19 +192,21 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
             f"Parameter {index}: initial_value ({init_val}) not in range [{min_val}, {max_val}]"
         )
     
-    # Check value label count
+    # Auto-calculate value_label_count from value_labels array
     value_labels = param.get('value_labels', [])
-    value_label_count = param.get('value_label_count', len(value_labels))
+    auto_count = len(value_labels)
     
-    if value_label_count > PARAM_MAX_VALUE_LABELS:
+    if auto_count > PARAM_MAX_VALUE_LABELS:
         raise ValueError(
-            f"Parameter {index}: value_label_count ({value_label_count}) exceeds max ({PARAM_MAX_VALUE_LABELS})"
+            f"Parameter {index}: too many value_labels ({auto_count}, max: {PARAM_MAX_VALUE_LABELS})"
         )
     
-    if value_label_count != len(value_labels):
-        raise ValueError(
-            f"Parameter {index}: value_label_count ({value_label_count}) != actual labels ({len(value_labels)})"
-        )
+    # Warn if value_label_count is specified (deprecated)
+    if 'value_label_count' in param:
+        specified_count = param['value_label_count']
+        if specified_count != auto_count:
+            print(f"WARNING: Parameter {index}: value_label_count ({specified_count}) ignored, using actual count ({auto_count})")
+
 
 
 def pack_parameter_config(param: Dict[str, Any]) -> bytes:
@@ -165,9 +237,18 @@ def pack_parameter_config(param: Dict[str, Any]) -> bytes:
     """
     data = bytearray()
     
+    # Convert string enums to integers if needed
+    param_id = param.get('parameter_id', 0)
+    if isinstance(param_id, str):
+        param_id = PARAMETER_ID_MAP.get(param_id, 0)
+    
+    control_mode = param.get('control_mode', 0)
+    if isinstance(control_mode, str):
+        control_mode = CONTROL_MODE_MAP.get(control_mode, 0)
+    
     # Pack integer fields (22 bytes)
-    data += struct.pack('<I', param.get('parameter_id', 0))
-    data += struct.pack('<I', param.get('control_mode', 0))
+    data += struct.pack('<I', param_id)
+    data += struct.pack('<I', control_mode)
     data += struct.pack('<H', param.get('min_value', 0))
     data += struct.pack('<H', param.get('max_value', 0))
     data += struct.pack('<H', param.get('initial_value', 0))
@@ -175,7 +256,7 @@ def pack_parameter_config(param: Dict[str, Any]) -> bytes:
     data += struct.pack('<H', param.get('display_max_value', 0))
     data += struct.pack('<B', param.get('display_float_digits', 0))
     
-    # Value label count
+    # Auto-calculate value label count from array length
     value_labels = param.get('value_labels', [])
     value_label_count = min(len(value_labels), PARAM_MAX_VALUE_LABELS)
     data += struct.pack('<B', value_label_count)
@@ -250,16 +331,17 @@ def validate_program_config(config: Dict[str, Any]) -> None:
     
     # Validate parameter count
     parameters = config.get('parameter', [])
-    declared_count = program.get('parameter_count', len(parameters))
+    actual_count = len(parameters)
     
-    if declared_count > NUM_PARAMETERS:
-        raise ValueError(
-            f"parameter_count ({declared_count}) exceeds maximum ({NUM_PARAMETERS})"
-        )
+    # Check if parameter_count was specified (deprecated)
+    if 'parameter_count' in program:
+        declared_count = program['parameter_count']
+        if declared_count != actual_count:
+            print(f"WARNING: parameter_count ({declared_count}) ignored, using actual parameter count ({actual_count})")
     
-    if declared_count != len(parameters):
+    if actual_count > NUM_PARAMETERS:
         raise ValueError(
-            f"parameter_count ({declared_count}) does not match actual parameters ({len(parameters)})"
+            f"Too many parameters ({actual_count}, maximum: {NUM_PARAMETERS})"
         )
     
     # Validate each parameter
@@ -326,7 +408,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     data += pack_string(program.get('category', ''), CATEGORY_MAX_LENGTH)
     data += pack_string(program.get('description', ''), DESCRIPTION_MAX_LENGTH)
     
-    # Parameter count and padding (4 bytes)
+    # Parameter count and padding (4 bytes) - auto-calculated from array
     parameters = config.get('parameter', [])
     parameter_count = min(len(parameters), NUM_PARAMETERS)
     data += struct.pack('<H', parameter_count)

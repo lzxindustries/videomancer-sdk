@@ -1,8 +1,10 @@
 // Videomancer SDK - Open source FPGA-based video effects development kit
 // Copyright (C) 2025 LZX Industries LLC
-// File: videomancer_fpga_controller.hpp - Videomancer SPI Controller
+// File: videomancer_abi.hpp - Videomancer ABI Constants and Enumerations
 // License: GNU General Public License v3.0
 // https://github.com/lzxindustries/videomancer-sdk
+//
+// For complete protocol specification, see: docs/abi-format.md
 //
 // This file is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
