@@ -102,26 +102,102 @@ for PROGRAM in $PROGRAMS; do
     echo -e "${GREEN}Synthesizing FPGA bitstreams...${NC}"
     cd fpga
     
+    # Temporary file for capturing make errors
+    MAKE_LOG=$(mktemp)
+    
+    # Track total bitstream generation time
+    BITSTREAM_START=$(date +%s.%N)
+    
     echo -e "${CYAN}  [1/6] HD Analog (80 MHz)...${NC}"
-    make PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > /dev/null 2>&1
+    START=$(date +%s.%N)
+    if ! make PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+        echo -e "${RED}Build failed. Error output:${NC}"
+        cat "$MAKE_LOG"
+        rm -f "$MAKE_LOG"
+        cd ..
+        FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+        continue
+    fi
+    END=$(date +%s.%N)
+    ELAPSED=$(echo "$END - $START" | bc)
+    echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
     echo -e "${CYAN}  [2/6] SD Analog (30 MHz)...${NC}"
-    make PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > /dev/null 2>&1
+    START=$(date +%s.%N)
+    if ! make PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+        echo -e "${RED}Build failed. Error output:${NC}"
+        cat "$MAKE_LOG"
+        rm -f "$MAKE_LOG"
+        cd ..
+        FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+        continue
+    fi
+    END=$(date +%s.%N)
+    ELAPSED=$(echo "$END - $START" | bc)
+    echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
     echo -e "${CYAN}  [3/6] HD HDMI (80 MHz)...${NC}"
-    make PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > /dev/null 2>&1
+    START=$(date +%s.%N)
+    if ! make PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+        echo -e "${RED}Build failed. Error output:${NC}"
+        cat "$MAKE_LOG"
+        rm -f "$MAKE_LOG"
+        cd ..
+        FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+        continue
+    fi
+    END=$(date +%s.%N)
+    ELAPSED=$(echo "$END - $START" | bc)
+    echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
     echo -e "${CYAN}  [4/6] SD HDMI (30 MHz)...${NC}"
-    make PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > /dev/null 2>&1
+    START=$(date +%s.%N)
+    if ! make PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+        echo -e "${RED}Build failed. Error output:${NC}"
+        cat "$MAKE_LOG"
+        rm -f "$MAKE_LOG"
+        cd ..
+        FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+        continue
+    fi
+    END=$(date +%s.%N)
+    ELAPSED=$(echo "$END - $START" | bc)
+    echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
     echo -e "${CYAN}  [5/6] HD Dual (80 MHz)...${NC}"
-    make PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > /dev/null 2>&1
+    START=$(date +%s.%N)
+    if ! make PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+        echo -e "${RED}Build failed. Error output:${NC}"
+        cat "$MAKE_LOG"
+        rm -f "$MAKE_LOG"
+        cd ..
+        FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+        continue
+    fi
+    END=$(date +%s.%N)
+    ELAPSED=$(echo "$END - $START" | bc)
+    echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
     echo -e "${CYAN}  [6/6] SD Dual (30 MHz)...${NC}"
-    make PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > /dev/null 2>&1
+    START=$(date +%s.%N)
+    if ! make PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+        echo -e "${RED}Build failed. Error output:${NC}"
+        cat "$MAKE_LOG"
+        rm -f "$MAKE_LOG"
+        cd ..
+        FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+        continue
+    fi
+    END=$(date +%s.%N)
+    ELAPSED=$(echo "$END - $START" | bc)
+    echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
+    BITSTREAM_END=$(date +%s.%N)
+    TOTAL_BITSTREAM_TIME=$(echo "$BITSTREAM_END - $BITSTREAM_START" | bc)
+    
+    rm -f "$MAKE_LOG"
     cd ..
-    echo -e "${GREEN}✓ All 6 bitstream variants generated${NC}"
+    echo -e "${GREEN}✓ All 6 bitstream variants generated in ${TOTAL_BITSTREAM_TIME}s${NC}"
     
     # Convert TOML configuration to binary
     echo -e "${GREEN}Converting TOML configuration to binary...${NC}"
@@ -140,12 +216,28 @@ for PROGRAM in $PROGRAMS; do
     echo -e "${GREEN}Packaging ${PROGRAM}.vmprog...${NC}"
     cd scripts/vmprog_pack
     
+    PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then
         echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-        python3 vmprog_pack.py ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > /dev/null 2>&1
+        if ! python3 vmprog_pack.py ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > "$PACK_LOG" 2>&1; then
+            echo -e "${RED}Packaging failed. Error output:${NC}"
+            cat "$PACK_LOG"
+            rm -f "$PACK_LOG"
+            cd ../..
+            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+            continue
+        fi
     else
-        python3 vmprog_pack.py --no-sign ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > /dev/null 2>&1
+        if ! python3 vmprog_pack.py --no-sign ../../build/programs/${PROGRAM} ../../out/${PROGRAM}.vmprog > "$PACK_LOG" 2>&1; then
+            echo -e "${RED}Packaging failed. Error output:${NC}"
+            cat "$PACK_LOG"
+            rm -f "$PACK_LOG"
+            cd ../..
+            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+            continue
+        fi
     fi
+    rm -f "$PACK_LOG"
     
     cd ../..
     

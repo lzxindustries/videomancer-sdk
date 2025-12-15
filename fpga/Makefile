@@ -17,7 +17,7 @@ VHD_FILES = $(wildcard ./rtl/*.vhd) \
 PCF_FILE = \
 	./constraints/$(HARDWARE)/pin_map.pcf
 
-BUILD_PREFIX = ../../build/programs/$(PROGRAM)/bitstreams/
+BUILD_PREFIX = ../build/programs/$(PROGRAM)/bitstreams/
 BIN_FILE = $(BUILD_PREFIX)$(CONFIG).bin
 JSON_FILE = $(BUILD_PREFIX)$(CONFIG).json
 ASC_FILE = $(BUILD_PREFIX)$(CONFIG).asc

@@ -23,6 +23,7 @@ cd "$SCRIPT_DIR"
 if [ -d "build" ]; then
     echo -e "${GREEN}Removing build directory...${NC}"
     rm -rf build
+    rm -rf out
     echo -e "${GREEN}Build directory removed.${NC}"
 else
     echo "No build directory found."

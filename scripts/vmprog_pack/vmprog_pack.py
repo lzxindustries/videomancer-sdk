@@ -30,7 +30,7 @@ import struct
 import sys
 import hashlib
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 
 try:
@@ -39,6 +39,8 @@ try:
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
+    if TYPE_CHECKING:
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
     print("WARNING: cryptography library not available - signature generation disabled")
     print("Install with: pip install cryptography")
 
@@ -161,7 +163,7 @@ def calculate_sha256(data: bytes) -> bytes:
     return hashlib.sha256(data).digest()
 
 
-def load_ed25519_keys(keys_dir: Path) -> Tuple[Optional[Ed25519PrivateKey], Optional[Ed25519PublicKey]]:
+def load_ed25519_keys(keys_dir: Path) -> Tuple[Optional['Ed25519PrivateKey'], Optional['Ed25519PublicKey']]:
     """Load Ed25519 private and public keys from binary files
     
     Args:
@@ -221,7 +223,7 @@ def load_ed25519_keys(keys_dir: Path) -> Tuple[Optional[Ed25519PrivateKey], Opti
         return None, None
 
 
-def sign_descriptor(descriptor_data: bytes, private_key: Ed25519PrivateKey) -> bytes:
+def sign_descriptor(descriptor_data: bytes, private_key: 'Ed25519PrivateKey') -> bytes:
     """Sign the descriptor with Ed25519 private key
     
     Args:
