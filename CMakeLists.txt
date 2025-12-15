@@ -52,7 +52,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
     message(STATUS "Project Version Patch:   ${PROJECT_VERSION_PATCH}")
     message(STATUS "Project Version:         ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/videomancer_sdk_version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lzx/sdk/videomancer_sdk_version.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/videomancer_sdk_version/videomancer_sdk_version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lzx/sdk/videomancer_sdk_version.hpp)
 
 add_subdirectory(third_party)
 

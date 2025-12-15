@@ -1,0 +1,75 @@
+# Copyright (C) 2025 LZX Industries LLC
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Example Videomancer Program Configuration (TOML)
+# This file defines a complete vmprog_program_config_v1_0 structure
+
+[program]
+program_id = "com.lzxindustries.example.waveform_generator"
+program_version_major = 1
+program_version_minor = 2
+program_version_patch = 3
+abi_min_major = 1
+abi_min_minor = 0
+abi_max_major = 2
+abi_max_minor = 0
+hw_mask = 0x00000003  # videomancer_core_rev_a | videomancer_core_rev_b
+program_name = "Waveform Generator"
+author = "LZX Industries LLC"
+license = "GPL-3.0"
+category = "Signal Generation"
+description = "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation."
+parameter_count = 3
+
+# Parameter 1: Frequency Control
+[[parameter]]
+parameter_id = 1  # rotary_potentiometer_1
+control_mode = 0  # linear
+min_value = 0
+max_value = 4095
+initial_value = 2048
+display_min_value = 0
+display_max_value = 1000
+display_float_digits = 1
+value_label_count = 0
+name_label = "Frequency"
+suffix_label = "Hz"
+value_labels = []
+
+# Parameter 2: Amplitude Control
+[[parameter]]
+parameter_id = 2  # rotary_potentiometer_2
+control_mode = 0  # linear
+min_value = 0
+max_value = 4095
+initial_value = 4095
+display_min_value = 0
+display_max_value = 100
+display_float_digits = 0
+value_label_count = 0
+name_label = "Amplitude"
+suffix_label = "%"
+value_labels = []
+
+# Parameter 3: Waveform Shape Selector
+[[parameter]]
+parameter_id = 3  # rotary_potentiometer_3
+control_mode = 5  # steps_4
+min_value = 0
+max_value = 3
+initial_value = 0
+display_min_value = 0
+display_max_value = 3
+display_float_digits = 0
+value_label_count = 4
+name_label = "Waveform"
+suffix_label = ""
+value_labels = [
+    "Sine",
+    "Triangle",
+    "Sawtooth",
+    "Square"
+]
+
+# Note: The structure supports up to 12 parameters total.
+# Unused parameters (4-12) will be zeroed in the binary output.
