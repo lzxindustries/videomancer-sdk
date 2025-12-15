@@ -524,6 +524,7 @@ namespace lzx {
         vmprog_program_config_v1_0::license_max_length +      // 32
         vmprog_program_config_v1_0::category_max_length +     // 32
         vmprog_program_config_v1_0::description_max_length +  // 128
+        vmprog_program_config_v1_0::url_max_length +          // 128
         2 +                                                   // 2 (parameter_count + reserved_pad)
         sizeof(vmprog_parameter_config_v1_0) * vmprog_program_config_v1_0::num_parameters + // 6864
         2,  // reserved padding
