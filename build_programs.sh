@@ -173,12 +173,13 @@ echo -e "${CYAN}Total programs processed:  ${TOTAL_PROGRAMS}${NC}"
 echo -e "${GREEN}Successfully built:        ${SUCCESSFUL_PROGRAMS}${NC}"
 
 if [ $FAILED_PROGRAMS -gt 0 ]; then
+    echo -e "${RED}Failed:                    ${FAILED_PROGRAMS}${NC}"
+fi
+
 if [ "$SIGN_PACKAGES" = true ]; then
     echo -e "${GREEN}All packages cryptographically signed with Ed25519${NC}"
 else
     echo -e "${YELLOW}Packages are unsigned (no Ed25519 keys found)${NC}"
-fi
-    echo -e "${RED}Failed:                    ${FAILED_PROGRAMS}${NC}"
 fi
 
 echo ""

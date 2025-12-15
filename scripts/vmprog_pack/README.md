@@ -92,9 +92,7 @@ python generate_ed25519_keys.py --output-dir ../../keys
 
 # Or use the setup script
 cd ../
-./setup_ed25519_signing.sh   # Linux/Mac
-# or
-setup_ed25519_signing.bat    # Windows
+./setup_ed25519_signing.sh   # Linux/macOS/WSL2
 ```
 
 ⚠️ **Security Notice:** Keep private keys secure. Do NOT commit them to version control!

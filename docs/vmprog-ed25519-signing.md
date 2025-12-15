@@ -71,10 +71,10 @@ Ed25519 cryptographic signing has been integrated into the Videomancer SDK to en
 - Validates key loading and signature generation
 - Verifies signature correctness
 
-**`scripts/setup_ed25519_signing.sh` / `.bat`**
-- One-step setup scripts for signing infrastructure
+**`scripts/setup_ed25519_signing.sh`**
+- One-step setup script for signing infrastructure
 - Automated dependency installation and key generation
-- Cross-platform support (Linux/Mac/Windows)
+- Cross-platform support (Linux/macOS/WSL2)
 
 **`keys/README.md`**
 - Key management documentation
@@ -194,9 +194,7 @@ python generate_ed25519_keys.py --output-dir ../../keys
 
 # Or use the automated setup script
 cd scripts
-./setup_ed25519_signing.sh    # Linux/Mac
-# or
-setup_ed25519_signing.bat     # Windows
+./setup_ed25519_signing.sh    # Linux/macOS/WSL2
 ```
 
 ### Create Signed Packages

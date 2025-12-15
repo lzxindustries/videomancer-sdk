@@ -5,42 +5,9 @@ All notable changes to the Videomancer SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-
-#### Ed25519 Package Signing
-
-- **generate_ed25519_keys.py** - Generate Ed25519 key pairs for package signing (32-byte raw keys)
-- **test_ed25519_signing.py** - Test suite for Ed25519 signing functionality
-- **vmprog_pack.py signing support** - Integrated Ed25519 signature generation
-  - Automatic key loading from `keys/` directory
-  - `--no-sign` flag for unsigned packages
-  - `--keys-dir` option for custom key locations
-  - Graceful fallback when `cryptography` library unavailable
-- **setup_ed25519_signing.sh / .bat** - One-step signing setup scripts (cross-platform)
-- **SIGNING_GUIDE.md** - Quick reference for daily Ed25519 usage
-- **vmprog-ed25519-signing.md** - Complete implementation documentation
-- **keys/README.md** - Key management and security guidelines
-- Python `cryptography` library integration for Ed25519 operations
-- Signature generation over 332-byte signed descriptor structure
-- `signed_pkg` header flag automatically set for signed packages
-
-### Changed
-
-- **vmprog_pack.py** - Enhanced with Ed25519 signing capability (default behavior)
-- **vmprog_pack README.md** - Updated with signing documentation and examples
-
-### Security
-
-- Private keys protected by `.gitignore` in `keys/` directory
-- Automatic file permissions (600) set on private keys (Unix-like systems)
-- Interactive confirmation required before overwriting existing keys
-- Clear security warnings and documentation throughout
-
 ## [0.1.0] - 2025-12-14
 
-Initial public release of the Videomancer SDK. Complete FPGA development toolchain including format specification, C++ SDK, FPGA build chain, RTL libraries, and automated packaging workflow for cryptographically signed `.vmprog` packages.
+Initial public release of the Videomancer SDK. Complete FPGA development toolchain including format specification, C++ SDK, FPGA build chain, RTL libraries, Ed25519 package signing, and automated packaging workflow for cryptographically signed `.vmprog` packages.
 
 ### Added
 
@@ -116,11 +83,15 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 #### Python Tools
 
 - **toml_to_config_binary.py** - TOML to binary converter with comprehensive validation (enum bounds, value ranges, ABI checks)
-- **vmprog_pack.py** - Complete `.vmprog` packager (creates TOC, calculates SHA-256 hashes, validates output)
+- **vmprog_pack.py** - Complete `.vmprog` packager with Ed25519 signing support (creates TOC, calculates SHA-256 hashes, validates output)
+- **generate_ed25519_keys.py** - Generate Ed25519 key pairs for package signing (32-byte raw keys)
+- **test_ed25519_signing.py** - Test suite for Ed25519 signing functionality
 - **test_converter.py** / **test_conversion.sh** - Test suite for TOML converter
 - **test_vmprog_pack.sh** - Test suite for packaging tool
+- **setup_ed25519_signing.sh** - One-step signing setup script (Linux/macOS/WSL2)
 - Example TOML configuration demonstrating 3 parameters
 - Python 3.7+ compatibility (standard library only)
+- Python `cryptography` library integration for Ed25519 operations
 
 #### Example Programs
 
@@ -139,10 +110,23 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 #### Documentation
 
 - **vmprog-format.md** - Complete binary format specification with diagrams and validation procedures
-- **vmprog_pack README.md** - Detailed documentation for packaging tool with usage examples
-- README with quickstart guide, complete toolchain documentation, and examples
+- **vmprog-ed25519-signing.md** - Complete Ed25519 signing implementation documentation
+- **vmprog_pack README.md** - Detailed documentation for packaging tool with Ed25519 signing examples
+- **SIGNING_GUIDE.md** - Quick reference for daily Ed25519 usage
+- **keys/README.md** - Key management and security guidelines
+- README with quickstart guide, complete toolchain documentation, and Ed25519 signing examples
 - CONTRIBUTING guidelines (LZX Industries maintained, external contributions case-by-case)
 - THIRD_PARTY_LICENSES documentation (Monocypher, SiliconBlue ICE40 components)
+
+### Security
+
+- Private keys protected by `.gitignore` in `keys/` directory
+- Automatic file permissions (600) set on private keys (Unix-like systems)
+- Interactive confirmation required before overwriting existing keys
+- Clear security warnings and documentation throughout
+- Ed25519 signature generation over 332-byte signed descriptor structure
+- `signed_pkg` header flag automatically set for signed packages
+- Graceful fallback when `cryptography` library unavailable
 
 ### Project Information
 
@@ -157,8 +141,8 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 - Complete FPGA development toolchain (setup → build → package)
 - Format specification and SDK headers (complete)
 - RTL VHDL libraries for video processing (complete)
-- Python configuration and packaging tools (complete)
-- Automated build scripts for full workflow (complete)
+- Python configuration and packaging tools with Ed25519 signing (complete)
+- Automated build scripts for full workflow with signing integration (complete)
 - Example program demonstrating complete development cycle (passthru)
 
 **Stability:**
@@ -173,5 +157,5 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 - Single Ed25519 public key for verification (additional keys require SDK update)
 - Signature generation requires optional `cryptography` Python library
 
-[Unreleased]: https://github.com/lzxindustries/videomancer-sdk/compare/0.1.0...HEAD
 [0.1.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.1.0
+

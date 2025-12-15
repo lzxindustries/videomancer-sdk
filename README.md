@@ -4,8 +4,6 @@
 
 > Official SDK for Videomancer FPGA hardware by LZX Industries
 
-Header-only C++ SDK for the `.vmprog` file format - cryptographically signed FPGA program packages for Videomancer hardware. Includes complete format specification, Ed25519/BLAKE2b cryptography, and Python TOML converter.
-
 **Repository:** [github.com/lzxindustries/videomancer-sdk](https://github.com/lzxindustries/videomancer-sdk)
 
 ## Overview
@@ -38,6 +36,7 @@ cd videomancer-sdk
 bash setup.sh
 
 # 3. (Optional) Set up Ed25519 signing for cryptographically signed packages
+#    (Linux/macOS only - Windows users should use WSL2)
 bash scripts/setup_ed25519_signing.sh
 
 # 4. Build all FPGA programs (synthesizes bitstreams and creates .vmprog packages)
@@ -227,6 +226,7 @@ python3 test_ed25519_signing.py
 ### Build Scripts
 
 - **[setup.sh](setup.sh)** - One-time setup script that downloads and extracts OSS CAD Suite (Yosys, nextpnr, GHDL)
+- **[setup_ed25519_signing.sh](scripts/setup_ed25519_signing.sh)** - One-step Ed25519 signing setup (installs cryptography library, generates keys)
 - **[build_sdk.sh](build_sdk.sh)** - Builds SDK headers and configures CMake
 - **[clean_sdk.sh](clean_sdk.sh)** - Removes build artifacts
 - **[build_programs.sh](build_programs.sh)** - Complete FPGA build workflow: synthesizes bitstreams for all 6 variants, generates config binary, packages into `.vmprog` files
@@ -327,8 +327,7 @@ videomancer-sdk/
 │       ├── passthru.vhd                   # FPGA implementation
 │       └── passthru.toml                  # Configuration
 ├── scripts/
-│   ├── setup_ed25519_signing.sh           # Ed25519 signing setup (Linux/Mac)
-│   ├── setup_ed25519_signing.bat          # Ed25519 signing setup (Windows)
+│   ├── setup_ed25519_signing.sh           # Ed25519 signing setup
 │   ├── toml_to_config_binary/             # TOML → binary converter
 │   │   ├── toml_to_config_binary.py       # Converter (443 lines)
 │   │   ├── example_program_config.toml
