@@ -38,6 +38,27 @@ bash build_programs.sh
 - **Python:** Python 3.7+
 - **Disk Space:** ~2 GB for OSS CAD Suite toolchain
 
+#### Windows: Setting up WSL2
+
+1. Open PowerShell as Administrator and run:
+   ```powershell
+   wsl --install
+   ```
+2. Restart your computer when prompted
+3. Launch Ubuntu from the Start menu and create a user account
+4. Update packages: `sudo apt update && sudo apt upgrade`
+
+For more details, see [Microsoft's WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+
+#### macOS: Installing Homebrew
+
+Run this command in Terminal:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Follow the on-screen instructions to complete setup. More info at [brew.sh](https://brew.sh/).
+
 ### What Gets Built
 
 The build process:
