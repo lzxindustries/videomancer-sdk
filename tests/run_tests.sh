@@ -5,6 +5,9 @@
 
 set -e
 
+# Ensure common binary paths are in PATH
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$PATH"
+
 # Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -13,7 +16,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 # Get script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR/.."
 
 echo -e "${BLUE}========================================${NC}"
@@ -90,7 +93,13 @@ if [ "$RUN_CPP" = true ]; then
     echo -e "${YELLOW}Running C++ Unit Tests...${NC}"
     echo ""
 
-    if [ ! -d "build" ]; then
+    # Check if ctest is available
+    if ! command -v ctest &> /dev/null; then
+        echo -e "${RED}ctest not found. CMake/CTest is required for C++ tests.${NC}"
+        echo -e "${YELLOW}Please install CMake or ensure it's in your PATH.${NC}"
+        echo -e "${YELLOW}You may need to run: sudo apt-get install cmake${NC}"
+        CPP_RESULT=1
+    elif [ ! -d "build" ]; then
         echo -e "${BLUE}Building SDK with tests...${NC}"
         ./build_sdk.sh --test
         CPP_RESULT=$?

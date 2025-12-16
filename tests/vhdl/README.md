@@ -114,7 +114,7 @@ gtkwave vunit_out/ghdl/rtl_lib.tb_sync_slv.test_two_ff_delay_xxx/wave.vcd
    ```vhdl
    library vunit_lib;
    context vunit_lib.vunit_context;
-   
+
    entity tb_<module_name> is
      generic (runner_cfg : string);
    end entity;
