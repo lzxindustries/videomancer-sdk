@@ -35,35 +35,31 @@ entity blanking_yuv444 is
 end blanking_yuv444;
 
 architecture rtl of blanking_yuv444 is
-    signal s_data_in : t_video_stream_yuv444;
-    signal s_data_out : t_video_stream_yuv444;
-    signal s_data_out_reg : t_video_stream_yuv444;
+    signal s_data_reg : t_video_stream_yuv444;
 begin
 
     process(clk)
     begin
         if rising_edge(clk) then
-            s_data_in <= data_in;
-            if s_data_in.avid = '1' then
-                s_data_out.y <= s_data_in.y;
-                s_data_out.u <= s_data_in.u;
-                s_data_out.v <= s_data_in.v;
+            -- Input register (cycle 1)
+            s_data_reg <= data_in;
+            
+            -- Processing with 2-cycle total delay
+            if s_data_reg.avid = '1' then
+                data_out.y <= s_data_reg.y;
+                data_out.u <= s_data_reg.u;
+                data_out.v <= s_data_reg.v;
             else
-                s_data_out.y <= std_logic_vector(to_unsigned(0,   10));
-                s_data_out.u <= std_logic_vector(to_unsigned(512, 10));
-                s_data_out.v <= std_logic_vector(to_unsigned(512, 10));
+                data_out.y <= std_logic_vector(to_unsigned(0,   10));
+                data_out.u <= std_logic_vector(to_unsigned(512, 10));
+                data_out.v <= std_logic_vector(to_unsigned(512, 10));
             end if;
 
-            s_data_out.avid <= s_data_in.avid;
-            s_data_out.hsync_n <= s_data_in.hsync_n;
-            s_data_out.vsync_n <= s_data_in.vsync_n;
-            s_data_out.field_n <= s_data_in.field_n;
-
-            -- Output register
-            s_data_out_reg <= s_data_out;
+            data_out.avid <= s_data_reg.avid;
+            data_out.hsync_n <= s_data_reg.hsync_n;
+            data_out.vsync_n <= s_data_reg.vsync_n;
+            data_out.field_n <= s_data_reg.field_n;
         end if;
     end process;
-
-    data_out <= s_data_out_reg;
 
 end architecture rtl;

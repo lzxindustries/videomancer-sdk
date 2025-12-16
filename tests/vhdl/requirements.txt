@@ -1,0 +1,3 @@
+# VUnit VHDL Test Requirements
+# Install with: pip3 install -r requirements.txt
+vunit-hdl>=4.7.0

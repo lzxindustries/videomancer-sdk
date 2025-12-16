@@ -1,0 +1,3 @@
+        67500000 fs - default              -    INFO - Testing black level conversion
+       175500000 fs - default              -    INFO - Black level test completed
+simulation stopped @175500ps with status 0

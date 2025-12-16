@@ -44,15 +44,7 @@ architecture rtl of yuv422_to_yuv444 is
     -- Constants
     constant C_BIT_DEPTH : integer := i_data.y'length;
 
-    -- Input registers
-    signal s_y_in          : std_logic_vector(C_BIT_DEPTH - 1 downto 0) := (others => '0');
-    signal s_c_in          : std_logic_vector(C_BIT_DEPTH - 1 downto 0) := (others => '0');
-    signal s_hsync_n_in    : std_logic := '1';
-    signal s_vsync_n_in    : std_logic := '1';
-    signal s_avid_in       : std_logic := '0';
-    signal s_field_n_in    : std_logic := '1';
-
-    -- Sync signal delay chain (2 cycles after input register)
+    -- Sync signal delay chain (2 cycles total)
     signal s_hsync_n_d1    : std_logic := '1';
     signal s_hsync_n_d2    : std_logic := '1';
     signal s_vsync_n_d1    : std_logic := '1';
@@ -61,7 +53,6 @@ architecture rtl of yuv422_to_yuv444 is
     signal s_avid_d2       : std_logic := '0';
     signal s_field_n_d1    : std_logic := '1';
     signal s_field_n_d2    : std_logic := '1';
-    signal s_2x_clk_en     : std_logic := '0';
 
     -- Phase control
     signal s_phase_reset   : std_logic := '0';
@@ -81,33 +72,25 @@ architecture rtl of yuv422_to_yuv444 is
 begin
 
     -- Phase reset detection (rising edge of AVID)
-    s_phase_reset <= '1' when (s_avid_in = '0' and s_avid_d1 = '1') else '0';
+    s_phase_reset <= '1' when (s_avid_d1 = '0' and s_avid_d2 = '1') else '0';
 
     -- Main processing pipeline
     process(clk)
     begin
         if rising_edge(clk) then
-            -- Input registers
-            s_y_in       <= i_data.y;
-            s_c_in       <= i_data.c;
-            s_hsync_n_in <= i_data.hsync_n;
-            s_vsync_n_in <= i_data.vsync_n;
-            s_avid_in    <= i_data.avid;
-            s_field_n_in <= i_data.field_n;
-
-            -- Data path from input registers
-            s_yuv422_y <= s_y_in;
-            s_yuv422_c <= s_c_in;
-
-            -- Sync signal delay chain (2 cycles after input register)
-            s_hsync_n_d1 <= s_hsync_n_in;
+            -- Sync signal delay chain (2 cycles total)
+            s_hsync_n_d1 <= i_data.hsync_n;
             s_hsync_n_d2 <= s_hsync_n_d1;
-            s_vsync_n_d1 <= s_vsync_n_in;
+            s_vsync_n_d1 <= i_data.vsync_n;
             s_vsync_n_d2 <= s_vsync_n_d1;
-            s_avid_d1    <= s_avid_in;
+            s_avid_d1    <= i_data.avid;
             s_avid_d2    <= s_avid_d1;
-            s_field_n_d1 <= s_field_n_in;
+            s_field_n_d1 <= i_data.field_n;
             s_field_n_d2 <= s_field_n_d1;
+
+            -- Data path
+            s_yuv422_y <= i_data.y;
+            s_yuv422_c <= i_data.c;
 
             -- Data delay registers
             s_yuv422_y_d1 <= s_yuv422_y;
@@ -116,7 +99,7 @@ begin
             -- Phase control logic
             if s_phase_reset = '1' then
                 s_phase <= '0';  -- Start with U/Cb phase
-            elsif s_avid_in = '1' then
+            elsif i_data.avid = '1' then
                 s_phase <= not s_phase;  -- Toggle phase each valid pixel
             end if;
 

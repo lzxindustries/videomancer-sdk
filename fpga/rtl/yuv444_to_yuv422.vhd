@@ -66,6 +66,8 @@ architecture rtl of yuv444_to_yuv422 is
     -- YUV422 output registers
     signal s_yuv422_y : std_logic_vector(C_BIT_DEPTH - 1 downto 0) := (others => '0');
     signal s_yuv422_c : std_logic_vector(C_BIT_DEPTH - 1 downto 0) := (others => '0');
+    signal s_yuv422_y_out : std_logic_vector(C_BIT_DEPTH - 1 downto 0) := (others => '0');
+    signal s_yuv422_c_out : std_logic_vector(C_BIT_DEPTH - 1 downto 0) := (others => '0');
 
 begin
 
@@ -110,15 +112,19 @@ begin
                 when others =>
                     null;
             end case;
+            
+            -- Second delay stage to align with sync delay (2 cycles total)
+            s_yuv422_y_out <= s_yuv422_y;
+            s_yuv422_c_out <= s_yuv422_c;
 
         end if;
     end process;
 
-    -- Output assignments
-    o_data.y <= s_yuv422_y;
-    o_data.c <= s_yuv422_c;
+    -- Output assignments with 2-cycle delay
+    o_data.y <= s_yuv422_y_out;
+    o_data.c <= s_yuv422_c_out;
 
-    -- Sync outputs with 1-cycle delay
+    -- Sync outputs with 2-cycle delay
     o_data.hsync_n <= s_hsync_n_d1;
     o_data.vsync_n <= s_vsync_n_d1;
     o_data.avid <= s_avid_d1;

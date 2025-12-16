@@ -25,6 +25,7 @@ echo ""
 RUN_CPP=true
 RUN_PYTHON=true
 RUN_SHELL=true
+RUN_VHDL=true
 VERBOSE=false
 
 while [[ $# -gt 0 ]]; do
@@ -32,16 +33,25 @@ while [[ $# -gt 0 ]]; do
         --cpp-only)
             RUN_PYTHON=false
             RUN_SHELL=false
+            RUN_VHDL=false
             shift
             ;;
         --python-only)
             RUN_CPP=false
             RUN_SHELL=false
+            RUN_VHDL=false
             shift
             ;;
         --shell-only)
             RUN_CPP=false
             RUN_PYTHON=false
+            RUN_VHDL=false
+            shift
+            ;;
+        --vhdl-only)
+            RUN_CPP=false
+            RUN_PYTHON=false
+            RUN_SHELL=false
             shift
             ;;
         --verbose|-v)
@@ -55,6 +65,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --cpp-only      Run only C++ tests"
             echo "  --python-only   Run only Python tests"
             echo "  --shell-only    Run only shell script tests"
+            echo "  --vhdl-only     Run only VHDL tests"
             echo "  --verbose, -v   Verbose output"
             echo "  --help, -h      Show this help message"
             exit 0
@@ -70,6 +81,7 @@ done
 CPP_PASS=0
 PYTHON_PASS=0
 SHELL_PASS=0
+VHDL_PASS=0
 TOTAL_PASS=0
 TOTAL_FAIL=0
 
@@ -168,6 +180,67 @@ if [ "$RUN_SHELL" = true ]; then
     echo ""
 fi
 
+# Run VHDL tests
+if [ "$RUN_VHDL" = true ]; then
+    echo -e "${YELLOW}Running VHDL Unit Tests...${NC}"
+    echo ""
+
+    VHDL_FAILED=0
+
+    # Check if Python 3 and VUnit are available
+    if ! command -v python3 &> /dev/null; then
+        echo -e "${RED}Python 3 not found. Skipping VHDL tests.${NC}"
+        VHDL_FAILED=1
+    elif ! python3 -c "import vunit" 2>/dev/null; then
+        echo -e "${YELLOW}VUnit not found. Installing...${NC}"
+        # Try user install first, then system (with break-system-packages for Ubuntu 24.04+)
+        if pip3 install --user vunit-hdl 2>/dev/null; then
+            echo -e "${GREEN}VUnit installed successfully${NC}"
+        elif pip3 install --break-system-packages vunit-hdl 2>/dev/null; then
+            echo -e "${GREEN}VUnit installed successfully${NC}"
+        else
+            echo -e "${RED}Failed to install VUnit. Skipping VHDL tests.${NC}"
+            echo -e "${YELLOW}To install manually, run:${NC}"
+            echo -e "${YELLOW}  pip3 install --break-system-packages vunit-hdl${NC}"
+            echo -e "${YELLOW}Or use a virtual environment (recommended for Ubuntu 24.04+)${NC}"
+            VHDL_FAILED=1
+        fi
+    fi
+
+    # Check if GHDL is available
+    if [ $VHDL_FAILED -eq 0 ]; then
+        if ! command -v ghdl &> /dev/null; then
+            # Try to use GHDL from oss-cad-suite
+            if [ -f "build/oss-cad-suite/bin/ghdl" ]; then
+                export PATH="$PWD/build/oss-cad-suite/bin:$PATH"
+                echo -e "${BLUE}Using GHDL from oss-cad-suite${NC}"
+            else
+                echo -e "${RED}GHDL not found. Please install GHDL or run scripts/setup.sh${NC}"
+                VHDL_FAILED=1
+            fi
+        fi
+    fi
+
+    if [ $VHDL_FAILED -eq 0 ]; then
+        cd tests/vhdl
+        if [ "$VERBOSE" = true ]; then
+            python3 run.py -v
+        else
+            python3 run.py
+        fi
+        VHDL_RESULT=$?
+        cd ../..
+
+        if [ $VHDL_RESULT -eq 0 ]; then
+            VHDL_PASS=1
+            echo -e "${GREEN}✓ VHDL tests passed${NC}"
+        else
+            echo -e "${RED}✗ VHDL tests failed${NC}"
+        fi
+    fi
+    echo ""
+fi
+
 # Summary
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Test Summary${NC}"
@@ -199,6 +272,16 @@ if [ "$RUN_SHELL" = true ]; then
         TOTAL_PASS=$((TOTAL_PASS + 1))
     else
         echo -e "${RED}Shell Tests:  FAILED${NC}"
+        TOTAL_FAIL=$((TOTAL_FAIL + 1))
+    fi
+fi
+
+if [ "$RUN_VHDL" = true ]; then
+    if [ $VHDL_PASS -eq 1 ]; then
+        echo -e "${GREEN}VHDL Tests:   PASSED${NC}"
+        TOTAL_PASS=$((TOTAL_PASS + 1))
+    else
+        echo -e "${RED}VHDL Tests:   FAILED${NC}"
         TOTAL_FAIL=$((TOTAL_FAIL + 1))
     fi
 fi

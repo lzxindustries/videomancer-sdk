@@ -1,0 +1,3 @@
+        67500000 fs - default              -    INFO - Testing interlaced video detection
+  18236016000000 fs - default              -    INFO - Interlaced detection test completed
+simulation stopped @18236016ns with status 0

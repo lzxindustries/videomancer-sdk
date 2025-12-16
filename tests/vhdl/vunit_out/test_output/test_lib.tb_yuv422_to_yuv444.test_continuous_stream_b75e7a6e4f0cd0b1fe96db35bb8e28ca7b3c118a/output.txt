@@ -1,0 +1,3 @@
+        67500000 fs - default              -    INFO - Testing continuous pixel stream
+       432000000 fs - default              -    INFO - Continuous stream test completed
+simulation stopped @432ns with status 0

@@ -1,0 +1,2 @@
+        67500000 fs - default              -    INFO - Testing field signal propagation
+simulation stopped @150500ps with status 0

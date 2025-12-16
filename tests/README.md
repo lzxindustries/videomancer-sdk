@@ -11,9 +11,12 @@ Comprehensive test suite for the Videomancer SDK C++ headers and Python tools.
   - test_vmprog_stream_reader: 37 tests
   - test_vmprog_public_keys: 8 tests
   - test_videomancer_fpga_controller: 11 tests
+- **VHDL Unit Tests**: 12 tests across 2 test suites
+  - tb_sync_slv: 5 tests
+  - tb_yuv422_to_yuv444: 7 tests
 - **Python Tests**: 2 test modules
 - **Shell Tests**: 2 integration tests
-- **Test Coverage**: All SDK C++ headers are tested
+- **Test Coverage**: All SDK C++ headers and core FPGA RTL modules are tested
 
 ## Test Organization
 
@@ -29,6 +32,11 @@ tests/
 │   ├── test_vmprog_public_keys.cpp
 │   ├── test_videomancer_fpga_controller.cpp
 │   └── CMakeLists.txt
+├── vhdl/                   # VHDL unit tests for FPGA RTL modules
+│   ├── run.py             # VUnit test runner
+│   ├── tb_sync_slv.vhd
+│   ├── tb_yuv422_to_yuv444.vhd
+│   └── README.md
 ├── python/                 # Python tool tests
 │   ├── test_converter.py
 │   └── test_ed25519_signing.py
@@ -89,7 +97,21 @@ python3 python/test_ed25519_signing.py
 cd tests
 ./run_tests.sh --shell-only
 
-# Or run individual tests
+# OrVHDL Tests Only
+
+```bash
+cd tests
+./run_tests.sh --vhdl-only
+
+# Or run from vhdl directory
+cd tests/vhdl
+python3 run.py
+
+# Run specific test
+python3 run.py 'rtl_lib.tb_sync_slv.test_two_ff_delay'
+```
+
+###  run individual tests
 bash shell/test_conversion.sh
 bash shell/test_vmprog_pack.sh
 ```

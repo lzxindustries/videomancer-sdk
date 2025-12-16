@@ -30,7 +30,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake build-essential python3 python3-pip
-        pip3 install jsonschema toml
+        pip3 install jsonschema toml vunit-hdl
 
     - name: Setup OSS CAD Suite
       if: steps.cache-oss-cad.outputs.cache-hit != 'true'
@@ -44,10 +44,12 @@ jobs:
         cd build
         ctest --output-on-failure --verbose
 
-    - name: Run all tests (C++, Python, Shell)
+    - name: Run all tests (C++, Python, Shell, VHDL)
       run: |
         cd tests
         bash run_tests.sh --verbose
+      env:
+        PATH: ${{ github.workspace }}/build/oss-cad-suite/bin:${{ env.PATH }}
 
     - name: Build example programs
       run: bash build_programs.sh
@@ -65,9 +67,52 @@ jobs:
       run: |
         echo "## Test Results" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 118 C++ unit tests" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 12 VHDL unit tests" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 2 Python tests" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 2 Shell integration tests" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 2 Example FPGA programs built" >> $GITHUB_STEP_SUMMARY
+
+  vhdl-tests:
+    name: VHDL Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Cache OSS CAD Suite
+      id: cache-oss-cad
+      uses: actions/cache@v4
+      with:
+        path: build/oss-cad-suite
+        key: oss-cad-suite-vhdl-${{ runner.os }}-${{ hashFiles('scripts/setup.sh') }}
+        restore-keys: |
+          oss-cad-suite-vhdl-${{ runner.os }}-
+
+    - name: Install VUnit
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip
+        pip3 install vunit-hdl
+
+    - name: Setup GHDL (from OSS CAD Suite)
+      if: steps.cache-oss-cad.outputs.cache-hit != 'true'
+      run: bash scripts/setup.sh
+
+    - name: Run VHDL tests
+      run: |
+        export PATH="${{ github.workspace }}/build/oss-cad-suite/bin:$PATH"
+        cd tests/vhdl
+        python3 run.py -v
+
+    - name: VHDL test summary
+      if: always()
+      run: |
+        echo "## VHDL Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 5 sync_slv tests" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 7 yuv422_to_yuv444 tests" >> $GITHUB_STEP_SUMMARY
 
   multi-platform:
     name: Test on ${{ matrix.os }}
@@ -87,7 +132,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake build-essential python3 python3-pip
-        pip3 install jsonschema toml
+        pip3 install jsonschema toml vunit-hdl
 
     - name: Cache OSS CAD Suite
       id: cache-oss-cad

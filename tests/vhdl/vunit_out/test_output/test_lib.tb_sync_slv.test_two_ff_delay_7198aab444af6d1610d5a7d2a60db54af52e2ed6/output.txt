@@ -1,0 +1,2 @@
+               0 fs - default              -    INFO - Testing 2-FF synchronization delay
+simulation stopped @53ns with status 0

@@ -1,0 +1,2 @@
+        67500000 fs - default              -    INFO - Testing transition from active to blanking
+simulation stopped @136ns with status 0

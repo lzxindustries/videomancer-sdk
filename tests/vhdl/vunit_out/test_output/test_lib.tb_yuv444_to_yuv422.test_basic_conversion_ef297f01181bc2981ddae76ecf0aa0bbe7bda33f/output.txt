@@ -1,0 +1,2 @@
+        67500000 fs - default              -    INFO - Testing YUV444 to YUV422 conversion
+simulation stopped @163ns with status 0

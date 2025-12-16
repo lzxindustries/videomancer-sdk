@@ -1,0 +1,3 @@
+        67500000 fs - default              -    INFO - Testing white level conversion
+       175500000 fs - default              -    INFO - White level test completed
+simulation stopped @175500ps with status 0

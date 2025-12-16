@@ -1,0 +1,2 @@
+        67500000 fs - default              -    INFO - Testing sync signals pass through unchanged
+simulation stopped @109ns with status 0

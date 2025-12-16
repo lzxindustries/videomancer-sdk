@@ -1,0 +1,2 @@
+               0 fs - default              -    INFO - Testing multiple value changes
+simulation stopped @336ns with status 0

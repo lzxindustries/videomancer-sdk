@@ -1,0 +1,3 @@
+        67500000 fs - default              -    INFO - Testing field parity detection
+  18236016000000 fs - default              -    INFO - Field parity test completed
+simulation stopped @18236016ns with status 0
