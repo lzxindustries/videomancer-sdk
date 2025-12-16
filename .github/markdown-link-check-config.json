@@ -5,6 +5,9 @@
     },
     {
       "pattern": "^https://github.com/lzxindustries/videomancer-sdk/blob"
+    },
+    {
+      "pattern": "^https://www.gnu.org/licenses/"
     }
   ],
   "timeout": "20s",
