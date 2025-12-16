@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-12-15
+
 ### Added
 
 - **Comprehensive Test Suite Expansion** - Significantly increased test coverage across all SDK headers
@@ -28,13 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Edge case testing for invalid sizes, corrupted data, overflow conditions, and boundary cases
   - Tests all 7 bitstream type variants (SD/HD analog/HDMI/dual, generic)
 
+- **Test Documentation** - Comprehensive test suite documentation
+  - tests/README.md: Complete test suite overview, organization, and running instructions
+  - tests/COVERAGE.md: Detailed coverage report showing 100% header coverage
+  - Test suite reorganization into cpp/, python/, and shell/ directories
+
 ### Changed
 
 - **Test Organization** - Improved test structure and coverage
+  - Reorganized tests into language-specific directories (cpp/, python/, shell/)
   - Systematic method-level coverage analysis ensuring all public APIs tested
   - Added validation tests for all VMProg format structures
   - Enhanced error condition testing for robust SDK behavior
   - Comprehensive testing of string manipulation, cryptographic, and I/O operations
+
+- **Cryptographic API** - Updated to use RFC 8032-compliant Ed25519
+  - Changed from `crypto_eddsa_check` to `crypto_ed25519_check` in vmprog_crypto.hpp
+  - Signature verification now uses SHA-512 instead of Blake2b for RFC compliance
+  - All existing code using the API remains compatible
 
 ### Fixed
 
