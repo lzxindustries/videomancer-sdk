@@ -6,6 +6,11 @@
 
 set -e
 
+# Get repository root (script is in tests/shell/)
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TOOLS_DIR="$REPO_ROOT/tools/toml-converter"
+EXAMPLES_DIR="$REPO_ROOT/examples/templates"
+
 echo "=== Videomancer Config Converter Test ==="
 echo
 
@@ -33,25 +38,30 @@ echo
 
 # Run the conversion
 echo "Converting TOML to binary..."
-python3 toml_to_config_binary.py example_program_config.toml example_program_config.bin
+cd "$TOOLS_DIR"
+python3 toml_to_config_binary.py "$EXAMPLES_DIR/template.toml" /tmp/test_config.bin
 echo
 
 # Verify output
-if [ -f "template_test.bin" ]; then
-    SIZE=$(stat -f%z "template_test.bin" 2>/dev/null || stat -c%s "template_test.bin")
+if [ -f "/tmp/test_config.bin" ]; then
+    SIZE=$(stat -f%z "/tmp/test_config.bin" 2>/dev/null || stat -c%s "/tmp/test_config.bin")
     echo "=== Verification ==="
-    echo "Output file: template_test.bin"
+    echo "Output file: /tmp/test_config.bin"
     echo "Size: $SIZE bytes (expected: 7368)"
     
     if [ "$SIZE" -eq 7368 ]; then
         echo "✓ Size matches!"
+        rm /tmp/test_config.bin
+        exit 0
     else
         echo "✗ Size mismatch!"
+        rm /tmp/test_config.bin
         exit 1
     fi
-    
-    echo
-    echo "First 128 bytes (hex dump):"
+else
+    echo "✗ Output file not created"
+    exit 1
+fi
     xxd -l 128 template_test.bin
     
     echo

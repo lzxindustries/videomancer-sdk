@@ -7,7 +7,13 @@ This script runs the conversion and validates the output.
 """
 
 import sys
+import os
 from pathlib import Path
+
+# Add tools directory to Python path
+REPO_ROOT = Path(__file__).parent.parent.parent
+TOOLS_DIR = REPO_ROOT / 'tools' / 'toml-converter'
+sys.path.insert(0, str(TOOLS_DIR))
 
 # Check for TOML library
 try:
@@ -26,7 +32,8 @@ try:
     import toml_to_config_binary
 except ImportError:
     print("Error: Could not import toml_to_config_binary.py")
-    print("Make sure you're running this from the tools/toml-converter directory")
+    print(f"Tools directory: {TOOLS_DIR}")
+    print(f"Python path: {sys.path}")
     sys.exit(1)
 
 def verify_binary_output(binary_path: Path):
@@ -112,8 +119,9 @@ def main():
     """Run the test."""
     print("=== Videomancer Config Converter Test ===\n")
     
-    toml_path = Path('example_program_config.toml')
-    output_path = Path('program_config.bin')
+    # Use template TOML from examples
+    toml_path = REPO_ROOT / 'examples' / 'templates' / 'template.toml'
+    output_path = Path('/tmp/test_program_config.bin')
     
     # Check input file exists
     if not toml_path.exists():
@@ -137,6 +145,13 @@ def main():
     
     if not verify_binary_output(output_path):
         sys.exit(1)
+    
+    print("\n=== All Tests Passed ===")
+    
+    # Cleanup
+    output_path.unlink()
+    
+    sys.exit(0)
     
     print("\n=== All Tests Passed ===")
 
