@@ -633,9 +633,9 @@ namespace lzx {
 
     /**
      * @brief Get the length of a string in a fixed-size buffer.
-     * 
+     *
      * Returns the length of the string, or size if not null-terminated.
-     * 
+     *
      * @param str Character array to measure
      * @param size Size of the array
      * @return Length of string (without null terminator), or size if not terminated
@@ -649,7 +649,7 @@ namespace lzx {
 
     /**
      * @brief Check if a string buffer is empty (first char is null).
-     * 
+     *
      * @param str Character array to check
      * @param size Size of the array
      * @return true if empty or invalid
@@ -660,7 +660,7 @@ namespace lzx {
 
     /**
      * @brief Safely compare two strings in fixed-size buffers.
-     * 
+     *
      * @param str1 First string
      * @param size1 Size of first buffer
      * @param str2 Second string
@@ -670,13 +670,13 @@ namespace lzx {
     inline bool safe_strcmp(const char* str1, size_t size1, const char* str2, size_t size2) {
         size_t len1 = safe_strlen(str1, size1);
         size_t len2 = safe_strlen(str2, size2);
-        
+
         if (len1 != len2) return false;
-        
+
         for (size_t i = 0; i < len1; ++i) {
             if (str1[i] != str2[i]) return false;
         }
-        
+
         return true;
     }
 
@@ -1152,7 +1152,7 @@ namespace lzx {
 
     /**
      * @brief Calculate hash of arbitrary data.
-     * 
+     *
      * @param data Data to hash
      * @param size Size of data in bytes
      * @param out_hash Output buffer (must be 32 bytes)
@@ -1167,7 +1167,7 @@ namespace lzx {
 
     /**
      * @brief Find TOC entry by type.
-     * 
+     *
      * @param toc Pointer to TOC array
      * @param toc_count Number of TOC entries
      * @param type Entry type to find
@@ -1191,7 +1191,7 @@ namespace lzx {
 
     /**
      * @brief Check if TOC contains entry of specified type.
-     * 
+     *
      * @param toc Pointer to TOC array
      * @param toc_count Number of TOC entries
      * @param type Entry type to check for
@@ -1207,7 +1207,7 @@ namespace lzx {
 
     /**
      * @brief Count TOC entries of specified type.
-     * 
+     *
      * @param toc Pointer to TOC array
      * @param toc_count Number of TOC entries
      * @param type Entry type to count
@@ -1231,7 +1231,7 @@ namespace lzx {
 
     /**
      * @brief Verify all payload hashes in TOC match actual data.
-     * 
+     *
      * @param file_data Complete file data
      * @param file_size File size in bytes
      * @param header Validated header
@@ -1267,7 +1267,7 @@ namespace lzx {
 
     /**
      * @brief Check if package is signed.
-     * 
+     *
      * @param header Package header
      * @return true if signed flag is set
      */
@@ -1277,7 +1277,7 @@ namespace lzx {
 
     /**
      * @brief Get human-readable validation result string.
-     * 
+     *
      * @param result Validation result code
      * @return String description
      */
@@ -1312,7 +1312,7 @@ namespace lzx {
 
     /**
      * @brief Initialize vmprog_header_v1_0 with default values.
-     * 
+     *
      * @param header Header to initialize
      */
     inline void init_vmprog_header(vmprog_header_v1_0& header) {
@@ -1326,7 +1326,7 @@ namespace lzx {
 
     /**
      * @brief Initialize vmprog_program_config_v1_0 with default values.
-     * 
+     *
      * @param config Config to initialize
      */
     inline void init_vmprog_config(vmprog_program_config_v1_0& config) {
@@ -1344,7 +1344,7 @@ namespace lzx {
 
     /**
      * @brief Initialize vmprog_signed_descriptor_v1_0 with default values.
-     * 
+     *
      * @param descriptor Descriptor to initialize
      */
     inline void init_signed_descriptor(vmprog_signed_descriptor_v1_0& descriptor) {
@@ -1355,7 +1355,7 @@ namespace lzx {
 
     /**
      * @brief Initialize vmprog_toc_entry_v1_0 with default values.
-     * 
+     *
      * @param entry TOC entry to initialize
      */
     inline void init_toc_entry(vmprog_toc_entry_v1_0& entry) {
@@ -1366,7 +1366,7 @@ namespace lzx {
 
     /**
      * @brief Initialize vmprog_parameter_config_v1_0 with default values.
-     * 
+     *
      * @param param Parameter to initialize
      */
     inline void init_parameter_config(vmprog_parameter_config_v1_0& param) {
@@ -1388,7 +1388,7 @@ namespace lzx {
 
     /**
      * @brief Comprehensively validate an entire vmprog package.
-     * 
+     *
      * This performs all validation checks in the correct order:
      * 1. Header validation
      * 2. TOC validation
@@ -1396,7 +1396,7 @@ namespace lzx {
      * 4. Package hash verification (if present)
      * 5. Signed descriptor validation (if present)
      * 6. Config validation (if present)
-     * 
+     *
      * @param file_data Complete file data
      * @param file_size File size in bytes
      * @param verify_hashes If true, verify all payload and package hashes
@@ -1451,7 +1451,7 @@ namespace lzx {
         // Find and validate config if present
         const vmprog_toc_entry_v1_0* config_entry = find_toc_entry(
             toc, header->toc_count, vmprog_toc_entry_type_v1_0::config);
-        
+
         if (config_entry && config_entry->size == sizeof(vmprog_program_config_v1_0)) {
             const auto* config = reinterpret_cast<const vmprog_program_config_v1_0*>(
                 file_data + config_entry->offset);
@@ -1464,7 +1464,7 @@ namespace lzx {
         // Find and validate signed descriptor if present
         const vmprog_toc_entry_v1_0* desc_entry = find_toc_entry(
             toc, header->toc_count, vmprog_toc_entry_type_v1_0::signed_descriptor);
-        
+
         if (desc_entry && desc_entry->size == sizeof(vmprog_signed_descriptor_v1_0)) {
             const auto* descriptor = reinterpret_cast<const vmprog_signed_descriptor_v1_0*>(
                 file_data + desc_entry->offset);
@@ -1481,7 +1481,7 @@ namespace lzx {
 
                 const vmprog_toc_entry_v1_0* sig_entry = find_toc_entry(
                     toc, header->toc_count, vmprog_toc_entry_type_v1_0::signature);
-                
+
                 if (!sig_entry || sig_entry->size != VMPROG_SIGNATURE_SIZE) {
                     return vmprog_validation_result::invalid_hash; // Missing or invalid signature
                 }
@@ -1502,7 +1502,7 @@ namespace lzx {
 
     /**
      * @brief Get number of built-in public keys.
-     * 
+     *
      * @return Number of public keys in vmprog_public_keys array
      */
     inline constexpr size_t get_public_key_count() {
@@ -1511,10 +1511,10 @@ namespace lzx {
 
     /**
      * @brief Verify signature against all built-in public keys.
-     * 
+     *
      * Tries to verify the signature using each built-in public key until
      * one succeeds or all fail.
-     * 
+     *
      * @param signature Ed25519 signature (64 bytes)
      * @param signed_descriptor The signed descriptor to verify
      * @param out_key_index Optional output parameter for which key succeeded

@@ -53,12 +53,12 @@ begin
                 s_data_out.u <= std_logic_vector(to_unsigned(512, 10));
                 s_data_out.v <= std_logic_vector(to_unsigned(512, 10));
             end if;
-            
+
             s_data_out.avid <= s_data_in.avid;
             s_data_out.hsync_n <= s_data_in.hsync_n;
             s_data_out.vsync_n <= s_data_in.vsync_n;
             s_data_out.field_n <= s_data_in.field_n;
-            
+
             -- Output register
             s_data_out_reg <= s_data_out;
         end if;

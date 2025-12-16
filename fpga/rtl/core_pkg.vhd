@@ -31,10 +31,10 @@ package core_pkg is
   constant C_PARAMETER_DATA_WIDTH      : integer := 10; -- Width of parameter data
   constant C_VIDEO_DATA_WIDTH          : integer := 10; -- Width of video data
   -- spi ram config
-  constant C_SPI_TRANSFER_DATA_BITS    : integer := C_PARAMETER_DATA_WIDTH; 
+  constant C_SPI_TRANSFER_DATA_BITS    : integer := C_PARAMETER_DATA_WIDTH;
   constant C_SPI_TRANSFER_SIZE_BYTES   : integer := 2;
   constant C_VIDEO_TIMING_DEPTH        : integer := C_VIDEO_TIMING_DATA_WIDTH;
-  
+
   -- spi ram derived constants
   constant C_SPI_TRANSFER_TOTAL_BITS    : integer := C_SPI_TRANSFER_SIZE_BYTES * 8;
   constant C_SPI_TRANSFER_COMMAND_BITS  : integer := 1;

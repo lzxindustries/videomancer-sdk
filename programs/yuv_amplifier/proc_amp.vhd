@@ -20,7 +20,7 @@
 -- Description:
 --   Processing amplifier for unsigned video streams
 --
--- Author: 
+-- Author:
 --   Lars Larsen
 --
 -- Overview:
@@ -34,10 +34,10 @@
 --   Two-step processing:
 --     1. Contrast: Multiply centered input by contrast factor
 --     2. Brightness: Add brightness offset to result
---   
+--
 --   Mathematical formula:
 --     result = (input - 0.5) * contrast + brightness
---   
+--
 --   Where:
 --     input:      Unsigned video value [0, 1] normalized
 --     contrast:   Multiplication factor [0, 2] where 1.0 = unity
@@ -108,7 +108,7 @@ architecture rtl of proc_amp_u is
   constant C_PROC_WIDTH : integer := G_WIDTH + 2;  -- Extra bits for signed arithmetic
   constant C_FRAC_BITS  : integer := G_WIDTH;      -- Fractional precision
   constant C_HALF       : signed(C_PROC_WIDTH - 1 downto 0) := to_signed(2 ** (C_FRAC_BITS - 1), C_PROC_WIDTH);  -- 0.5 in fixed-point
-  
+
   --------------------------------------------------------------------------------
   -- Stage 1: Input Processing Signals
   --------------------------------------------------------------------------------
@@ -116,13 +116,13 @@ architecture rtl of proc_amp_u is
   signal s_contrast     : signed(C_PROC_WIDTH - 1 downto 0);  -- Contrast factor [0, 2.0]
   signal s_brightness   : signed(C_PROC_WIDTH - 1 downto 0);  -- Brightness offset [-0.5, +0.5]
   signal s_enable       : std_logic;
-  
+
   --------------------------------------------------------------------------------
   -- Stage 2+: Multiplier Output
   --------------------------------------------------------------------------------
   signal s_result       : signed(C_PROC_WIDTH - 1 downto 0);  -- Final result from multiplier
   signal s_valid        : std_logic;
-  
+
 begin
 
   --------------------------------------------------------------------------------
@@ -137,22 +137,22 @@ begin
       -- This allows contrast to work symmetrically around middle gray
       -- Calculation: centered = input - 0.5
       s_centered   <= resize(signed('0' & std_logic_vector(a)), C_PROC_WIDTH) - C_HALF;
-      
+
       -- Prepare contrast: scale to range [0, 2.0] with 1 extra fractional bit
       -- Input 512 (half range) represents 1.0x unity gain
       -- Append '0' to create extra fractional precision
       s_contrast   <= resize(signed('0' & std_logic_vector(contrast) & '0'), C_PROC_WIDTH);
-      
+
       -- Prepare brightness: convert to range [-0.5, +0.5] centered at 0
       -- Input 512 represents 0.0 (no brightness change)
       -- Subtract 0.5 to create symmetric range around zero
       s_brightness <= resize(signed('0' & std_logic_vector(brightness) & '0'), C_PROC_WIDTH) - C_HALF;
-      
+
       -- Register enable signal
       s_enable     <= enable;
     end if;
   end process p_input_stage;
-  
+
   --------------------------------------------------------------------------------
   -- Stage 2+: Multiplication and Addition
   -- Latency: multiplier_s pipeline depth (typically 6-9 cycles)

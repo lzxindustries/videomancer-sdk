@@ -36,7 +36,7 @@ if python3 -c "import cryptography" 2>/dev/null; then
 else
     echo "${YELLOW}⚠ cryptography library is not installed${RESET}"
     echo "Installing cryptography library..."
-    
+
     # Try system package manager first (for PEP 668 environments)
     if command -v apt-get &> /dev/null; then
         echo "Using system package manager (apt)..."
@@ -69,7 +69,7 @@ else
             }
         fi
     fi
-    
+
     # Verify installation
     if python3 -c "import cryptography" 2>/dev/null; then
         echo "${GREEN}✓ cryptography library installed successfully${RESET}"

@@ -33,7 +33,7 @@ constexpr size_t vmprog_stream_max_toc_entries = 16;
 
 /**
  * @brief Read and validate vmprog header from stream.
- * 
+ *
  * @param stream Input stream positioned at start of file
  * @param out_header Output header structure
  * @return Validation result code
@@ -60,7 +60,7 @@ inline vmprog_validation_result read_vmprog_header(
 
 /**
  * @brief Read and validate complete package header with file size validation.
- * 
+ *
  * @param stream Input stream positioned at start of file
  * @param file_size Total file size in bytes
  * @param out_header Output header structure
@@ -81,7 +81,7 @@ inline vmprog_validation_result read_and_validate_vmprog_header(
 
 /**
  * @brief Read TOC entries from stream.
- * 
+ *
  * @param stream Input stream
  * @param header Validated package header
  * @param out_toc Output buffer to store TOC entries (must be at least header.toc_count entries)
@@ -107,7 +107,7 @@ inline vmprog_validation_result read_vmprog_toc(
     // Read all TOC entries
     size_t bytes_to_read = header.toc_count * sizeof(vmprog_toc_entry_v1_0);
     size_t bytes_read = stream.read(reinterpret_cast<uint8_t*>(out_toc), bytes_to_read);
-    
+
     if (bytes_read != bytes_to_read) {
         return vmprog_validation_result::invalid_toc_size;
     }
@@ -117,7 +117,7 @@ inline vmprog_validation_result read_vmprog_toc(
 
 /**
  * @brief Read and validate TOC entries from stream.
- * 
+ *
  * @param stream Input stream
  * @param header Validated package header
  * @param file_size Total file size in bytes
@@ -150,7 +150,7 @@ inline vmprog_validation_result read_and_validate_vmprog_toc(
 
 /**
  * @brief Read payload data from stream based on TOC entry.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry specifying payload location
  * @param out_payload Output buffer to store payload data (must be at least entry.size bytes)
@@ -185,7 +185,7 @@ inline bool read_payload(
 
 /**
  * @brief Read and verify payload data with hash validation.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry specifying payload location and expected hash
  * @param out_payload Output buffer to store payload data (must be at least entry.size bytes)
@@ -213,7 +213,7 @@ inline vmprog_validation_result read_and_verify_payload(
 
 /**
  * @brief Read program configuration from stream.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry for config
  * @param out_config Output configuration structure
@@ -248,7 +248,7 @@ inline vmprog_validation_result read_vmprog_config(
 
 /**
  * @brief Read and validate program configuration from stream.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry for config
  * @param out_config Output configuration structure
@@ -274,8 +274,8 @@ inline vmprog_validation_result read_and_validate_vmprog_config(
 
     // Verify hash if requested
     if (should_verify_hash) {
-        if (!verify_hash(reinterpret_cast<const uint8_t*>(&out_config), 
-                        sizeof(vmprog_program_config_v1_0), 
+        if (!verify_hash(reinterpret_cast<const uint8_t*>(&out_config),
+                        sizeof(vmprog_program_config_v1_0),
                         entry.sha256)) {
             return vmprog_validation_result::invalid_hash;
         }
@@ -286,7 +286,7 @@ inline vmprog_validation_result read_and_validate_vmprog_config(
 
 /**
  * @brief Read signed descriptor from stream.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry for signed descriptor
  * @param out_descriptor Output descriptor structure
@@ -321,7 +321,7 @@ inline vmprog_validation_result read_signed_descriptor(
 
 /**
  * @brief Read and validate signed descriptor from stream.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry for signed descriptor
  * @param out_descriptor Output descriptor structure
@@ -342,7 +342,7 @@ inline vmprog_validation_result read_and_validate_signed_descriptor(
 
 /**
  * @brief Read Ed25519 signature from stream.
- * 
+ *
  * @param stream Input stream
  * @param entry TOC entry for signature
  * @param out_signature Output signature buffer (must be 64 bytes)
@@ -373,7 +373,7 @@ inline bool read_signature(
 
 /**
  * @brief Find and read specific TOC entry by type.
- * 
+ *
  * @param stream Input stream
  * @param toc TOC entries array
  * @param toc_count Number of TOC entries
@@ -408,7 +408,7 @@ inline vmprog_validation_result find_and_read_payload(
 
 /**
  * @brief Verify all payload hashes in TOC using stream.
- * 
+ *
  * @param stream Input stream
  * @param toc TOC entries array
  * @param toc_count Number of TOC entries
@@ -425,7 +425,7 @@ inline vmprog_validation_result verify_all_payload_hashes_stream(
 ) {
     for (uint32_t i = 0; i < toc_count; ++i) {
         const auto& entry = toc[i];
-        
+
         // Skip entries with no payload
         if (entry.size == 0) continue;
 
@@ -451,7 +451,7 @@ inline vmprog_validation_result verify_all_payload_hashes_stream(
 
 /**
  * @brief Read and verify package signature using stream.
- * 
+ *
  * @param stream Input stream
  * @param toc TOC entries array
  * @param toc_count Number of TOC entries
@@ -501,7 +501,7 @@ inline vmprog_validation_result verify_package_signature_stream(
 
 /**
  * @brief Verify package signature with built-in public keys using stream.
- * 
+ *
  * @param stream Input stream
  * @param toc TOC entries array
  * @param toc_count Number of TOC entries
@@ -551,13 +551,13 @@ inline vmprog_validation_result verify_package_signature_builtin_keys_stream(
 
 /**
  * @brief Comprehensively validate a vmprog package using stream-based reading.
- * 
+ *
  * This performs validation in stages:
  * 1. Read and validate header
  * 2. Read and validate TOC
  * 3. Optionally verify all payload hashes
  * 4. Optionally verify package signature
- * 
+ *
  * @param stream Input stream positioned at start of file
  * @param file_size Total file size in bytes
  * @param verify_hashes If true, verify all payload hashes
@@ -604,7 +604,7 @@ inline vmprog_validation_result validate_vmprog_package_stream(
     // Find and validate config if present
     const vmprog_toc_entry_v1_0* config_entry = find_toc_entry(
         toc, header.toc_count, vmprog_toc_entry_type_v1_0::config);
-    
+
     if (config_entry && config_entry->size == sizeof(vmprog_program_config_v1_0)) {
         vmprog_program_config_v1_0 config;
         result = read_and_validate_vmprog_config(stream, *config_entry, config, verify_hashes);
@@ -634,14 +634,14 @@ inline vmprog_validation_result validate_vmprog_package_stream(
 
 /**
  * @brief High-level reader for vmprog packages using streams.
- * 
+ *
  * Provides convenient access to package contents with automatic validation.
  */
 class vmprog_package_reader {
 public:
     /**
      * @brief Open and validate a vmprog package.
-     * 
+     *
      * @param stream Stream to read from
      * @param file_size Total file size in bytes
      * @param verify_hashes If true, verify all payload hashes
@@ -713,7 +713,7 @@ public:
 
     /**
      * @brief Read program configuration.
-     * 
+     *
      * @param out_config Output configuration structure
      * @return Validation result code
      */
@@ -722,7 +722,7 @@ public:
 
         const vmprog_toc_entry_v1_0* entry = find_toc_entry(
             toc_, header_.toc_count, vmprog_toc_entry_type_v1_0::config);
-        
+
         if (!entry) {
             return vmprog_validation_result::invalid_toc_entry;
         }
@@ -732,7 +732,7 @@ public:
 
     /**
      * @brief Read specific payload by type.
-     * 
+     *
      * @param type Payload type to read
      * @param out_payload Output buffer to store payload data
      * @param max_payload_size Maximum size of out_payload buffer
@@ -751,7 +751,7 @@ public:
 
     /**
      * @brief Read FPGA bitstream.
-     * 
+     *
      * @param out_bitstream Output buffer to store bitstream data
      * @param max_bitstream_size Maximum size of out_bitstream buffer
      * @param out_bytes_read Optional output parameter for actual bytes read
@@ -767,7 +767,7 @@ public:
 
     /**
      * @brief Verify package signature.
-     * 
+     *
      * @param public_key Public key for verification (32 bytes, optional)
      * @param out_key_index Optional output parameter for which built-in key succeeded
      * @return Validation result code

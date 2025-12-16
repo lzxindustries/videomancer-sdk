@@ -20,7 +20,7 @@
 -- Description:
 --   Pipelined signed multiplier using Radix-4 Booth encoding
 --
--- Authors: 
+-- Authors:
 --   Ed Leckie & Lars Larsen
 --
 -- Overview:
@@ -32,7 +32,7 @@
 -- Algorithm:
 --   Radix-4 Booth Multiplication with accumulator:
 --     result = (x * y) / 2^G_FRAC_BITS + z
---   
+--
 --   Radix-4 Booth encoding examines 3 bits at a time (current, previous, and
 --   next bit) to determine the partial product: -2x, -x, 0, +x, or +2x.
 --   This reduces the number of additions from N to N/2 compared to standard
@@ -148,7 +148,7 @@ begin
   --------------------------------------------------------------------------------
   -- Radix-4 Booth Multiplication Pipeline
   -- Processes 2 bits of multiplier per stage using Booth encoding
-  -- 
+  --
   -- Booth encoding rules for 3-bit groups (examining bits i+1, i, i-1):
   --   000, 111: Add 0 (no operation)
   --   001, 010: Add +1x multiplicand
@@ -162,34 +162,34 @@ begin
     if rising_edge(clk) then
       -- Shift multiplicand through pipeline for parallel Booth stages
       s_multiplicand_arr <= s_x & s_multiplicand_arr(0 to s_multiplicand_arr'high - 1);
-      
+
       -- Initialize first multiplier stage with y in lower bits
       s_multiplier_arr(0)                        <= (others => '0');
       s_multiplier_arr(0)(C_DATA_WIDTH downto 1) <= s_y;
-      
+
       -- Process each Booth stage (handles 2 bits per iteration)
       for i in 0 to C_MULTIPLIER_STAGES - 1 loop
         -- Extract 3-bit Booth selector (current, previous, and implicit next bit)
         v_sel := s_multiplier_arr(i)(2 downto 0);
-        
+
         -- Apply Booth encoding rule
         case v_sel is
           -- Add +1x multiplicand
           when "001" | "010" =>
             s_multiplier_arr(i + 1) <= (resize(s_multiplier_arr(i)(C_PRODUCT_WIDTH downto C_DATA_WIDTH + 1), C_DATA_WIDTH + 2) + s_multiplicand_arr(i)) & s_multiplier_arr(i)(C_DATA_WIDTH downto 2);
-          
+
           -- Add +2x multiplicand (shift left = multiply by 2)
           when "011" =>
             s_multiplier_arr(i + 1) <= (resize(s_multiplier_arr(i)(C_PRODUCT_WIDTH downto C_DATA_WIDTH + 1), C_DATA_WIDTH + 2) + shift_left(resize(s_multiplicand_arr(i), C_DATA_WIDTH + 1), 1)) & s_multiplier_arr(i)(C_DATA_WIDTH downto 2);
-          
+
           -- Add -2x multiplicand (shift left and negate)
           when "100" =>
             s_multiplier_arr(i + 1) <= (resize(s_multiplier_arr(i)(C_PRODUCT_WIDTH downto C_DATA_WIDTH + 1), C_DATA_WIDTH + 2) - shift_left(resize(s_multiplicand_arr(i), C_DATA_WIDTH + 1), 1)) & s_multiplier_arr(i)(C_DATA_WIDTH downto 2);
-          
+
           -- Add -1x multiplicand (negate)
           when "101" | "110" =>
             s_multiplier_arr(i + 1) <= (resize(s_multiplier_arr(i)(C_PRODUCT_WIDTH downto C_DATA_WIDTH + 1), C_DATA_WIDTH + 2) - s_multiplicand_arr(i)) & s_multiplier_arr(i)(C_DATA_WIDTH downto 2);
-          
+
           -- Add 0 (no operation, just shift)
           when others =>
             s_multiplier_arr(i + 1) <= shift_right(s_multiplier_arr(i), 2);
@@ -233,7 +233,7 @@ begin
       -- Step 1: Scale product by removing fractional bits (divide by 2^G_FRAC_BITS)
       -- This converts from fixed-point product back to fixed-point result
       v_scaled := s_multiplier_arr(C_MULTIPLIER_STAGES)(C_PRODUCT_WIDTH downto G_FRAC_BITS + 1);
-      
+
       -- Step 2: Add z (accumulator) to scaled product
       v_added  := resize(v_scaled, G_WIDTH + 1) + resize(s_z_arr(s_z_arr'high), G_WIDTH + 1);
 

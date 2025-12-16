@@ -100,7 +100,7 @@ mkdir -p "${VIDEOMANCER_OUT_DIR}"
 TOTAL_PROGRAMS=0
 SUCCESSFUL_PROGRAMS=0
 FAILED_PROGRAMS=0
-    
+
 for PROGRAM in $PROGRAMS; do
     TOTAL_PROGRAMS=$((TOTAL_PROGRAMS + 1))
     PROJECT_ROOT="${VIDEOMANCER_PROGRAMS_DIR}/${PROGRAM}/"
@@ -112,28 +112,28 @@ for PROGRAM in $PROGRAMS; do
     echo -e "${BLUE}Program ${TOTAL_PROGRAMS}/${PROGRAM_COUNT}: ${PROGRAM}${NC}"
     echo -e "${BLUE}====================================${NC}"
     echo ""
-    
+
     # Check if program directory exists
     if [ ! -d "${PROJECT_ROOT}" ]; then
         echo -e "${RED}ERROR: Program directory '${PROJECT_ROOT}' not found${NC}"
         FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
         continue
     fi
-    
+
     # Create output directories
     echo -e "${GREEN}Creating output directories...${NC}"
     mkdir -p "${BUILD_ROOT}/bitstreams"
-    
+
     # Synthesize FPGA bitstreams (6 variants)
     echo -e "${GREEN}Synthesizing FPGA bitstreams...${NC}"
     cd fpga
-    
+
     # Temporary file for capturing make errors
     MAKE_LOG=$(mktemp)
-    
+
     # Track total bitstream generation time
     BITSTREAM_START=$(date +%s.%N)
-    
+
     echo -e "${CYAN}  [1/6] HD Analog (75 MHz)...${NC}"
     START=$(date +%s.%N)
     if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=75 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
@@ -147,7 +147,7 @@ for PROGRAM in $PROGRAMS; do
     END=$(date +%s.%N)
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
-    
+
     echo -e "${CYAN}  [2/6] SD Analog (30 MHz)...${NC}"
     START=$(date +%s.%N)
     if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
@@ -161,7 +161,7 @@ for PROGRAM in $PROGRAMS; do
     END=$(date +%s.%N)
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
-    
+
     echo -e "${CYAN}  [3/6] HD HDMI (75 MHz)...${NC}"
     START=$(date +%s.%N)
     if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=75 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
@@ -175,7 +175,7 @@ for PROGRAM in $PROGRAMS; do
     END=$(date +%s.%N)
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
-    
+
     echo -e "${CYAN}  [4/6] SD HDMI (30 MHz)...${NC}"
     START=$(date +%s.%N)
     if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
@@ -189,7 +189,7 @@ for PROGRAM in $PROGRAMS; do
     END=$(date +%s.%N)
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
-    
+
     echo -e "${CYAN}  [5/6] HD Dual (75 MHz)...${NC}"
     START=$(date +%s.%N)
     if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=75 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
@@ -203,7 +203,7 @@ for PROGRAM in $PROGRAMS; do
     END=$(date +%s.%N)
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
-    
+
     echo -e "${CYAN}  [6/6] SD Dual (30 MHz)...${NC}"
     START=$(date +%s.%N)
     if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=30 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
@@ -217,31 +217,31 @@ for PROGRAM in $PROGRAMS; do
     END=$(date +%s.%N)
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
-    
+
     BITSTREAM_END=$(date +%s.%N)
     TOTAL_BITSTREAM_TIME=$(echo "$BITSTREAM_END - $BITSTREAM_START" | bc)
-    
+
     rm -f "$MAKE_LOG"
     cd ..
     echo -e "${GREEN}✓ All 6 bitstream variants generated in ${TOTAL_BITSTREAM_TIME}s${NC}"
-    
+
     # Convert TOML configuration to binary
     echo -e "${GREEN}Converting TOML configuration to binary...${NC}"
     cd tools/toml-converter
     python3 toml_to_config_binary.py "${PROJECT_ROOT}${PROGRAM}.toml" "${BUILD_ROOT}program_config.bin" --quiet
     cd ../..
     echo -e "${GREEN}✓ Configuration binary created (7,368 bytes)${NC}"
-    
+
     # Clean up intermediate files
     echo -e "${GREEN}Cleaning intermediate files...${NC}"
     cd "${BUILD_ROOT}/bitstreams"
     rm -f *.asc *.json
     cd ../../../..
-    
+
     # Package into .vmprog format
     echo -e "${GREEN}Packaging ${PROGRAM}.vmprog...${NC}"
     cd ${VIDEOMANCER_SDK_ROOT}/tools/vmprog-packer
-    
+
     PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then
         echo -e "${CYAN}  Signing package with Ed25519...${NC}"
@@ -264,9 +264,9 @@ for PROGRAM in $PROGRAMS; do
         fi
     fi
     rm -f "$PACK_LOG"
-    
+
     cd ../..
-    
+
     # Verify output file
     if [ -f "${VIDEOMANCER_OUT_DIR}/${PROGRAM}.vmprog" ]; then
         FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" 2>/dev/null)

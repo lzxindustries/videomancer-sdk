@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace lzx 
+namespace lzx
 {
     class vmprog_stream
     {
@@ -31,5 +31,5 @@ namespace lzx
         virtual size_t read(uint8_t* buffer, size_t size) = 0;
         virtual bool seek(size_t position) = 0;
     };
-    
+
 } // namespace lzx

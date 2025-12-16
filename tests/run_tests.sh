@@ -77,7 +77,7 @@ TOTAL_FAIL=0
 if [ "$RUN_CPP" = true ]; then
     echo -e "${YELLOW}Running C++ Unit Tests...${NC}"
     echo ""
-    
+
     if [ ! -d "build" ]; then
         echo -e "${BLUE}Building SDK with tests...${NC}"
         ./build_sdk.sh --test
@@ -92,7 +92,7 @@ if [ "$RUN_CPP" = true ]; then
         CPP_RESULT=$?
         cd ..
     fi
-    
+
     if [ $CPP_RESULT -eq 0 ]; then
         CPP_PASS=1
         echo -e "${GREEN}✓ C++ tests passed${NC}"
@@ -106,9 +106,9 @@ fi
 if [ "$RUN_PYTHON" = true ]; then
     echo -e "${YELLOW}Running Python Tests...${NC}"
     echo ""
-    
+
     PYTHON_FAILED=0
-    
+
     # Check if Python is available
     if ! command -v python3 &> /dev/null; then
         echo -e "${RED}Python 3 not found. Skipping Python tests.${NC}"
@@ -128,7 +128,7 @@ if [ "$RUN_PYTHON" = true ]; then
             fi
         done
     fi
-    
+
     if [ $PYTHON_FAILED -eq 0 ]; then
         PYTHON_PASS=1
         echo -e "${GREEN}✓ Python tests passed${NC}"
@@ -142,9 +142,9 @@ fi
 if [ "$RUN_SHELL" = true ]; then
     echo -e "${YELLOW}Running Shell Script Tests...${NC}"
     echo ""
-    
+
     SHELL_FAILED=0
-    
+
     # Run each shell test
     for test_file in tests/shell/test_*.sh; do
         if [ -f "$test_file" ]; then
@@ -158,7 +158,7 @@ if [ "$RUN_SHELL" = true ]; then
             echo ""
         fi
     done
-    
+
     if [ $SHELL_FAILED -eq 0 ]; then
         SHELL_PASS=1
         echo -e "${GREEN}✓ Shell tests passed${NC}"

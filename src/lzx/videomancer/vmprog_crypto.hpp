@@ -60,7 +60,7 @@ namespace lzx {
 
     /**
      * @brief Incremental BLAKE2b-256 hash context.
-     * 
+     *
      * BLAKE2b-256 is used as a SHA-256 equivalent for vmprog packages.
      * It provides:
      * - 256-bit (32-byte) hash output
@@ -74,7 +74,7 @@ namespace lzx {
 
     /**
      * @brief Initialize hash context.
-     * 
+     *
      * @param ctx Hash context to initialize
      */
     inline void sha256_init(sha256_ctx& ctx) {
@@ -83,9 +83,9 @@ namespace lzx {
 
     /**
      * @brief Update hash with additional data.
-     * 
+     *
      * Can be called multiple times to hash large data incrementally.
-     * 
+     *
      * @param ctx Hash context
      * @param data Data to hash
      * @param n Length of data in bytes
@@ -96,9 +96,9 @@ namespace lzx {
 
     /**
      * @brief Finalize hash and output result.
-     * 
+     *
      * After calling this, the context should be reinitialized before reuse.
-     * 
+     *
      * @param ctx Hash context
      * @param out Output buffer (must be 32 bytes)
      */
@@ -108,9 +108,9 @@ namespace lzx {
 
     /**
      * @brief One-shot hash function.
-     * 
+     *
      * Convenience function to hash data in a single call.
-     * 
+     *
      * @param data Data to hash
      * @param length Length of data in bytes
      * @param out Output buffer (must be 32 bytes)
@@ -128,14 +128,14 @@ namespace lzx {
 
     /**
      * @brief Verify Ed25519 signature.
-     * 
+     *
      * Ed25519 provides:
      * - Fast signature verification using SHA-512
      * - 256-bit security level
      * - Deterministic signatures (no random number needed)
      * - Small key and signature sizes
      * - RFC 8032 compliant (Ed25519 with SHA-512)
-     * 
+     *
      * @param sig Signature (64 bytes)
      * @param pub Public key (32 bytes)
      * @param msg Message data
@@ -158,10 +158,10 @@ namespace lzx {
 
     /**
      * @brief Constant-time memory comparison.
-     * 
+     *
      * Compares two memory regions in constant time to prevent timing attacks.
      * Use this for comparing cryptographic hashes, MACs, etc.
-     * 
+     *
      * @param a First buffer
      * @param b Second buffer
      * @param length Length to compare in bytes
@@ -177,9 +177,9 @@ namespace lzx {
 
     /**
      * @brief Constant-time 32-byte hash comparison.
-     * 
+     *
      * Specialized version for comparing 32-byte hashes.
-     * 
+     *
      * @param a First hash (32 bytes)
      * @param b Second hash (32 bytes)
      * @return true if hashes are equal, false otherwise
@@ -190,10 +190,10 @@ namespace lzx {
 
     /**
      * @brief Securely zero memory.
-     * 
+     *
      * Zeros memory in a way that won't be optimized away by the compiler.
      * Use this to clear sensitive data (keys, passwords, etc.).
-     * 
+     *
      * @param data Buffer to zero
      * @param length Length in bytes
      */
@@ -207,9 +207,9 @@ namespace lzx {
 
     /**
      * @brief Verify data matches expected hash.
-     * 
+     *
      * Computes hash of data and compares with expected hash in constant time.
-     * 
+     *
      * @param data Data to verify
      * @param length Length of data in bytes
      * @param expected_hash Expected hash (32 bytes)
@@ -223,7 +223,7 @@ namespace lzx {
 
     /**
      * @brief Check if hash is all zeros (uninitialized or optional).
-     * 
+     *
      * @param hash Hash to check (32 bytes)
      * @return true if hash is all zeros, false otherwise
      */
@@ -238,7 +238,7 @@ namespace lzx {
 
     /**
      * @brief Check if public key is valid (not all zeros).
-     * 
+     *
      * @param pubkey Public key to check (32 bytes)
      * @return true if key appears valid, false if all zeros
      */

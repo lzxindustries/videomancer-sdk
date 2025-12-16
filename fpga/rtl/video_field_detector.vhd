@@ -51,7 +51,7 @@ begin
         if rising_edge(clk) then
             hsync_prev <= hsync;
             vsync_prev <= vsync;
-            
+
             pixel_counter <= pixel_counter + 1;
 
             -- HSYNC rising edge: reset pixel counter
@@ -62,7 +62,7 @@ begin
             -- VSYNC rising edge: capture position and determine field
             if vsync_prev = '0' and vsync = '1' then
                 vsync_pixel_pos <= pixel_counter;
-                
+
                 -- Compare current VSYNC position with previous
                 -- If positions differ significantly (half-line difference),
                 -- fields alternate. Otherwise same field type.
@@ -77,7 +77,7 @@ begin
                         interlaced <= '1';  -- Different positions = interlaced
                     end if;
                 end if;
-                
+
                 last_vsync_pixel_pos <= vsync_pixel_pos;
             end if;
         end if;

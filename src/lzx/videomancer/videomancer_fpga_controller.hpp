@@ -27,14 +27,14 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace lzx 
+namespace lzx
 {
     /// @brief High-level controller for Videomancer FPGA control interface
-    /// 
+    ///
     /// This class wraps the low-level videomancer_fpga interface and provides
     /// convenient methods for writing to all control registers defined in the
     /// Videomancer ABI 1.0 specification.
-    /// 
+    ///
     /// The ABI uses 16-bit SPI frames with the following structure:
     /// - Bit 15: R/W flag (0 = Write, 1 = Read)
     /// - Bits 14-10: 5-bit register address
@@ -44,7 +44,7 @@ namespace lzx
     public:
         /// @brief Construct controller with SPI interface
         /// @param spi Reference to SPI interface implementation
-        explicit videomancer_fpga_controller(videomancer_fpga& spi) 
+        explicit videomancer_fpga_controller(videomancer_fpga& spi)
             : m_fpga(spi)
             , m_shadow_rotary_pot_1(0)
             , m_shadow_rotary_pot_2(0)
@@ -197,7 +197,7 @@ namespace lzx
         /// @return true on success
         bool set_video_timing(videomancer_abi_v1_0::video_timing_id mode)
         {
-            return write_register(videomancer_abi_v1_0::register_address::video_timing_id, 
+            return write_register(videomancer_abi_v1_0::register_address::video_timing_id,
                                 static_cast<uint16_t>(mode) & 0xF);
         }
 
@@ -310,7 +310,7 @@ namespace lzx
         {
             if (switch_num < 7 || switch_num > 11)
                 return false;
-            
+
             uint8_t bit_pos = switch_num - 7;
             return (m_shadow_toggle_switches & (1 << bit_pos)) != 0;
         }
@@ -339,7 +339,7 @@ namespace lzx
 
     private:
         videomancer_fpga& m_fpga;
-        
+
         // Shadow registers (initialized to zero in constructor)
         uint16_t m_shadow_rotary_pot_1;
         uint16_t m_shadow_rotary_pot_2;
@@ -359,13 +359,13 @@ namespace lzx
         {
             // Get reference to appropriate shadow register
             uint16_t* shadow_reg = get_shadow_register(address);
-            
+
             // Only write if value has changed
             if (shadow_reg != nullptr && *shadow_reg == data)
             {
                 return true; // No change needed
             }
-            
+
             // Build 16-bit frame: [R/W(1)][Addr(5)][Data(10)]
             // R/W = 0 for write, Addr << 10, Data in lower 10 bits
             uint16_t frame = (0 << 15) |                    // Write bit
@@ -381,16 +381,16 @@ namespace lzx
             m_fpga.assert_chip_select_spi(false); // De-assert CS high
 
             bool success = (transferred == 2);
-            
+
             // Update shadow register on successful write
             if (success && shadow_reg != nullptr)
             {
                 *shadow_reg = data;
             }
-            
+
             return success;
         }
-        
+
         /// @brief Get pointer to shadow register for given address
         /// @param address Register address
         /// @return Pointer to shadow register or nullptr if invalid

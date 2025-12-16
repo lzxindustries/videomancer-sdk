@@ -134,7 +134,7 @@ begin
   end generate;
 
   GEN_SD_DUAL_IN : if C_ENABLE_SD and C_ENABLE_DUAL generate
-  
+
     pll_inst : SB_PLL40_CORE
     generic map(
       FEEDBACK_PATH => "SIMPLE",
@@ -171,7 +171,7 @@ begin
   end generate;
 
   GEN_HD_DUAL_IN : if C_ENABLE_HD and C_ENABLE_DUAL generate
-  
+
     VID_ENC_CLK <= HDMI_RX_CLK;
     VID_ENC_D(15 downto 8) <= HDMI_RX_D(15 downto 8);
     VID_ENC_D(7 downto 0) <= HDMI_RX_D(7 downto 0);
@@ -415,7 +415,7 @@ begin
   end generate;
 
   GEN_SD_DUAL_OUT : if C_ENABLE_SD and C_ENABLE_DUAL generate
-  
+
     HDMI_TX_D(23 downto 14) <= s_video_out.y(9 downto 0);
     HDMI_TX_D(13 downto 4) <= s_video_out.c(9 downto 0);
     HDMI_TX_HSYNC <= s_video_out.hsync_n;
@@ -427,7 +427,7 @@ begin
   end generate;
 
   GEN_HD_DUAL_OUT : if C_ENABLE_HD and C_ENABLE_DUAL generate
-  
+
     HDMI_TX_D(23 downto 14) <= s_video_out.y(9 downto 0);
     HDMI_TX_D(13 downto 4) <= s_video_out.c(9 downto 0);
     HDMI_TX_HSYNC <= s_video_out.hsync_n;

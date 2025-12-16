@@ -13,40 +13,40 @@ jobs:
   build-and-release:
     name: Build and Release
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
-    
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake build-essential python3 python3-pip
         pip3 install jsonschema toml
-    
+
     - name: Setup OSS CAD Suite
       run: bash scripts/setup.sh
-    
+
     - name: Build SDK with tests
       run: bash build_sdk.sh --test
-    
+
     - name: Run all tests
       run: |
         cd tests
         bash run_tests.sh
-    
+
     - name: Build example programs
       run: bash build_programs.sh
-    
+
     - name: Generate checksums
       run: |
         cd out
         sha256sum *.vmprog > checksums.sha256
         cat checksums.sha256
-    
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
@@ -58,19 +58,19 @@ jobs:
         prerelease: false
         body: |
           ## Videomancer SDK Release ${{ github.ref_name }}
-          
+
           This release includes pre-built FPGA program packages.
-          
+
           ### Included Programs
           - `passthru.vmprog` - Pass-through example program
           - `yuv_amplifier.vmprog` - YUV signal amplifier with proc amp controls
-          
+
           ### Installation
           Upload `.vmprog` files to your Videomancer hardware via the web interface.
-          
+
           ### Checksums
           See `checksums.sha256` for SHA-256 verification hashes.
-          
+
           ### Build Information
           - Platform: Ubuntu Linux
           - Toolchain: OSS CAD Suite

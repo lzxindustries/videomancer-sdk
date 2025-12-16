@@ -24,7 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace lzx 
+namespace lzx
 {
 namespace videomancer_abi_v1_0
 {

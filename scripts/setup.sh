@@ -50,7 +50,7 @@ if [ "${OS_TYPE}" = "Linux" ]; then
     echo -e "${GREEN}Installing build dependencies...${NC}"
     sudo apt update
     sudo apt install -y cmake git gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib gcc g++ build-essential
-    
+
     OSS_ARCH="linux-x64"
     DOWNLOAD_CMD="wget"
 elif [ "${OS_TYPE}" = "macOS" ]; then
@@ -63,12 +63,12 @@ elif [ "${OS_TYPE}" = "macOS" ]; then
         echo -e "${YELLOW}Or visit: https://brew.sh${NC}"
         exit 1
     fi
-    
+
     echo -e "${GREEN}Installing build dependencies...${NC}"
     brew install --cask gcc-arm-embedded || {
         echo -e "${YELLOW}Warning: gcc-arm-embedded installation failed or already installed${NC}"
     }
-    
+
     # Detect architecture (Apple Silicon vs Intel)
     ARCH="$(uname -m)"
     if [ "${ARCH}" = "arm64" ]; then
@@ -81,7 +81,7 @@ elif [ "${OS_TYPE}" = "macOS" ]; then
         echo -e "${RED}ERROR: Unsupported macOS architecture: ${ARCH}${NC}"
         exit 1
     fi
-    
+
     DOWNLOAD_CMD="curl -L -O"
 fi
 

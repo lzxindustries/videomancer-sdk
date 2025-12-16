@@ -20,7 +20,7 @@
 -- Description:
 --   4-Stage Pipelined Unsigned Interpolator
 --
--- Authors: 
+-- Authors:
 --   Lars Larsen
 --
 -- Overview:
@@ -102,25 +102,25 @@ architecture rtl of interpolator_u is
   signal s_a_0                  : unsigned(G_WIDTH - 1 downto 0);
   signal s_b_0                  : unsigned(G_WIDTH - 1 downto 0);
   signal s_t_0                  : unsigned(G_FRAC_BITS - 1 downto 0);
-  
+
   --------------------------------------------------------------------------------
   -- Pipeline Stage 1: Difference Computation
   --------------------------------------------------------------------------------
   signal s_a_1                  : unsigned(G_WIDTH - 1 downto 0);  -- Delayed a
   signal s_t_1                  : unsigned(G_FRAC_BITS - 1 downto 0);  -- Delayed t
   signal s_diff                 : signed(C_DIFF_WIDTH - 1 downto 0);  -- Signed difference (b - a)
-  
+
   --------------------------------------------------------------------------------
   -- Pipeline Stage 2: Multiplication
   --------------------------------------------------------------------------------
   signal s_a_2                  : unsigned(G_WIDTH - 1 downto 0);  -- Delayed a
   signal s_product              : signed(C_PRODUCT_WIDTH - 1 downto 0);  -- (b - a) * t
-  
+
   --------------------------------------------------------------------------------
   -- Pipeline Stage 3: Scaling, Addition, and Clamping
   --------------------------------------------------------------------------------
   signal s_final_result         : unsigned(G_WIDTH - 1 downto 0);
-  
+
   --------------------------------------------------------------------------------
   -- Valid Signal Pipeline
   --------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ begin
       -- Delay a and t through the pipeline
       s_a_1   <= s_a_0;
       s_t_1   <= s_t_0;
-      
+
       -- Compute signed difference: diff = b - a
       -- Using signed arithmetic ensures correct result when b < a (negative difference)
       s_diff  <= signed(resize(s_b_0, C_DIFF_WIDTH)) - signed(resize(s_a_0, C_DIFF_WIDTH));
@@ -174,7 +174,7 @@ begin
     if rising_edge(clk) then
       -- Continue delaying a for final addition
       s_a_2     <= s_a_1;
-      
+
       -- Multiply difference by interpolation factor
       -- Product = (b - a) * t, where t is in range [0, 2^G_FRAC_BITS - 1]
       s_product <= s_diff * signed('0' & s_t_1);
@@ -200,16 +200,16 @@ begin
       else
         v_round_bit := '0';
       end if;
-      
+
       -- Step 2: Scale product by removing fractional bits (divide by 2^G_FRAC_BITS)
       -- This converts from fixed-point back to integer representation
       v_scaled := s_product(C_PRODUCT_WIDTH - 1 downto G_FRAC_BITS);
-      
+
       -- Step 3: Round to nearest (add 1 if rounding bit is set)
       if v_round_bit = '1' then
         v_scaled := v_scaled + 1;
       end if;
-      
+
       -- Step 4: Add back the 'a' value to complete interpolation
       -- result = a + scaled_product = a + (b - a) * t / 2^G_FRAC_BITS
       v_added  := signed(resize(s_a_2, G_WIDTH + 2)) + resize(v_scaled, G_WIDTH + 2);

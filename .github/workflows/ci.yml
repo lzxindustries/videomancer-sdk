@@ -10,13 +10,13 @@ jobs:
   test:
     name: Build and Test
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
-    
+
     - name: Cache OSS CAD Suite
       id: cache-oss-cad
       uses: actions/cache@v4
@@ -25,33 +25,33 @@ jobs:
         key: oss-cad-suite-${{ runner.os }}-${{ hashFiles('scripts/setup.sh') }}
         restore-keys: |
           oss-cad-suite-${{ runner.os }}-
-    
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake build-essential python3 python3-pip
         pip3 install jsonschema toml
-    
+
     - name: Setup OSS CAD Suite
       if: steps.cache-oss-cad.outputs.cache-hit != 'true'
       run: bash scripts/setup.sh
-    
+
     - name: Build SDK with tests
       run: bash build_sdk.sh --test
-    
+
     - name: Run C++ tests
       run: |
         cd build
         ctest --output-on-failure --verbose
-    
+
     - name: Run all tests (C++, Python, Shell)
       run: |
         cd tests
         bash run_tests.sh --verbose
-    
+
     - name: Build example programs
       run: bash build_programs.sh
-    
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       if: success()
@@ -59,7 +59,7 @@ jobs:
         name: vmprog-packages
         path: out/*.vmprog
         retention-days: 7
-    
+
     - name: Test summary
       if: always()
       run: |
@@ -76,19 +76,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
-    
+
     - name: Install dependencies (Ubuntu)
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake build-essential python3 python3-pip
         pip3 install jsonschema toml
-    
+
     - name: Cache OSS CAD Suite
       id: cache-oss-cad
       uses: actions/cache@v4
@@ -97,10 +97,10 @@ jobs:
         key: oss-cad-suite-${{ matrix.os }}-${{ hashFiles('scripts/setup.sh') }}
         restore-keys: |
           oss-cad-suite-${{ matrix.os }}-
-    
+
     - name: Build SDK tests only
       run: bash build_sdk.sh --test
-    
+
     - name: Run C++ tests
       run: |
         cd build

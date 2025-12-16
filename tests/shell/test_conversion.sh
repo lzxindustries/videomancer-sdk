@@ -48,7 +48,7 @@ if [ -f "/tmp/test_config.bin" ]; then
     echo "=== Verification ==="
     echo "Output file: /tmp/test_config.bin"
     echo "Size: $SIZE bytes (expected: 7368)"
-    
+
     if [ "$SIZE" -eq 7368 ]; then
         echo "✓ Size matches!"
         rm /tmp/test_config.bin
@@ -63,7 +63,7 @@ else
     exit 1
 fi
     xxd -l 128 template_test.bin
-    
+
     echo
     echo "=== Test Passed ==="
 else

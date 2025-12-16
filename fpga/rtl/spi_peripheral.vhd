@@ -70,7 +70,7 @@ architecture rtl of spi_peripheral is
     signal s_bit_count : unsigned(DATA_WIDTH - 1 downto 0)         := (others => '0');
     signal s_addr_buf  : unsigned(ADDR_WIDTH - 1 downto 0)         := (others => '0');
     signal s_data_buf  : std_logic_vector(DATA_WIDTH - 1 downto 0) := (others => '0');
-    
+
     -- Pre-computed signals for critical path optimization
     signal s_output_en_reg : std_logic := '0';
     signal s_input_en_reg  : std_logic := '0';
@@ -94,13 +94,13 @@ begin
             s_sck_d  <= s_sck;
             s_cs_n_d <= s_cs_n;
             s_sdi_d  <= s_sdi;
-            
+
             -- Register edge detections to break critical path
             s_output_en_reg <= '1' when (s_sck xor CPOL xor CPHA) = '1' and (s_sck_d xor CPOL xor CPHA) = '0' else '0';
             s_input_en_reg  <= '1' when (s_sck xor CPOL xor CPHA) = '0' and (s_sck_d xor CPOL xor CPHA) = '1' else '0';
             s_stop_reg      <= '1' when s_cs_n = '1' and s_cs_n_d = '0' else '0';
             s_start_reg     <= '1' when s_cs_n = '0' and s_cs_n_d = '1' else '0';
-            
+
             -- Pre-compute bit count comparisons (breaks critical path)
             s_last_addr_bit <= '1' when s_bit_count = (ADDR_WIDTH - 1) else '0';
             s_last_data_bit <= '1' when s_bit_count = (DATA_WIDTH - 1) else '0';
@@ -124,7 +124,7 @@ begin
         if rising_edge(clk) then
             wr_en <= '0';
             rd_en <= '0';
-            
+
             -- Priority: stop/start first (highest priority)
             if s_stop_reg = '1' then
                 s_sdo_en <= '0';
@@ -141,20 +141,20 @@ begin
                 case s_state is
                     when REQUESTING_READ =>
                         s_state <= WAITING_READ;
-                        
+
                     when WAITING_READ =>
                         s_data_buf <= din;
                         s_state    <= SENDING_DATA;
-                        
+
                     when REQUESTING_WRITE =>
                         dout        <= s_data_buf;
                         wr_en       <= '1';
                         s_bit_count <= to_unsigned(0, DATA_WIDTH);
                         s_state     <= WAITING_WRITE;
-                        
+
                     when WAITING_WRITE =>
                         s_state <= IDLE;
-                        
+
                     when RECEIVING_ADDRESS =>
                         if s_input_en_reg = '1' then
                             s_addr_buf(ADDR_WIDTH - 1 - to_integer(s_bit_count)) <= s_sdi;
@@ -165,7 +165,7 @@ begin
                                 s_bit_count <= s_bit_count + to_unsigned(1, DATA_WIDTH);
                             end if;
                         end if;
-                        
+
                     when RECEIVING_COMMAND =>
                         if s_input_en_reg = '1' then
                             addr  <= s_addr_buf;
@@ -176,7 +176,7 @@ begin
                                 s_state <= REQUESTING_READ;
                             end if;
                         end if;
-                        
+
                     when RECEIVING_DATA =>
                         if s_input_en_reg = '1' then
                             s_data_buf(DATA_WIDTH - 1 - to_integer(s_bit_count)) <= s_sdi;
@@ -186,7 +186,7 @@ begin
                                 s_bit_count <= s_bit_count + to_unsigned(1, DATA_WIDTH);
                             end if;
                         end if;
-                        
+
                     when SENDING_DATA =>
                         if s_output_en_reg = '1' then
                             s_sdo_state <= s_data_buf(DATA_WIDTH - 1 - to_integer(s_bit_count));
@@ -196,7 +196,7 @@ begin
                                 s_bit_count <= s_bit_count + to_unsigned(1, DATA_WIDTH);
                             end if;
                         end if;
-                        
+
                     when others => -- IDLE
                         null;
                 end case;

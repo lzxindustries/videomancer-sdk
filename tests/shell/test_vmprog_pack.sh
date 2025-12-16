@@ -40,9 +40,9 @@ else
     echo "Input: $INPUT_DIR"
     echo "Output: $OUTPUT_FILE"
     echo
-    
+
     python3 "$SCRIPT_DIR/vmprog_pack.py" "$INPUT_DIR" "$OUTPUT_FILE"
-    
+
     if [ -f "$OUTPUT_FILE" ]; then
         echo
         echo "✓ Test 1 PASSED"
@@ -72,9 +72,9 @@ else
     echo "Input: $INPUT_DIR"
     echo "Output: $OUTPUT_FILE"
     echo
-    
+
     python3 "$SCRIPT_DIR/vmprog_pack.py" "$INPUT_DIR" "$OUTPUT_FILE"
-    
+
     if [ -f "$OUTPUT_FILE" ]; then
         echo
         echo "✓ Test 2 PASSED"

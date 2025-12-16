@@ -10,27 +10,27 @@ jobs:
   check-docs:
     name: Documentation Checks
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
+
     - name: Check for broken links in markdown
       uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: 'yes'
         config-file: '.github/markdown-link-check-config.json'
-    
+
     - name: Install Python dependencies
       run: |
         pip3 install jsonschema toml
-    
+
     - name: Validate TOML schema
       run: |
         cd tools/toml-validator
         echo "Validating example templates..."
         python3 toml_schema_validator.py ../../examples/templates/template.toml
-    
+
     - name: Validate example programs
       run: |
         cd tools/toml-validator
@@ -38,12 +38,12 @@ jobs:
         python3 toml_schema_validator.py ../../programs/passthru/passthru.toml
         echo "Validating yuv_amplifier program..."
         python3 toml_schema_validator.py ../../programs/yuv_amplifier/yuv_amplifier.toml
-    
+
     - name: Check for trailing whitespace
       run: |
         ! git grep -I --line-number --perl-regexp '\s+$' -- '*.md' '*.cpp' '*.hpp' '*.py' '*.sh' '*.toml' || \
         (echo "Found trailing whitespace in the above files" && exit 1)
-    
+
     - name: Check file permissions
       run: |
         echo "Checking for executable permissions on scripts..."
@@ -52,7 +52,7 @@ jobs:
         if [ ! -x "clean.sh" ]; then echo "clean.sh not executable"; exit 1; fi
         if [ ! -x "tests/run_tests.sh" ]; then echo "tests/run_tests.sh not executable"; exit 1; fi
         echo "All required scripts are executable"
-    
+
     - name: Documentation summary
       run: |
         echo "## Documentation Status" >> $GITHUB_STEP_SUMMARY

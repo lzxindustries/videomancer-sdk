@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-namespace lzx 
+namespace lzx
 {
 
     constexpr uint8_t vmprog_public_keys[][32] =

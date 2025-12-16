@@ -79,7 +79,7 @@ if [ "$RUN_TESTS" = true ]; then
     echo -e "${YELLOW}Running Unit Tests${NC}"
     echo -e "${YELLOW}====================================${NC}"
     echo ""
-    
+
     # Run CTest with output on failure
     if ctest --output-on-failure; then
         echo ""

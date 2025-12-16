@@ -18,7 +18,7 @@
 -- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- Description:
---   Generates bi-level and tri-level sync signals based on reference sync 
+--   Generates bi-level and tri-level sync signals based on reference sync
 --   inputs and timing configurations.
 
 --------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ architecture rtl of video_sync_generator is
   signal s_vavid                    : std_logic := '0';
   signal s_avid                     : std_logic := '0';
   signal s_field                    : std_logic := '0';
-  
+
 begin
 
   event_detectors : process (clk)
@@ -133,7 +133,7 @@ begin
 
   s_ref_field_event <= '1' when ref_field_n = '0' and s_ref_field_n_d = '1' else
     '0';
-    
+
   s_ref_vsync_event <= '1' when ref_vsync = '0' and s_ref_vsync_d = '1' else
     '0';
 
@@ -221,20 +221,20 @@ begin
       elsif s_counter_clks = s_hsync_clks_b_1 then
         s_hsync_2x <= '1';
       end if;
-      
+
       if s_counter_clks = s_csync_clks_0 then
         s_csync <= '0';
       elsif s_counter_clks = s_csync_clks_1 then
         s_csync <= '1';
       end if;
-      
+
       -- Direct csync_2x comparison
       if s_counter_clks = s_csync_2x_a_clks_0 or s_counter_clks = s_csync_2x_b_clks_0 then
         s_csync_2x <= '0';
       elsif s_counter_clks = s_csync_2x_a_clks_1 or s_counter_clks = s_csync_2x_b_clks_1 then
         s_csync_2x <= '1';
       end if;
-      
+
       -- Direct eq_pulses comparison
       if (s_counter_lines = s_eq_pulses_a_lines_0 and s_counter_clks = s_eq_pulses_a_clks_0) or
          (s_counter_lines = s_eq_pulses_b_lines_0 and s_counter_clks = s_eq_pulses_b_clks_0) then
@@ -243,7 +243,7 @@ begin
             (s_counter_lines = s_eq_pulses_b_lines_1 and s_counter_clks = s_eq_pulses_b_clks_1) then
         s_eq_pulses <= '1';
       end if;
-      
+
       -- Direct csync_serration comparison
       if s_counter_clks = s_csync_serration_a_clks_0 or s_counter_clks = s_csync_serration_b_clks_0 or
          s_counter_clks = s_csync_serration_c_clks_0 or s_counter_clks = s_csync_serration_d_clks_0 then
@@ -252,7 +252,7 @@ begin
             s_counter_clks = s_csync_serration_c_clks_1 or s_counter_clks = s_csync_serration_d_clks_1 then
         s_csync_serration <= '1';
       end if;
-      
+
       -- Direct vsync comparison
       if (s_counter_lines = s_vsync_a_lines_0 and s_counter_clks = s_vsync_a_clks_0) or
          (s_counter_lines = s_vsync_b_lines_0 and s_counter_clks = s_vsync_b_clks_0) then
@@ -264,20 +264,20 @@ begin
 
       -- -- Horizontal active video generation
       -- if s_counter_clks = s_havid_clks_0 then
-      --   s_havid <= '0'; 
+      --   s_havid <= '0';
       -- elsif s_counter_clks = s_havid_clks_1 then
       --   s_havid <= '1';
       -- end if;
-      
+
       -- -- Vertical active video generation
-      -- if (s_counter_lines = s_vavid_a_lines_0 and s_counter_clks = s_vavid_a_clks_0) or 
+      -- if (s_counter_lines = s_vavid_a_lines_0 and s_counter_clks = s_vavid_a_clks_0) or
       --    (s_counter_lines = s_vavid_b_lines_0 and s_counter_clks = s_vavid_b_clks_0) then
       --   s_vavid <= '0';
-      -- elsif (s_counter_lines = s_vavid_a_lines_1 and s_counter_clks = s_vavid_a_clks_1) or 
+      -- elsif (s_counter_lines = s_vavid_a_lines_1 and s_counter_clks = s_vavid_a_clks_1) or
       --       (s_counter_lines = s_vavid_b_lines_1 and s_counter_clks = s_vavid_b_clks_1) then
       --   s_vavid <= '1';
       -- end if;
-      
+
       -- -- Field generation
       -- if (s_counter_lines = s_field_lines_0 and s_counter_clks = s_field_clks_0) then
       --   s_field <= '0';
@@ -302,5 +302,5 @@ begin
 
   hsync <= s_hsync;
   vsync <= s_vsync;
-  
+
 end architecture;

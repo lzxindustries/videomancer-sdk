@@ -82,7 +82,7 @@ begin
 
     -- Phase reset detection (rising edge of AVID)
     s_phase_reset <= '1' when (s_avid_in = '0' and s_avid_d1 = '1') else '0';
-    
+
     -- Main processing pipeline
     process(clk)
     begin
@@ -123,7 +123,7 @@ begin
             -- YUV422 to YUV444 conversion
             -- Y always passes through with 1 cycle delay
             s_yuv444_y <= s_yuv422_y_d1;
-            
+
             if s_phase = '0' then
                 -- U/Cb phase - store chroma for next cycle
                 s_yuv422_c_d1 <= s_yuv422_c;

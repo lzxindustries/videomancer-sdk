@@ -20,12 +20,12 @@
 -- Program Name:
 --   YUV Amplifier
 --
--- Author: 
+-- Author:
 --   Lars Larsen
 --
 -- Overview:
---   This program provides per-channel contrast and brightness adjustment, color 
---   inversion, and fade effects. The design uses a pipelined architecture with 
+--   This program provides per-channel contrast and brightness adjustment, color
+--   inversion, and fade effects. The design uses a pipelined architecture with
 --   a total latency of 14 clock cycles, ensuring proper timing alignment
 --   between the video data and sync signals.
 --
@@ -242,7 +242,7 @@ begin
     -- Latency: 9 clock cycles per channel
     -- Operation: result = (input * contrast) + brightness
     --------------------------------------------------------------------------------
-    
+
     -- Y channel process amplifier
     -- Applies contrast multiplication followed by brightness addition
     proc_amp_y : entity work.proc_amp_u
@@ -299,7 +299,7 @@ begin
     -- Y channel: Fades between target color (black/white) and processed Y
     -- U/V channels: Fade toward neutral (512) for desaturation effect
     --------------------------------------------------------------------------------
-    
+
     -- Y channel interpolator: Fade to black or white
     -- When t=0: full fade (result = fade_color_value)
     -- When t=1023: no fade (result = proc_y_result)
@@ -367,7 +367,7 @@ begin
         -- Delay line types: arrays indexed 0 (newest) to DELAY_CLKS-1 (oldest)
         type t_sync_delay is array (0 to C_PROCESSING_DELAY_CLKS - 1) of std_logic;
         type t_data_delay is array (0 to C_PROCESSING_DELAY_CLKS - 1) of std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
-        
+
         -- Shift register variables (initialized to safe defaults)
         variable v_hsync_delay : t_sync_delay := (others => '1');  -- Sync inactive high
         variable v_vsync_delay : t_sync_delay := (others => '1');  -- Sync inactive high
@@ -401,7 +401,7 @@ begin
     -- Output Multiplexing and Assignment
     -- Selects between processed video (normal mode) and delayed input (bypass mode)
     --------------------------------------------------------------------------------
-    
+
     -- Video data outputs: Choose processed or bypassed data
     -- When bypass_enable = '0': Output fully processed video (with all effects)
     -- When bypass_enable = '1': Output delayed input (unprocessed, latency-matched)
@@ -416,8 +416,8 @@ begin
 
     -- Valid signal: Active when all interpolators have valid output
     -- This indicates when processed data is available and stable
-    data_out.avid <= s_interpolator_y_valid and 
-                     s_interpolator_u_valid and 
+    data_out.avid <= s_interpolator_y_valid and
+                     s_interpolator_u_valid and
                      s_interpolator_v_valid;
 
     -- Sync signals: Always use delayed versions (matched to processing latency)

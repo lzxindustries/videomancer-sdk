@@ -21,13 +21,13 @@ set(TEST_SOURCES
 foreach(TEST_SOURCE ${TEST_SOURCES})
     # Get test name from source file
     string(REPLACE ".cpp" "" TEST_NAME ${TEST_SOURCE})
-    
+
     # Create executable
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    
+
     # Link with SDK
     target_link_libraries(${TEST_NAME} PRIVATE videomancer-sdk)
-    
+
     # Set C++ standard (match SDK)
     if(WIN32)
         set_property(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 17)
@@ -35,10 +35,10 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         set_property(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 20)
     endif()
     set_property(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
-    
+
     # Add as CTest test
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-    
+
     message(STATUS "Configured test: ${TEST_NAME}")
 endforeach()
 

@@ -20,7 +20,7 @@
 -- Program Name:
 --   Passthru
 --
--- Author: 
+-- Author:
 --   Lars Larsen
 --
 -- Overview:

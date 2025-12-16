@@ -1,7 +1,7 @@
 --******************************************************
---Title:    sb_ice_components_syn.vhd 
+--Title:    sb_ice_components_syn.vhd
 --Author:   jglong
---Function: instantiate all the cells of the sb_ice_syn.v library 
+--Function: instantiate all the cells of the sb_ice_syn.v library
 --Company:  SiliconBlue Technologies, Inc.
 --INIT:     Feb 18, 2008
 --Revision History:
@@ -29,217 +29,217 @@ attribute SCL_FILTERED : boolean;
 attribute I2C_CLK_DIVIDER : integer;
 attribute I2C_FIFO_ENB : string;
 attribute TEST_SPRAM : string;
-component SB_CARRY 
-          port( 
+component SB_CARRY
+          port(
                 CO : out std_logic  ;
                 I0 : in  std_logic ;
                 I1:  in  std_logic ;
-                CI : in  std_logic 
+                CI : in  std_logic
                );
 end component;
 
 component SB_CARRY_IN_MUX
           generic ( C_INIT : bit_vector( 1  downto 0) )  ;
-          port( 
+          port(
                 carry_init_out :  out std_logic ;
-                carry_init_in  :  in  std_logic 
+                carry_init_in  :  in  std_logic
                );
 end component;
 
 component SB_LUT4
           generic ( LUT_INIT : bit_vector( 15  downto 0) ) ;
-          port( 
+          port(
                 O  : out std_logic ;
                 I0 : in  std_logic ;
                 I1 : in  std_logic ;
                 I2 : in  std_logic ;
-                I3 : in  std_logic 
+                I3 : in  std_logic
                );
 end component;
 
 component SB_DFF
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
-                D : in  std_logic 
+                D : in  std_logic
                );
 end component;
 
 component SB_DFFSR
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFSS
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFR
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFS
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFE
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
-                D : in  std_logic 
+                D : in  std_logic
                );
 end component;
 
 component SB_DFFESR
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFESS
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFER
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFES
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFN
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
-                D : in  std_logic 
+                D : in  std_logic
                );
 end component;
 
 component SB_DFFNSR
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFNSS
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFNR
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFNS
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFNE
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
-                D : in  std_logic 
+                D : in  std_logic
                );
 end component;
 
 component SB_DFFNESR
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFNESS
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
 component SB_DFFNER
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                R : in  std_logic 
+                R : in  std_logic
                );
 end component;
 
 component SB_DFFNES
-          port( 
+          port(
                 Q : out std_logic ;
                 C : in  std_logic ;
                 E : in  std_logic ;
                 D : in  std_logic ;
-                S : in  std_logic 
+                S : in  std_logic
                );
 end component;
 
@@ -247,10 +247,10 @@ component SB_RAM40_4K
           generic ( WRITE_MODE : integer := 0;
                     READ_MODE : integer := 0;
                     INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -261,9 +261,9 @@ component SB_RAM40_4K
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -283,10 +283,10 @@ component SB_RAM40_4KNR
           generic ( WRITE_MODE : integer := 0;
                     READ_MODE : integer := 0;
                     INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -297,9 +297,9 @@ component SB_RAM40_4KNR
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -319,10 +319,10 @@ component SB_RAM40_4KNW
           generic ( WRITE_MODE : integer := 0;
                     READ_MODE : integer := 0;
                     INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -333,9 +333,9 @@ component SB_RAM40_4KNW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -355,10 +355,10 @@ component SB_RAM40_4KNRNW
           generic ( WRITE_MODE : integer := 0;
                     READ_MODE : integer := 0;
                     INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -369,9 +369,9 @@ component SB_RAM40_4KNRNW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -388,10 +388,10 @@ end component;
 
 component SB_RAM256x16
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -402,9 +402,9 @@ component SB_RAM256x16
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -421,10 +421,10 @@ end component;
 
 component SB_RAM256x16NR
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -435,9 +435,9 @@ component SB_RAM256x16NR
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLKN  : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -454,10 +454,10 @@ end component;
 
 component SB_RAM256x16NW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -468,9 +468,9 @@ component SB_RAM256x16NW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -487,10 +487,10 @@ end component;
 
 component SB_RAM256x16NRNW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -501,9 +501,9 @@ component SB_RAM256x16NRNW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 15  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -521,10 +521,10 @@ end component;
 
 component SB_RAM512x8
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -535,9 +535,9 @@ component SB_RAM512x8
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 7  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -554,10 +554,10 @@ end component;
 
 component SB_RAM512x8NR
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -568,9 +568,9 @@ component SB_RAM512x8NR
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 7  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -586,10 +586,10 @@ end component;
 
 component SB_RAM512x8NW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -600,9 +600,9 @@ component SB_RAM512x8NW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 7  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -618,10 +618,10 @@ end component;
 
 component SB_RAM512x8NRNW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -632,9 +632,9 @@ component SB_RAM512x8NRNW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 7  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -651,10 +651,10 @@ end component;
 
 component SB_RAM1024x4
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -665,9 +665,9 @@ component SB_RAM1024x4
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 3  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -683,10 +683,10 @@ end component;
 
 component SB_RAM1024x4NR
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -697,9 +697,9 @@ component SB_RAM1024x4NR
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 3  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -715,10 +715,10 @@ end component;
 
 component SB_RAM1024x4NW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -729,9 +729,9 @@ component SB_RAM1024x4NW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 3  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -747,10 +747,10 @@ end component;
 
 component SB_RAM1024x4NRNW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -761,9 +761,9 @@ component SB_RAM1024x4NRNW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 3  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -780,10 +780,10 @@ end component;
 
 component SB_RAM2048x2
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -794,9 +794,9 @@ component SB_RAM2048x2
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 1  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -812,10 +812,10 @@ end component;
 
 component SB_RAM2048x2NR
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -826,9 +826,9 @@ component SB_RAM2048x2NR
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 1  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -844,10 +844,10 @@ end component;
 
 component SB_RAM2048x2NW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -858,9 +858,9 @@ component SB_RAM2048x2NW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 1  downto 0) ;
                 RCLK : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -876,10 +876,10 @@ end component;
 
 component SB_RAM2048x2NRNW
           generic ( INIT_0 : bit_vector( 255  downto 0) ;
-                    INIT_1 : bit_vector( 255  downto 0) ; 
-                    INIT_2 : bit_vector( 255  downto 0) ; 
-                    INIT_3 : bit_vector( 255  downto 0) ; 
-                    INIT_4 : bit_vector( 255  downto 0) ; 
+                    INIT_1 : bit_vector( 255  downto 0) ;
+                    INIT_2 : bit_vector( 255  downto 0) ;
+                    INIT_3 : bit_vector( 255  downto 0) ;
+                    INIT_4 : bit_vector( 255  downto 0) ;
                     INIT_5 : bit_vector( 255  downto 0) ;
                     INIT_6 : bit_vector( 255  downto 0) ;
                     INIT_7 : bit_vector( 255  downto 0) ;
@@ -890,9 +890,9 @@ component SB_RAM2048x2NRNW
                     INIT_C : bit_vector( 255  downto 0) ;
                     INIT_D : bit_vector( 255  downto 0) ;
                     INIT_E : bit_vector( 255  downto 0) ;
-                    INIT_F : bit_vector( 255  downto 0) 
+                    INIT_F : bit_vector( 255  downto 0)
                   ) ;
-          port( 
+          port(
                 RDATA : out std_logic_vector( 1  downto 0) ;
                 RCLKN : in  std_logic ;
                 RCLKE : in  std_logic ;
@@ -908,11 +908,11 @@ end component;
 
 component SB_IO
           generic ( PIN_TYPE    : bit_vector( 5  downto 0);
-                    PULLUP   : bit; 
-                    NEG_TRIGGER : bit; 
-                    IO_STANDARD : string 
+                    PULLUP   : bit;
+                    NEG_TRIGGER : bit;
+                    IO_STANDARD : string
                   ) ;
-          port( 
+          port(
                 PACKAGE_PIN        : inout std_logic ;
                 LATCH_INPUT_VALUE  : in  std_logic ;
                 CLOCK_ENABLE       : in  std_logic ;
@@ -922,17 +922,17 @@ component SB_IO
                 D_OUT_1            : in  std_logic ;
                 D_OUT_0            : in  std_logic ;
                 D_IN_1             : out std_logic ;
-                D_IN_0             : out std_logic                 
+                D_IN_0             : out std_logic
                );
 end component;
 
 component SB_GB_IO
           generic ( PIN_TYPE    : bit_vector( 5  downto 0);
-                    PULLUP   : bit; 
-                    NEG_TRIGGER : bit; 
-                    IO_STANDARD : string 
+                    PULLUP   : bit;
+                    NEG_TRIGGER : bit;
+                    IO_STANDARD : string
                   ) ;
-          port( 
+          port(
                 PACKAGE_PIN          : inout std_logic ;
                 LATCH_INPUT_VALUE    : in  std_logic ;
                 CLOCK_ENABLE         : in  std_logic ;
@@ -943,16 +943,16 @@ component SB_GB_IO
                 D_OUT_0              : in  std_logic ;
                 D_IN_1               : out std_logic ;
                 D_IN_0               : out std_logic ;
-                GLOBAL_BUFFER_OUTPUT : out std_logic                
+                GLOBAL_BUFFER_OUTPUT : out std_logic
                );
 end component;
 
 component SB_IO_DS
           generic ( PIN_TYPE    : bit_vector( 5  downto 0);
-                    NEG_TRIGGER : bit; 
-                    IO_STANDARD : string 
+                    NEG_TRIGGER : bit;
+                    IO_STANDARD : string
                   ) ;
-          port( 
+          port(
                 PACKAGE_PIN        : inout std_logic ;
                 PACKAGE_PIN_B      : inout std_logic ;
                 LATCH_INPUT_VALUE  : in  std_logic ;
@@ -963,38 +963,38 @@ component SB_IO_DS
                 D_OUT_1            : in  std_logic ;
                 D_OUT_0            : in  std_logic ;
                 D_IN_1             : out std_logic ;
-                D_IN_0             : out std_logic                 
+                D_IN_0             : out std_logic
                );
 end component;
 
 component SB_GB
-          port( 
+          port(
                 GLOBAL_BUFFER_OUTPUT         : out std_logic ;
-                USER_SIGNAL_TO_GLOBAL_BUFFER : in  std_logic 
+                USER_SIGNAL_TO_GLOBAL_BUFFER : in  std_logic
                );
 end component;
 
-component SB_PLL40_CORE 
+component SB_PLL40_CORE
   generic (
        		--- Feedback
-		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)	
-		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED"; 
-		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5	
-	  	FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).   	
+		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED";
+		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
+	  	FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
   		PLLOUT_SELECT			 : string := "GENCLK";
 
   		--- Use the spread sheet to populate the values below
 		DIVF				: bit_vector(6 downto 0);  -- Determine a good default value
 		DIVR				: bit_vector(3 downto 0);  -- Determine a good default value
 		DIVQ				: bit_vector(2 downto 0);  -- Determine a good default value
-		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value 
+		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value
 
   		--- Additional C-Bits
   		ENABLE_ICEGATE			: bit := '0';
 
-  		--- Test Mode Parameter 
+  		--- Test Mode Parameter
   		TEST_MODE			: bit := '0';
 		EXTERNAL_DIVIDE_FACTOR		: integer := 1 -- Not Used by model, Added for PLL config GUI
        );
@@ -1015,19 +1015,19 @@ component SB_PLL40_CORE
        );
 end component;
 
-component  SB_PLL40_CORE_DUPLICATE 
-	generic (	
-		FEEDBACK_PATH 			: string 			:= "SIMPLE";	 -- String  (simple, delay, phase_and_delay, external) 
-		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED"; 
-		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5	
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).    
-		PLLOUT_SELECT 			: string 			:= "GENCLK";  
-		DIVR 				: bit_vector(3 downto 0)	:= "0000"; 	
-		DIVF 				: bit_vector(6 downto 0) 	:= "0000000"; 
-		DIVQ 				: bit_vector(2 downto 0)	:= "000"; 		
-		FILTER_RANGE 			: bit_vector(2 downto 0)        := "000"; 	
+component  SB_PLL40_CORE_DUPLICATE
+	generic (
+		FEEDBACK_PATH 			: string 			:= "SIMPLE";	 -- String  (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED";
+		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
+		PLLOUT_SELECT 			: string 			:= "GENCLK";
+		DIVR 				: bit_vector(3 downto 0)	:= "0000";
+		DIVF 				: bit_vector(6 downto 0) 	:= "0000000";
+		DIVQ 				: bit_vector(2 downto 0)	:= "000";
+		FILTER_RANGE 			: bit_vector(2 downto 0)        := "000";
 		ENABLE_ICEGATE			: bit				:= '0';
 		TEST_MODE 			: bit				:= '0';
 		EXTERNAL_DIVIDE_FACTOR 		: integer 				:= 1 		 --Not used by model. Added for PLL Config GUI.
@@ -1035,7 +1035,7 @@ component  SB_PLL40_CORE_DUPLICATE
 
 	port 	(
 		REFERENCECLK			: in std_logic ; 		-- Driven by core logic
-		PLLOUTCORE			: out std_logic; 		-- PLL output to core logic ( by normal routing) 
+		PLLOUTCORE			: out std_logic; 		-- PLL output to core logic ( by normal routing)
 		PLLOUTGLOBAL	   		: out std_logic; 		-- PLL output to core logic  (by global network)
 		EXTFEEDBACK  			: in std_logic;			-- Driven by core logic
 		DYNAMICDELAY			: in std_logic_vector (7 downto 0);	-- Driven by core logic
@@ -1045,37 +1045,37 @@ component  SB_PLL40_CORE_DUPLICATE
 		SDI				: in std_logic; 		-- Driven by core logic. Test Pin
 		SDO				: out std_logic;		-- Output to RB Logic Tile. Test Pin
 		SCLK				: in std_logic; 		-- Driven by core logic. Test Pin
-		LATCHINPUTVALUE 		: in std_logic 			-- iCEGate signal	
-	       ); 
-end component;			
+		LATCHINPUTVALUE 		: in std_logic 			-- iCEGate signal
+	       );
+end component;
 
 component SB_PLL40_PAD
 
   generic (
   		--- Feedback
-		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)	
-		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED"; 
+		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED";
 		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).   	  
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
   		PLLOUT_SELECT			 : string := "GENCLK";
 
   		--- Use the spread sheet to populate the values below
 		DIVF				: bit_vector(6 downto 0);  -- Determine a good default value
 		DIVR				: bit_vector(3 downto 0);  -- Determine a good default value
 		DIVQ				: bit_vector(2 downto 0);  -- Determine a good default value
-		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value 
+		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value
 
   		--- Additional C-Bits
   		ENABLE_ICEGATE			: bit := '0';
 
-  		--- Test Mode Parameter 
+  		--- Test Mode Parameter
   		TEST_MODE			: bit := '0';
 		EXTERNAL_DIVIDE_FACTOR		: integer := 1 -- Not Used by model, Added for PLL config GUI
        );
-  port ( 
-        PACKAGEPIN		: inout std_logic;		    
+  port (
+        PACKAGEPIN		: inout std_logic;
         PLLOUTCORE		: out std_logic;		    -- PLL output to core logic
         PLLOUTGLOBAL		: out std_logic;		    -- PLL output to global network
         EXTFEEDBACK		: in std_logic;			    -- Driven by core logic
@@ -1089,7 +1089,7 @@ component SB_PLL40_PAD
   	SDI			: in std_logic;			    -- Driven by core logic
   	SCLK			: in std_logic			    -- Driven by core logic
        );
-  
+
 end component;
 
 
@@ -1097,30 +1097,30 @@ component SB_PLL40_2_PAD
 
   generic (
   		--- Feedback
-		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)	
-		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED"; 
+		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED";
 		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).   	  
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
   		PLLOUT_SELECT_PORTB		 : string := "GENCLK";
 
   		--- Use the spread sheet to populate the values below
 		DIVF				: bit_vector(6 downto 0);  -- Determine a good default value
 		DIVR				: bit_vector(3 downto 0);  -- Determine a good default value
 		DIVQ				: bit_vector(2 downto 0);  -- Determine a good default value
-		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value 
+		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value
 
   		--- Additional C-Bits
   		ENABLE_ICEGATE_PORTA		: bit := '0';
   		ENABLE_ICEGATE_PORTB		: bit := '0';
 
-  		--- Test Mode Parameter 
+  		--- Test Mode Parameter
   		TEST_MODE			: bit := '0';
 		EXTERNAL_DIVIDE_FACTOR		: integer := 1 -- Not Used by model, Added for PLL config GUI
        );
-  port ( 
-        PACKAGEPIN		: inout std_logic;		    
+  port (
+        PACKAGEPIN		: inout std_logic;
         PLLOUTCOREA		: out std_logic;		    -- PLL output to core logic
         PLLOUTGLOBALA		: out std_logic;		    -- PLL output to global network
         PLLOUTCOREB		: out std_logic;		    -- PLL output to core logic
@@ -1136,19 +1136,19 @@ component SB_PLL40_2_PAD
   	SDI			: in std_logic;			    -- Driven by core logic
   	SCLK			: in std_logic			    -- Driven by core logic
        );
-  
+
 end component;
 
 component SB_PLL40_2F_CORE
 
   generic (
   		--- Feedback
-		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)	
-		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED"; 
+		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED";
 		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).    
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
   		PLLOUT_SELECT_PORTA		 : string := "GENCLK";
   		PLLOUT_SELECT_PORTB		 : string := "GENCLK";
 
@@ -1156,17 +1156,17 @@ component SB_PLL40_2F_CORE
 		DIVF				: bit_vector(6 downto 0);  -- Determine a good default value
 		DIVR				: bit_vector(3 downto 0);  -- Determine a good default value
 		DIVQ				: bit_vector(2 downto 0);  -- Determine a good default value
-		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value 
+		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value
 
   		--- Additional C-Bits
   		ENABLE_ICEGATE_PORTA		: bit := '0';
   		ENABLE_ICEGATE_PORTB		: bit := '0';
 
-  		--- Test Mode Parameter 
+  		--- Test Mode Parameter
   		TEST_MODE			: bit := '0';
 		EXTERNAL_DIVIDE_FACTOR		: integer := 1 -- Not Used by model, Added for PLL config GUI
        );
-  port ( 
+  port (
         REFERENCECLK		: in std_logic;		    	    -- Driven by core logic
         PLLOUTCOREA		: out std_logic;		    -- PLL output to core logic
         PLLOUTGLOBALA		: out std_logic;		    -- PLL output to global network
@@ -1183,19 +1183,19 @@ component SB_PLL40_2F_CORE
   	SDI			: in std_logic;			    -- Driven by core logic
   	SCLK			: in std_logic			    -- Driven by core logic
        );
-  
+
 end component;
 
 component SB_PLL40_2F_PAD
 
   generic (
   		--- Feedback
-		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)	
-		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED"; 
+		FEEDBACK_PATH	 		 : string := "SIMPLE"; -- String (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK 	 : string := "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	 : string := "FIXED";
 		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).    
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
   		PLLOUT_SELECT_PORTA		 : string := "GENCLK";
   		PLLOUT_SELECT_PORTB		 : string := "GENCLK";
 
@@ -1203,18 +1203,18 @@ component SB_PLL40_2F_PAD
 		DIVF				: bit_vector(6 downto 0);  -- Determine a good default value
 		DIVR				: bit_vector(3 downto 0);  -- Determine a good default value
 		DIVQ				: bit_vector(2 downto 0);  -- Determine a good default value
-		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value 
+		FILTER_RANGE			: bit_vector(2 downto 0);  -- Determine a good default value
 
   		--- Additional C-Bits
   		ENABLE_ICEGATE_PORTA		: bit := '0';
   		ENABLE_ICEGATE_PORTB		: bit := '0';
 
-  		--- Test Mode Parameter 
+  		--- Test Mode Parameter
   		TEST_MODE			: bit := '0';
 		EXTERNAL_DIVIDE_FACTOR		: integer := 1 -- Not Used by model, Added for PLL config GUI
        );
-  port ( 
-        PACKAGEPIN		: inout std_logic;	    	    
+  port (
+        PACKAGEPIN		: inout std_logic;
         PLLOUTCOREA		: out std_logic;		    -- PLL output to core logic
         PLLOUTGLOBALA		: out std_logic;		    -- PLL output to global network
         PLLOUTCOREB		: out std_logic;		    -- PLL output to core logic
@@ -1230,34 +1230,34 @@ component SB_PLL40_2F_PAD
   	SDI			: in std_logic;			    -- Driven by core logic
   	SCLK			: in std_logic			    -- Driven by core logic
        );
-  
+
 end component;
 
 --------------------------------------------------------------------------------------------------
 -- 					 SB_PLL40_PAD_DS 					--
 --------------------------------------------------------------------------------------------------
 
-component  SB_PLL40_PAD_DS  
-	generic (	
-		FEEDBACK_PATH 			: string 			:= "SIMPLE";	 -- String  (simple, delay, phase_and_delay, external) 
-		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED"; 
-		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5	
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).    
-		PLLOUT_SELECT 			: string 			:= "GENCLK";  
-		DIVR 				: bit_vector(3 downto 0)	:= "0000"; 	
-		DIVF 				: bit_vector(6 downto 0) 	:= "0000000"; 
-		DIVQ 				: bit_vector(2 downto 0)	:= "000"; 		
-		FILTER_RANGE 			: bit_vector(2 downto 0)        := "000"; 	
+component  SB_PLL40_PAD_DS
+	generic (
+		FEEDBACK_PATH 			: string 			:= "SIMPLE";	 -- String  (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED";
+		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
+		PLLOUT_SELECT 			: string 			:= "GENCLK";
+		DIVR 				: bit_vector(3 downto 0)	:= "0000";
+		DIVF 				: bit_vector(6 downto 0) 	:= "0000000";
+		DIVQ 				: bit_vector(2 downto 0)	:= "000";
+		FILTER_RANGE 			: bit_vector(2 downto 0)        := "000";
 		ENABLE_ICEGATE			: bit				:= '0';
 		TEST_MODE 			: bit				:= '0';
 		EXTERNAL_DIVIDE_FACTOR 		: integer 			:= 1 		 --Not used by model. Added for PLL Config GUI.
  	 );
 
 	port 	(
-	       	PACKAGEPIN			: inout std_logic ; 		-- Reference clk (P) signal through PackagePin.   
-	       	PACKAGEPINB			: inout std_logic ; 		-- Reference clk (N) signal through PackagePinB.   
+	       	PACKAGEPIN			: inout std_logic ; 		-- Reference clk (P) signal through PackagePin.
+	       	PACKAGEPINB			: inout std_logic ; 		-- Reference clk (N) signal through PackagePinB.
 		PLLOUTCORE			: out std_logic; 		-- PLL output to core logic (by normal routing)
 		PLLOUTGLOBAL	   		: out std_logic; 		-- PLL output to core logic (by global network)
 		EXTFEEDBACK  			: in std_logic;			-- Driven by core logic
@@ -1268,28 +1268,28 @@ component  SB_PLL40_PAD_DS
 		SDI				: in std_logic; 		-- Driven by core logic. Test Pin
 		SDO				: out std_logic;		-- Output to RB Logic Tile. Test Pin
 		SCLK				: in std_logic; 		-- Driven by core logic. Test Pin
-		LATCHINPUTVALUE 		: in std_logic 			-- iCEGate signal	
-	       ); 
-end component; 	
+		LATCHINPUTVALUE 		: in std_logic 			-- iCEGate signal
+	       );
+end component;
 
 --------------------------------------------------------------------------------------------------
 -- 					 SB_PLL40_2F_PAD_DS 					--
 --------------------------------------------------------------------------------------------------
 
-component  SB_PLL40_2F_PAD_DS  
-	generic (	
-		FEEDBACK_PATH 			: string 			:= "SIMPLE";	 -- String  (simple, delay, phase_and_delay, external) 
-		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED"; 
-		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5	
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).   
-		PLLOUT_SELECT_PORTA		: string 			:= "GENCLK";  
-		PLLOUT_SELECT_PORTB		: string 			:= "GENCLK";  
-		DIVR 				: bit_vector(3 downto 0)	:= "0000"; 	
-		DIVF 				: bit_vector(6 downto 0) 	:= "0000000"; 
-		DIVQ 				: bit_vector(2 downto 0)	:= "000"; 		
-		FILTER_RANGE 			: bit_vector(2 downto 0)        := "000"; 	
+component  SB_PLL40_2F_PAD_DS
+	generic (
+		FEEDBACK_PATH 			: string 			:= "SIMPLE";	 -- String  (simple, delay, phase_and_delay, external)
+		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED";
+		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "00"; 	 --  0-->Divide by 4, 1-->Divide by 7, 3 -->Divide by 5
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
+		PLLOUT_SELECT_PORTA		: string 			:= "GENCLK";
+		PLLOUT_SELECT_PORTB		: string 			:= "GENCLK";
+		DIVR 				: bit_vector(3 downto 0)	:= "0000";
+		DIVF 				: bit_vector(6 downto 0) 	:= "0000000";
+		DIVQ 				: bit_vector(2 downto 0)	:= "000";
+		FILTER_RANGE 			: bit_vector(2 downto 0)        := "000";
 		ENABLE_ICEGATE_PORTA		: bit				:= '0';
 		ENABLE_ICEGATE_PORTB		: bit				:= '0';
 		TEST_MODE 			: bit				:= '0';
@@ -1297,8 +1297,8 @@ component  SB_PLL40_2F_PAD_DS
  	 );
 
 	port 	(
-	       	PACKAGEPIN			: inout std_logic ; 		-- Reference clk (P) signal through PackagePin.   
-	       	PACKAGEPINB			: inout std_logic ; 		-- Reference clk (N) signal through PackagePinB.   
+	       	PACKAGEPIN			: inout std_logic ; 		-- Reference clk (P) signal through PackagePin.
+	       	PACKAGEPINB			: inout std_logic ; 		-- Reference clk (N) signal through PackagePinB.
 		PLLOUTCOREA			: out std_logic; 		-- PLL A port output to core logic (by normal routing)
 		PLLOUTGLOBALA	   		: out std_logic; 		-- PLL A port output to core logic (by global routing)
 	        PLLOUTCOREB			: out std_logic; 		-- PLL B port output to core logic (by normal routing)
@@ -1311,83 +1311,83 @@ component  SB_PLL40_2F_PAD_DS
 		SDI				: in std_logic; 		-- Driven by core logic. Test Pin
 		SDO				: out std_logic;		-- Output to RB Logic Tile. Test Pin
 		SCLK				: in std_logic; 		-- Driven by core logic. Test Pin
-		LATCHINPUTVALUE 		: in std_logic 			-- iCEGate signal	
-	       ); 
-end component; 	
+		LATCHINPUTVALUE 		: in std_logic 			-- iCEGate signal
+	       );
+end component;
 
--- iCE40 MIPI Primitive  
+-- iCE40 MIPI Primitive
 --------------------------------------------------------------------------------------------------
 -- 					SB_MIPI_RX_2LANE					--
 --------------------------------------------------------------------------------------------------
 
-component SB_MIPI_RX_2LANE  
+component SB_MIPI_RX_2LANE
 	port (
-		ENPDESER  		: in std_logic; 	  		-- Common Interface Pins 
-  		PU			: in std_logic; 	  
-		DP0			: in std_logic; 	  		-- Device Pin 
-		DN0			: in std_logic; 	  	        -- Device Pin 
-		D0RXHSEN		: in std_logic; 	   		-- Data0 Interface Pins 
-		D0DTXLPP		: in std_logic; 	   
-		D0DTXLPN		: in std_logic; 	  
-		D0TXLPEN		: in std_logic; 	   	
-		D0DRXLPP		: out std_logic; 	   
-		D0DRXLPN		: out std_logic;  
-		D0RXLPEN		: in std_logic; 	  
-		D0DCDP			: out std_logic;  	 
-		D0DCDN 			: out std_logic;  	 
-		D0CDEN			: in std_logic; 
-		D0HSDESEREN		: in std_logic; 
-		D0HSRXDATA		: out std_logic_vector(7 downto 0); 
- 		D0HSBYTECLKD		: out std_logic; 	
-		D0SYNC			: out std_logic;  
-		D0ERRSYNC		: out std_logic; 
-		D0NOSYNC		: out std_logic; 
-		DP1			: in std_logic;  			-- Device Pin 
-		DN1			: in std_logic; 			-- Device Pin 
-		D1RXHSEN		: in std_logic; 			-- Data1 Interface Pins 
-		D1DRXLPP		: out std_logic; 
-		D1DRXLPN		: out std_logic; 	
-		D1RXLPEN		: in std_logic; 
-		D1HSDESEREN		: in std_logic; 
-		D1HSRXDATA		: out std_logic_vector(7 downto 0); 
-		D1SYNC			: out std_logic; 
-		D1ERRSYNC		: out std_logic; 
-		D1NOSYNC		: out std_logic; 
-		CKP			: in std_logic;          		-- Device Pin   
-		CKN			: in std_logic;				-- Device Pin 
-		CLKRXHSEN		: in std_logic; 	 		-- Clk interface Pins  
-		CLKDRXLPP		: out std_logic; 	
-		CLKDRXLPN		: out std_logic; 	
-		CLKRXLPEN		: in std_logic; 	
-		CLKHSBYTE		: out std_logic 
-      	     ); 
-end component; 
+		ENPDESER  		: in std_logic; 	  		-- Common Interface Pins
+  		PU			: in std_logic;
+		DP0			: in std_logic; 	  		-- Device Pin
+		DN0			: in std_logic; 	  	        -- Device Pin
+		D0RXHSEN		: in std_logic; 	   		-- Data0 Interface Pins
+		D0DTXLPP		: in std_logic;
+		D0DTXLPN		: in std_logic;
+		D0TXLPEN		: in std_logic;
+		D0DRXLPP		: out std_logic;
+		D0DRXLPN		: out std_logic;
+		D0RXLPEN		: in std_logic;
+		D0DCDP			: out std_logic;
+		D0DCDN 			: out std_logic;
+		D0CDEN			: in std_logic;
+		D0HSDESEREN		: in std_logic;
+		D0HSRXDATA		: out std_logic_vector(7 downto 0);
+ 		D0HSBYTECLKD		: out std_logic;
+		D0SYNC			: out std_logic;
+		D0ERRSYNC		: out std_logic;
+		D0NOSYNC		: out std_logic;
+		DP1			: in std_logic;  			-- Device Pin
+		DN1			: in std_logic; 			-- Device Pin
+		D1RXHSEN		: in std_logic; 			-- Data1 Interface Pins
+		D1DRXLPP		: out std_logic;
+		D1DRXLPN		: out std_logic;
+		D1RXLPEN		: in std_logic;
+		D1HSDESEREN		: in std_logic;
+		D1HSRXDATA		: out std_logic_vector(7 downto 0);
+		D1SYNC			: out std_logic;
+		D1ERRSYNC		: out std_logic;
+		D1NOSYNC		: out std_logic;
+		CKP			: in std_logic;          		-- Device Pin
+		CKN			: in std_logic;				-- Device Pin
+		CLKRXHSEN		: in std_logic; 	 		-- Clk interface Pins
+		CLKDRXLPP		: out std_logic;
+		CLKDRXLPN		: out std_logic;
+		CLKRXLPEN		: in std_logic;
+		CLKHSBYTE		: out std_logic
+      	     );
+end component;
 
--- iCE40 HDMI Primitive  
+-- iCE40 HDMI Primitive
 --------------------------------------------------------------------------------------------------
 -- 					SB_TMDS_deserializer					--
 --------------------------------------------------------------------------------------------------
 
-component SB_TMDS_deserializer  
+component SB_TMDS_deserializer
 	generic (
-		FEEDBACK_PATH 			: string 			:= "PHASE_AND_DELAY";	 
-		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED"; 
-		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED"; 
-		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "11"; 	 --  Divide by 5 mode 	
-		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15). 
-		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).   
+		FEEDBACK_PATH 			: string 			:= "PHASE_AND_DELAY";
+		DELAY_ADJUSTMENT_MODE_FEEDBACK  : string 			:= "FIXED";
+		DELAY_ADJUSTMENT_MODE_RELATIVE 	: string			:= "FIXED";
+		SHIFTREG_DIV_MODE 		: bit_vector(1 downto 0)	:= "11"; 	 --  Divide by 5 mode
+		FDA_FEEDBACK 			: bit_vector(3 downto 0) 	:= "0000"; 	 --  Integer (0-15).
+		FDA_RELATIVE 			: bit_vector(3 downto 0)	:= "0000"; 	 --  Integer (0-15).
 		PLLOUT_SELECT_PORTA		: string 			:= "GENCLK"; 	 --  Clkx5
-		PLLOUT_SELECT_PORTB		: string 			:= "SHIFTREG_0deg";  -- Clkx1  
-		DIVR 				: bit_vector(3 downto 0)	:= "0000"; 	    -- for TMDS clk at 40Mhz  	
-		DIVF 				: bit_vector(6 downto 0) 	:= "0000000"; 
-		DIVQ 				: bit_vector(2 downto 0)	:= "010"; 		
-		FILTER_RANGE 			: bit_vector(2 downto 0)        := "011"; 	
+		PLLOUT_SELECT_PORTB		: string 			:= "SHIFTREG_0deg";  -- Clkx1
+		DIVR 				: bit_vector(3 downto 0)	:= "0000"; 	    -- for TMDS clk at 40Mhz
+		DIVF 				: bit_vector(6 downto 0) 	:= "0000000";
+		DIVQ 				: bit_vector(2 downto 0)	:= "010";
+		FILTER_RANGE 			: bit_vector(2 downto 0)        := "011";
 		ENABLE_ICEGATE_PORTA		: bit				:= '0';
 		ENABLE_ICEGATE_PORTB		: bit				:= '0';
 		TEST_MODE 			: bit				:= '0';
 		EXTERNAL_DIVIDE_FACTOR 		: integer			:= 1 		 --Not used by model. Added for PLL Config GUI.
 
-	 	); 
+	 	);
 	port 	(
 		TMDSch0p 			: in std_logic;		   	     	--TMDS ch 0 differential input pos
 		TMDSch0n			: in std_logic;         		--TMDS ch 0 differential input neg
@@ -1405,77 +1405,77 @@ component SB_TMDS_deserializer
 		PHASELch1 			: in std_logic_vector(3 downto 0);      --Clock phase delay compensation select for ch 1
 		PHASELch2 			: in std_logic_vector(3 downto 0);      --Clock phase delay compensation select for ch 2
 		PLLlock				: out std_logic;               		-- PLL lock signal- active high
-											-- PLL output  
-		PLLOUTCOREclkx1  		: out std_logic; 			-- PLL 1x output on core network  
-		PLLOUTGLOBALclkx1 		: out std_logic ; 			-- PLL 1x output on global network 	
-		PLLOUTCOREclkx5			: out std_logic ; 			-- PLL 5x output on core network 
-		PLLOUTGLOBALclkx5 		: out std_logic ; 			-- PLL 5x output on global network  
-		RAWDATAch0  			: out std_logic_vector(9 downto 0); 	-- Recovered ch 0 10-bit data 
+											-- PLL output
+		PLLOUTCOREclkx1  		: out std_logic; 			-- PLL 1x output on core network
+		PLLOUTGLOBALclkx1 		: out std_logic ; 			-- PLL 1x output on global network
+		PLLOUTCOREclkx5			: out std_logic ; 			-- PLL 5x output on core network
+		PLLOUTGLOBALclkx5 		: out std_logic ; 			-- PLL 5x output on global network
+		RAWDATAch0  			: out std_logic_vector(9 downto 0); 	-- Recovered ch 0 10-bit data
 		RAWDATAch1  			: out std_logic_vector(9 downto 0); 	-- Recovered ch 1 10-bit data
 		RAWDATAch2   			: out std_logic_vector(9 downto 0); 	-- Recovered ch 2 10-bit data
 		EXTFEEDBACK	   		: in std_logic ; 			-- Driven by core logic. Not required HDMI mode.
 		DYNAMICDELAY 			: in std_logic_vector(7 downto 0);  	-- Driven by core logic. Not required for HDMI mode.
 		BYPASS				: in std_logic ; 			-- Driven by core logic. Not required for HDMI mode.
 		LATCHINPUTVALUE 		: in std_logic ; 			-- iCEGate signal. Not required for HDMI mode
-											-- Test Pins 	
+											-- Test Pins
 		SDO				: out std_logic;  			-- Test Signal. Output of PLL.
 		SDI				: in std_logic ; 			-- Test signal. Driven by core logic
 		SCLK				: in std_logic  			-- Test Clk Signal. Driven by core logic
-       		); 
+       		);
 end component;
 
 --------------------------------------------
--- PRIM TYPE  :  MULTIPLIERS 
+-- PRIM TYPE  :  MULTIPLIERS
 -- DEVICE     :  ICE40 SANFRNCISCO DEVICES
 -------------------------------------------
 --------------------------------------------
--- 		SB_MULT_8x8 
+-- 		SB_MULT_8x8
 --------------------------------------------
 component SB_MULT_8x8
-	generic ( 
-		DATAA_REG	: bit  	:= '0';	
-		DATAB_REG 	: bit	:= '0';	
+	generic (
+		DATAA_REG	: bit  	:= '0';
+		DATAB_REG 	: bit	:= '0';
 		DATAOUT_REG 	: bit 	:= '0';
 		DATAA_SIGNED 	: bit  	:= '0';
 		DATAB_SIGNED 	: bit  	:= '0';
-		NEG_TRIGGER  	: bit 	:= '0' 
-               ); 
+		NEG_TRIGGER  	: bit 	:= '0'
+               );
 	port   (
-		DATAA   : in std_logic_vector( 7 downto 0); 
-		DATAB   : in std_logic_vector( 7 downto 0); 
-		CLK     : in std_logic;  
-		CE      : in std_logic;  
+		DATAA   : in std_logic_vector( 7 downto 0);
+		DATAB   : in std_logic_vector( 7 downto 0);
+		CLK     : in std_logic;
+		CE      : in std_logic;
 		RESET   : in std_logic;                       -- Asynchronous Reset
  		DATAOUT : out std_logic_vector(15 downto 0)
-	); 	
-end component; 	
+	);
+end component;
 
 ---------------------------------------------
--- 		SB_MULT_16x16 
+-- 		SB_MULT_16x16
 ---------------------------------------------
 component SB_MULT_16x16
-	generic ( 
-		DATAA_REG	: bit  	:= '0';	
+	generic (
+		DATAA_REG	: bit  	:= '0';
 		DATAB_REG 	: bit	:= '0';
 		PIPELINE_REG	: bit	:= '0';
 		DATAOUT_REG 	: bit 	:= '0';
 		DATAA_SIGNED 	: bit  	:= '0';
 		DATAB_SIGNED 	: bit  	:= '0';
-		NEG_TRIGGER  	: bit 	:= '0' 
-               ); 
+		NEG_TRIGGER  	: bit 	:= '0'
+               );
 	port   (
-		DATAA   : in std_logic_vector( 15 downto 0); 
-		DATAB   : in std_logic_vector( 15 downto 0); 
-		CLK     : in std_logic; 
-		CE      : in std_logic;  
-		RESET   : in std_logic;                       -- Asynchronous Reset 
+		DATAA   : in std_logic_vector( 15 downto 0);
+		DATAB   : in std_logic_vector( 15 downto 0);
+		CLK     : in std_logic;
+		CE      : in std_logic;
+		RESET   : in std_logic;                       -- Asynchronous Reset
  		DATAOUT : out std_logic_vector(31 downto 0)
-	); 	
+	);
 end component;
-component SB_RAM40_16K 
-  generic ( 
-	   WRITE_MODE : integer := 0; 
-	   READ_MODE  : integer := 0; 
+component SB_RAM40_16K
+  generic (
+	   WRITE_MODE : integer := 0;
+	   READ_MODE  : integer := 0;
 
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -1492,96 +1492,7 @@ component SB_RAM40_16K
 	   INIT_C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"; 
-
-           INIT_10 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_11 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_12 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_13 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_14 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_15 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_16 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_17 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_18 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_19 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_1A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_1B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_1C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_1D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_1E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_1F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"; 
-
-           INIT_20 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_21 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_22 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_23 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_24 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_25 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_26 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_27 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_28 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_29 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_2A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_2B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_2C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_2D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_2E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_2F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"; 
-
-           INIT_30 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_31 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_32 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_33 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_34 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_35 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_36 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_37 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_38 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_39 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
-	    ) ;
-	  port( 
-		RDATA : out std_logic_vector( 15  downto 0) ;
-		RCLK  : in  std_logic ;
-		RCLKE : in  std_logic := 'H';
-		RE    : in  std_logic := 'H';
-		RADDR : in  std_logic_vector( 12  downto 0) ;
-		WCLK  : in  std_logic ;
-		WCLKE : in  std_logic := 'H';
-		WE    : in  std_logic := 'H';
-		WADDR : in  std_logic_vector( 12  downto 0) ;
-		MASK  : in  std_logic_vector( 15  downto 0) ;
-		WDATA : in  std_logic_vector( 15  downto 0)
-	       );
-	  
-end component;
-
-component SB_RAM40_16KNR is
-  generic ( 
-	   WRITE_MODE : integer := 0; 
-           READ_MODE  : integer := 0; 
-
-	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_3 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_4 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_5 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_6 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_7 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_8 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_9 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-	   INIT_F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"; 
+	   INIT_F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 
            INIT_10 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_11 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -1632,9 +1543,98 @@ component SB_RAM40_16KNR is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
+		RDATA : out std_logic_vector( 15  downto 0) ;
+		RCLK  : in  std_logic ;
+		RCLKE : in  std_logic := 'H';
+		RE    : in  std_logic := 'H';
+		RADDR : in  std_logic_vector( 12  downto 0) ;
+		WCLK  : in  std_logic ;
+		WCLKE : in  std_logic := 'H';
+		WE    : in  std_logic := 'H';
+		WADDR : in  std_logic_vector( 12  downto 0) ;
+		MASK  : in  std_logic_vector( 15  downto 0) ;
+		WDATA : in  std_logic_vector( 15  downto 0)
+	       );
+
+end component;
+
+component SB_RAM40_16KNR is
+  generic (
+	   WRITE_MODE : integer := 0;
+           READ_MODE  : integer := 0;
+
+	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_3 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_4 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_5 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_6 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_7 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_8 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_9 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+	   INIT_F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+
+           INIT_10 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_11 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_12 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_13 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_14 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_15 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_16 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_17 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_18 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_19 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_1A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_1B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_1C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_1D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_1E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_1F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+
+           INIT_20 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_21 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_22 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_23 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_24 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_25 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_26 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_27 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_28 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_29 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_2A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_2B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_2C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_2D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_2E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_2F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+
+           INIT_30 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_31 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_32 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_33 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_34 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_35 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_36 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_37 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_38 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_39 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_3A : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_3B : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
+	    ) ;
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -1650,9 +1650,9 @@ component SB_RAM40_16KNR is
 end component;
 
 component SB_RAM40_16KNW is
-  generic ( 
-	   WRITE_MODE : integer := 0; 
-	   READ_MODE  : integer := 0; 
+  generic (
+	   WRITE_MODE : integer := 0;
+	   READ_MODE  : integer := 0;
 
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -1720,9 +1720,9 @@ component SB_RAM40_16KNW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -1738,9 +1738,9 @@ component SB_RAM40_16KNW is
 end component;
 
 component SB_RAM40_16KNRNW is
-  generic ( 
-	   WRITE_MODE : integer := 0; 
-           READ_MODE  : integer := 0; 
+  generic (
+	   WRITE_MODE : integer := 0;
+           READ_MODE  : integer := 0;
 
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -1808,9 +1808,9 @@ component SB_RAM40_16KNRNW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
            ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -1825,8 +1825,8 @@ component SB_RAM40_16KNRNW is
 	       );
 end component;
 
-component SB_RAM1024x16 
-  generic ( 
+component SB_RAM1024x16
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -1893,9 +1893,9 @@ component SB_RAM1024x16
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -1908,11 +1908,11 @@ component SB_RAM1024x16
 		MASK  : in  std_logic_vector( 15  downto 0) ;
 		WDATA : in  std_logic_vector( 15  downto 0)
 	       );
-	  
+
 end component;
 
 component SB_RAM1024x16NR is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -1979,9 +1979,9 @@ component SB_RAM1024x16NR is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -1997,7 +1997,7 @@ component SB_RAM1024x16NR is
 end component;
 
 component SB_RAM1024x16NW is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2064,9 +2064,9 @@ component SB_RAM1024x16NW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2082,7 +2082,7 @@ component SB_RAM1024x16NW is
 end component;
 
 component SB_RAM1024x16NRNW is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2149,9 +2149,9 @@ component SB_RAM1024x16NRNW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 15  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2167,7 +2167,7 @@ component SB_RAM1024x16NRNW is
 end component;
 
 component SB_RAM2048x8 is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2234,9 +2234,9 @@ component SB_RAM2048x8 is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 7  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2251,7 +2251,7 @@ component SB_RAM2048x8 is
 end component;
 
 component SB_RAM2048x8NR is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2318,9 +2318,9 @@ component SB_RAM2048x8NR is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 7  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2335,7 +2335,7 @@ component SB_RAM2048x8NR is
 end component;
 
 component SB_RAM2048x8NW is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2402,9 +2402,9 @@ component SB_RAM2048x8NW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 7  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2418,8 +2418,8 @@ component SB_RAM2048x8NW is
 	       );
 end component;
 
-component SB_RAM2048x8NRNW 
-  generic ( 
+component SB_RAM2048x8NRNW
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2486,9 +2486,9 @@ component SB_RAM2048x8NRNW
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 7  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2502,8 +2502,8 @@ component SB_RAM2048x8NRNW
 	       );
 end component;
 
-component SB_RAM4096x4 
-  generic ( 
+component SB_RAM4096x4
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2570,9 +2570,9 @@ component SB_RAM4096x4
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 3  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2587,7 +2587,7 @@ component SB_RAM4096x4
 end component;
 
 component SB_RAM4096x4NR is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2654,9 +2654,9 @@ component SB_RAM4096x4NR is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 3  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2671,7 +2671,7 @@ component SB_RAM4096x4NR is
 end component;
 
 component SB_RAM4096x4NW is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2738,9 +2738,9 @@ component SB_RAM4096x4NW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 3  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2756,7 +2756,7 @@ end component;
 
 
 component SB_RAM4096x4NRNW is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2823,9 +2823,9 @@ component SB_RAM4096x4NRNW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 3  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2840,7 +2840,7 @@ component SB_RAM4096x4NRNW is
 end component;
 
 component SB_RAM8192x2 is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2907,9 +2907,9 @@ component SB_RAM8192x2 is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
    	        RDATA : out std_logic_vector( 1  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -2924,7 +2924,7 @@ component SB_RAM8192x2 is
 end component;
 
 component SB_RAM8192x2NR is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -2991,9 +2991,9 @@ component SB_RAM8192x2NR is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 1  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -3007,8 +3007,8 @@ component SB_RAM8192x2NR is
 	       );
 end component;
 
-component SB_RAM8192x2NW 
-  generic ( 
+component SB_RAM8192x2NW
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -3075,9 +3075,9 @@ component SB_RAM8192x2NW
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 1  downto 0) ;
 		RCLK  : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -3092,7 +3092,7 @@ component SB_RAM8192x2NW
 end component;
 
 component SB_RAM8192x2NRNW is
-  generic ( 
+  generic (
 	   INIT_0 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_1 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
 	   INIT_2 : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
@@ -3159,9 +3159,9 @@ component SB_RAM8192x2NRNW is
            INIT_3C : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3D : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
            INIT_3E : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000";
-           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000" 
+           INIT_3F : bit_vector := X"0000000000000000000000000000000000000000000000000000000000000000"
 	    ) ;
-	  port( 
+	  port(
 		RDATA : out std_logic_vector( 1  downto 0) ;
 		RCLKN : in  std_logic ;
 		RCLKE : in  std_logic := 'H';
@@ -3176,10 +3176,10 @@ component SB_RAM8192x2NRNW is
 end component;
 
 component SB_MAC16 is
- 	generic ( 
-		 NEG_TRIGGER 			: bit 		:='0'; 
+ 	generic (
+		 NEG_TRIGGER 			: bit 		:='0';
 		 C_REG				: bit 		:='0'; 		-- C0
-		 A_REG				: bit 		:='0'; 	    	-- C1 
+		 A_REG				: bit 		:='0'; 	    	-- C1
 		 B_REG				: bit 		:='0';		-- C2
 		 D_REG 				: bit 		:='0';		-- C3
 		 TOP_8x8_MULT_REG		: bit 		:='0'; 	   	-- C4
@@ -3196,45 +3196,45 @@ component SB_MAC16 is
 		 BOTADDSUB_LOWERINPUT 		: bit_vector(1 downto 0) := "00" ; 	--DATA, MULT_8x8, MULT_16x16, SIGNEXTIN //  {C18,C17} =00, 01, 10, 11
 		 BOTADDSUB_UPPERINPUT 		: bit 			 := '0'  ;  	--ACCUM_REG, DATAD   			//  C19 = 0, 1
 		 BOTADDSUB_CARRYSELECT 		: bit_vector(1 downto 0) := "00" ; 	--LOGIC0, LOGIC1, ACCUMCI, CI  		//  {C21, C20}=00,01,10,11
-		 MODE_8x8 			: bit 			 := '0' ; 	-- C22 
+		 MODE_8x8 			: bit 			 := '0' ; 	-- C22
 
 		 A_SIGNED 			: bit 			 := '0' ;  	-- C23
 		 B_SIGNED 			: bit 			 := '0'   	-- C24
 	);
 	port	(
 
-		A		: in 	std_logic_vector(15 downto 0) ;  
-		B		: in    std_logic_vector(15 downto 0) ; 	
-		C		: in 	std_logic_vector(15 downto 0) ; 
-		D		: in 	std_logic_vector(15 downto 0) ; 
+		A		: in 	std_logic_vector(15 downto 0) ;
+		B		: in    std_logic_vector(15 downto 0) ;
+		C		: in 	std_logic_vector(15 downto 0) ;
+		D		: in 	std_logic_vector(15 downto 0) ;
 		O		: out 	std_logic_vector(31 downto 0) ;
-		CLK		: in 	std_logic ; 
-		CE		: in 	std_logic ; 
-		IRSTTOP 	: in 	std_logic ; 
-	    	IRSTBOT 	: in 	std_logic ; 
-		ORSTTOP 	: in 	std_logic ; 
-		ORSTBOT 	: in 	std_logic ; 
-		AHOLD 		: in	std_logic ; 
-		BHOLD		: in 	std_logic ; 
-		CHOLD		: in 	std_logic ; 
-		DHOLD		: in 	std_logic ; 
-		OHOLDTOP	: in 	std_logic ; 
-		OHOLDBOT	: in 	std_logic ; 
-		OLOADTOP	: in	std_logic ; 
-		OLOADBOT	: in 	std_logic ; 
-		ADDSUBTOP	: in 	std_logic ; 
+		CLK		: in 	std_logic ;
+		CE		: in 	std_logic ;
+		IRSTTOP 	: in 	std_logic ;
+	    	IRSTBOT 	: in 	std_logic ;
+		ORSTTOP 	: in 	std_logic ;
+		ORSTBOT 	: in 	std_logic ;
+		AHOLD 		: in	std_logic ;
+		BHOLD		: in 	std_logic ;
+		CHOLD		: in 	std_logic ;
+		DHOLD		: in 	std_logic ;
+		OHOLDTOP	: in 	std_logic ;
+		OHOLDBOT	: in 	std_logic ;
+		OLOADTOP	: in	std_logic ;
+		OLOADBOT	: in 	std_logic ;
+		ADDSUBTOP	: in 	std_logic ;
 		ADDSUBBOT	: in 	std_logic ;
 		CO		: out 	std_logic ;
-		CI		: in 	std_logic ;  
-		ACCUMCI		: in 	std_logic ; 
+		CI		: in 	std_logic ;
+		ACCUMCI		: in 	std_logic ;
 		ACCUMCO        	: out 	std_logic ;
-		SIGNEXTIN	: in	std_logic ; 
-		SIGNEXTOUT      : out 	std_logic  				
-	); 
+		SIGNEXTIN	: in	std_logic ;
+		SIGNEXTOUT      : out 	std_logic
+	);
 
 end component;
 
-component SB_IO_DLY is 
+component SB_IO_DLY is
 	generic	(
 
 		NEG_TRIGGER 		: bit				:='0';
@@ -3243,158 +3243,158 @@ component SB_IO_DLY is
 		IO_STANDARD		: string			:="SB_LVCMOS";
 		INDELAY_VAL		: bit_vector (5 downto 0) 	:="000000";
 		OUTDELAY_VAL 		: bit_vector (5 downto 0) 	:="000000"
-	);	
+	);
 	port 	(
-		PACKAGE_PIN 		: inout std_ulogic; 
-		LATCH_INPUT_VALUE 	: in 	std_logic; 
-		CLOCK_ENABLE		: in 	std_logic; 
-		INPUT_CLK		: in 	std_logic; 
-		OUTPUT_CLK		: in 	std_logic; 
-		OUTPUT_ENABLE		: in 	std_logic :='H'; 
-		D_OUT_1			: in 	std_logic;   
-		D_OUT_0			: in 	std_logic;  
-		D_IN_1			: out 	std_logic; 
-		D_IN_0			: out 	std_logic; 
-		SCLK			: in 	std_logic; 	
-		SDI			: in 	std_logic; 	
-		C_R_SEL			: in 	std_logic;  
-		SDO			: out 	std_logic 
+		PACKAGE_PIN 		: inout std_ulogic;
+		LATCH_INPUT_VALUE 	: in 	std_logic;
+		CLOCK_ENABLE		: in 	std_logic;
+		INPUT_CLK		: in 	std_logic;
+		OUTPUT_CLK		: in 	std_logic;
+		OUTPUT_ENABLE		: in 	std_logic :='H';
+		D_OUT_1			: in 	std_logic;
+		D_OUT_0			: in 	std_logic;
+		D_IN_1			: out 	std_logic;
+		D_IN_0			: out 	std_logic;
+		SCLK			: in 	std_logic;
+		SDI			: in 	std_logic;
+		C_R_SEL			: in 	std_logic;
+		SDO			: out 	std_logic
 	 );
 
 
-end component; 
- 
-component SB_MIPI_TX_4LANE  
-	generic	( 		
+end component;
+
+component SB_MIPI_TX_4LANE
+	generic	(
 		DIVR 			: bit_vector( 4 downto 0)  	:= "11111" ;      	-- Ref Clk divider
 		DIVF 			: bit_vector( 7 downto 0)  	:= "11110000"; 		-- Feedback divider
 		DIVQ 			: bit_vector( 1 downto 0)  	:= "00";       		-- VCO divider
 		TEST_MODE 		: bit 				:= '0';
 		TEST_BITS 		: bit_vector( 3 downto 0) 	:= "1001"
-	); 
-	port 	( 
+	);
+	port 	(
 			--Common Interface Pins
-		PU			: in 	std_logic ; 
-		LBEN			: in 	std_logic ; 
- 		ROUTCAL			: in 	std_logic_vector(1 downto 0) ; 
- 		ENPDESER		: in	std_logic ; 	
-	       	PDCKG			: in	std_logic ; 
+		PU			: in 	std_logic ;
+		LBEN			: in 	std_logic ;
+ 		ROUTCAL			: in 	std_logic_vector(1 downto 0) ;
+ 		ENPDESER		: in	std_logic ;
+	       	PDCKG			: in	std_logic ;
 			-- DATA0 Interface pins
-		DP0			: inout	std_ulogic ; 	
-		DN0			: inout std_ulogic ; 
- 		D0OPMODE		: in	std_logic ;  
- 		D0DTXLPP		: in	std_logic ; 
- 		D0DTXLPN		: in 	std_logic ; 
- 		D0TXLPEN		: in	std_logic ;  	
- 		D0DRXLPP		: out	std_logic ; 
-	  	D0DRXLPN		: out 	std_logic ; 
- 		D0RXLPEN		: in 	std_logic ; 
- 		D0DCDP			: out 	std_logic ; 
-		D0DCDN			: out 	std_logic ; 
- 		D0CDEN			: in	std_logic ; 		
-  		D0TXHSPD		: in	std_logic ; 
- 		D0TXHSEN		: in 	std_logic ; 
-   		D0HSTXDATA		: in 	std_logic_vector( 7 downto 0) ; 
-  		D0HSSEREN		: in	std_logic ; 	 
- 		D0RXHSEN		: in	std_logic ; 
-  		D0HSDESEREN		: in 	std_logic ; 	
- 	 	D0HSRXDATA		: out 	std_logic_vector( 7 downto 0) ; 
- 		D0HSBYTECLKD		: out 	std_logic ; 
- 		D0SYNC			: out 	std_logic ; 
- 		D0ERRSYNC		: out 	std_logic ; 
-	      	D0HSBYTECLKSNOSYNC	: out 	std_logic ; 
+		DP0			: inout	std_ulogic ;
+		DN0			: inout std_ulogic ;
+ 		D0OPMODE		: in	std_logic ;
+ 		D0DTXLPP		: in	std_logic ;
+ 		D0DTXLPN		: in 	std_logic ;
+ 		D0TXLPEN		: in	std_logic ;
+ 		D0DRXLPP		: out	std_logic ;
+	  	D0DRXLPN		: out 	std_logic ;
+ 		D0RXLPEN		: in 	std_logic ;
+ 		D0DCDP			: out 	std_logic ;
+		D0DCDN			: out 	std_logic ;
+ 		D0CDEN			: in	std_logic ;
+  		D0TXHSPD		: in	std_logic ;
+ 		D0TXHSEN		: in 	std_logic ;
+   		D0HSTXDATA		: in 	std_logic_vector( 7 downto 0) ;
+  		D0HSSEREN		: in	std_logic ;
+ 		D0RXHSEN		: in	std_logic ;
+  		D0HSDESEREN		: in 	std_logic ;
+ 	 	D0HSRXDATA		: out 	std_logic_vector( 7 downto 0) ;
+ 		D0HSBYTECLKD		: out 	std_logic ;
+ 		D0SYNC			: out 	std_logic ;
+ 		D0ERRSYNC		: out 	std_logic ;
+	      	D0HSBYTECLKSNOSYNC	: out 	std_logic ;
 			-- DATA1 Interface pins
-		DP1			: inout std_ulogic ; 
-		DN1			: inout std_ulogic ;  
- 		D1DTXLPP		: in 	std_logic ; 
- 		D1DTXLPN		: in	std_logic ; 
-  		D1TXLPEN		: in 	std_logic ; 
+		DP1			: inout std_ulogic ;
+		DN1			: inout std_ulogic ;
+ 		D1DTXLPP		: in 	std_logic ;
+ 		D1DTXLPN		: in	std_logic ;
+  		D1TXLPEN		: in 	std_logic ;
  		D1DRXLPP		: out 	std_logic ;
-	  	D1DRXLPN		: out 	std_logic ; 
+	  	D1DRXLPN		: out 	std_logic ;
  		D1RXLPEN		: in	std_logic ;
- 		D1DCDP			: out 	std_logic ; 
-		D1DCDN			: out  	std_logic ; 
- 		D1CDEN			: in	std_logic ; 
-  		D1TXHSPD		: in 	std_logic ; 
- 		D1TXHSEN		: in	std_logic ;  
-		D1HSTXDATA		: in 	std_logic_vector( 7 downto 0) ; 
-  		D1HSSEREN		: in	std_logic ; 
+ 		D1DCDP			: out 	std_logic ;
+		D1DCDN			: out  	std_logic ;
+ 		D1CDEN			: in	std_logic ;
+  		D1TXHSPD		: in 	std_logic ;
+ 		D1TXHSEN		: in	std_logic ;
+		D1HSTXDATA		: in 	std_logic_vector( 7 downto 0) ;
+  		D1HSSEREN		: in	std_logic ;
  		D1RXHSEN		: in 	std_logic ;
-  		D1HSDESEREN		: in 	std_logic ; 
-	 	D1HSRXDATA		: out   std_logic_vector( 7 downto 0) ; 
- 		D1SYNC			: out 	std_logic ; 
- 		D1ERRSYNC		: out 	std_logic ; 
- 		D1NOSYNC		: out 	std_logic ; 
+  		D1HSDESEREN		: in 	std_logic ;
+	 	D1HSRXDATA		: out   std_logic_vector( 7 downto 0) ;
+ 		D1SYNC			: out 	std_logic ;
+ 		D1ERRSYNC		: out 	std_logic ;
+ 		D1NOSYNC		: out 	std_logic ;
 			-- DATA2 Interface pins
 		DP2			: inout std_ulogic ;
-		DN2			: inout std_ulogic ; 
- 		D2DTXLPP		: in	std_logic ; 
- 		D2DTXLPN		: in 	std_logic ; 
-  		D2TXLPEN		: in 	std_logic ; 
- 		D2DRXLPP		: out 	std_logic ; 
-	  	D2DRXLPN		: out 	std_logic ; 
- 		D2RXLPEN		: in 	std_logic ; 
- 		D2DCDP			: out 	std_logic ; 
-		D2DCDN			: out 	std_logic ; 
+		DN2			: inout std_ulogic ;
+ 		D2DTXLPP		: in	std_logic ;
+ 		D2DTXLPN		: in 	std_logic ;
+  		D2TXLPEN		: in 	std_logic ;
+ 		D2DRXLPP		: out 	std_logic ;
+	  	D2DRXLPN		: out 	std_logic ;
+ 		D2RXLPEN		: in 	std_logic ;
+ 		D2DCDP			: out 	std_logic ;
+		D2DCDN			: out 	std_logic ;
  		D2CDEN			: in	std_logic ;
-  		D2TXHSPD		: in	std_logic ; 
- 		D2TXHSEN		: in	std_logic ; 		 
-    	 	D2HSTXDATA		: in	std_logic_vector( 7 downto 0) ; 
-  		D2HSSEREN		: in	std_logic ; 
- 		D2RXHSEN		: in	std_logic ; 
-  		D2HSDESEREN		: in	std_logic ; 
- 	 	D2HSRXDATA		: out 	std_logic_vector( 7 downto 0) ; 
- 		D2SYNC			: out 	std_logic ; 
+  		D2TXHSPD		: in	std_logic ;
+ 		D2TXHSEN		: in	std_logic ;
+    	 	D2HSTXDATA		: in	std_logic_vector( 7 downto 0) ;
+  		D2HSSEREN		: in	std_logic ;
+ 		D2RXHSEN		: in	std_logic ;
+  		D2HSDESEREN		: in	std_logic ;
+ 	 	D2HSRXDATA		: out 	std_logic_vector( 7 downto 0) ;
+ 		D2SYNC			: out 	std_logic ;
  		D2ERRSYNC		: out 	std_logic ;
- 		D2NOSYNC		: out 	std_logic ; 
+ 		D2NOSYNC		: out 	std_logic ;
 			-- DATA3 Interface pins
-		DP3			: inout std_ulogic ; 
+		DP3			: inout std_ulogic ;
 		DN3			: inout std_ulogic ;
- 		D3DTXLPP		: in 	std_logic ; 
- 		D3DTXLPN		: in	std_logic ; 
-  		D3TXLPEN		: in 	std_logic ; 
- 		D3DRXLPP		: out 	std_logic ; 
+ 		D3DTXLPP		: in 	std_logic ;
+ 		D3DTXLPN		: in	std_logic ;
+  		D3TXLPEN		: in 	std_logic ;
+ 		D3DRXLPP		: out 	std_logic ;
 	  	D3DRXLPN		: out 	std_logic ;
- 		D3RXLPEN		: in	std_logic ; 
- 		D3DCDP			: out 	std_logic ; 
-		D3DCDN			: out 	std_logic ; 
- 		D3CDEN			: in	std_logic ; 
-  		D3TXHSPD		: in	std_logic ; 
- 		D3TXHSEN		: in	std_logic ;  
-  	 	D3HSTXDATA		: in 	std_logic_vector( 7 downto 0) ; 
-  		D3HSSEREN		: in	std_logic ; 
- 		D3RXHSEN		: in	std_logic ; 
-  		D3HSDESEREN		: in	std_logic ; 
- 	 	D3HSRXDATA		: out 	std_logic_vector( 7 downto 0) ; 
- 		D3SYNC			: out 	std_logic ;	
- 		D3ERRSYNC		: out	std_logic ; 
- 		D3NOSYNC		: out 	std_logic ; 
+ 		D3RXLPEN		: in	std_logic ;
+ 		D3DCDP			: out 	std_logic ;
+		D3DCDN			: out 	std_logic ;
+ 		D3CDEN			: in	std_logic ;
+  		D3TXHSPD		: in	std_logic ;
+ 		D3TXHSEN		: in	std_logic ;
+  	 	D3HSTXDATA		: in 	std_logic_vector( 7 downto 0) ;
+  		D3HSSEREN		: in	std_logic ;
+ 		D3RXHSEN		: in	std_logic ;
+  		D3HSDESEREN		: in	std_logic ;
+ 	 	D3HSRXDATA		: out 	std_logic_vector( 7 downto 0) ;
+ 		D3SYNC			: out 	std_logic ;
+ 		D3ERRSYNC		: out	std_logic ;
+ 		D3NOSYNC		: out 	std_logic ;
 			-- CLOCK Interface pins
-		CKP			: inout std_ulogic ;  
-		CKN			: inout std_ulogic ; 
- 		CLKDTXLPP		: in 	std_logic ; 
- 		CLKDTXLPN		: in	std_logic ; 
-  		CLKTXLPEN		: in 	std_logic ; 
-	  	CLKDRXLPP		: out 	std_logic ; 
-	  	CLKDRXLPN		: out 	std_logic ; 
-  		CLKRXLPEN		: in	std_logic ; 
-  		CLKTXHSPD		: in	std_logic ; 
- 		CLKTXHSEN		: in	std_logic ; 
-	       	CLKTXHSGATE		: in	std_logic ; 
-  		CLKRXHSEN		: in	std_logic ; 
-	     	CLKHSBYTE		: out 	std_logic ; 
+		CKP			: inout std_ulogic ;
+		CKN			: inout std_ulogic ;
+ 		CLKDTXLPP		: in 	std_logic ;
+ 		CLKDTXLPN		: in	std_logic ;
+  		CLKTXLPEN		: in 	std_logic ;
+	  	CLKDRXLPP		: out 	std_logic ;
+	  	CLKDRXLPN		: out 	std_logic ;
+  		CLKRXLPEN		: in	std_logic ;
+  		CLKTXHSPD		: in	std_logic ;
+ 		CLKTXHSEN		: in	std_logic ;
+	       	CLKTXHSGATE		: in	std_logic ;
+  		CLKRXHSEN		: in	std_logic ;
+	     	CLKHSBYTE		: out 	std_logic ;
 			-- Universal MIPI PLL Interface pins
- 		PLLPU			: in 	std_logic ; 
- 		PLLREF			: in	std_logic ; 
- 		PLLLOCK			: out 	std_logic ; 
+ 		PLLPU			: in 	std_logic ;
+ 		PLLREF			: in	std_logic ;
+ 		PLLLOCK			: out 	std_logic ;
 			-- Universal MIPI PLL Serial Configuration Register Interface pins
- 		PLLCFGSRDI		: in	std_logic ; 
- 		PLLCFGSRRESET		: in	std_logic ; 
- 		PLLCFGSRCLK		: in	std_logic ; 
- 		PLLCFGSRDO		: out 	std_logic 
+ 		PLLCFGSRDI		: in	std_logic ;
+ 		PLLCFGSRRESET		: in	std_logic ;
+ 		PLLCFGSRCLK		: in	std_logic ;
+ 		PLLCFGSRDO		: out 	std_logic
 	);
 
-end component; 
+end component;
 
 COMPONENT SB_I2C
    GENERIC (
@@ -3402,43 +3402,43 @@ COMPONENT SB_I2C
     I2C_SLAVE_INIT_ADDR : String :=  "0b1111100001";
     BUS_ADDR74   : String := "0b0110" );
 PORT (
- 		SBCLKI			: in 	std_logic ; 
- 		SBRWI			: in 	std_logic ; 
- 		SBSTBI			: in 	std_logic ; 
- 		SBADRI7			: in 	std_logic ; 
- 		SBADRI6			: in 	std_logic ; 
- 		SBADRI5			: in 	std_logic ; 
- 		SBADRI4			: in 	std_logic ; 
- 		SBADRI3			: in 	std_logic ; 
- 		SBADRI2			: in 	std_logic ; 
- 		SBADRI1			: in 	std_logic ; 
- 		SBADRI0			: in 	std_logic ; 
- 		SBDATI7			: in 	std_logic ; 
- 		SBDATI6			: in 	std_logic ; 
- 		SBDATI5			: in 	std_logic ; 
- 		SBDATI4			: in 	std_logic ; 
- 		SBDATI3			: in 	std_logic ; 
- 		SBDATI2			: in 	std_logic ; 
- 		SBDATI1			: in 	std_logic ; 
- 		SBDATI0			: in 	std_logic ; 
- 		SCLI			: in 	std_logic ; 
- 		SDAI			: in 	std_logic ; 
+ 		SBCLKI			: in 	std_logic ;
+ 		SBRWI			: in 	std_logic ;
+ 		SBSTBI			: in 	std_logic ;
+ 		SBADRI7			: in 	std_logic ;
+ 		SBADRI6			: in 	std_logic ;
+ 		SBADRI5			: in 	std_logic ;
+ 		SBADRI4			: in 	std_logic ;
+ 		SBADRI3			: in 	std_logic ;
+ 		SBADRI2			: in 	std_logic ;
+ 		SBADRI1			: in 	std_logic ;
+ 		SBADRI0			: in 	std_logic ;
+ 		SBDATI7			: in 	std_logic ;
+ 		SBDATI6			: in 	std_logic ;
+ 		SBDATI5			: in 	std_logic ;
+ 		SBDATI4			: in 	std_logic ;
+ 		SBDATI3			: in 	std_logic ;
+ 		SBDATI2			: in 	std_logic ;
+ 		SBDATI1			: in 	std_logic ;
+ 		SBDATI0			: in 	std_logic ;
+ 		SCLI			: in 	std_logic ;
+ 		SDAI			: in 	std_logic ;
 
- 		SBDATO7			: out 	std_logic ; 
- 		SBDATO6			: out 	std_logic ; 
- 		SBDATO5			: out 	std_logic ; 
- 		SBDATO4			: out 	std_logic ; 
- 		SBDATO3			: out 	std_logic ; 
- 		SBDATO2			: out 	std_logic ; 
- 		SBDATO1			: out 	std_logic ; 
- 		SBDATO0			: out 	std_logic ; 
- 		SBACKO			: out 	std_logic ; 
+ 		SBDATO7			: out 	std_logic ;
+ 		SBDATO6			: out 	std_logic ;
+ 		SBDATO5			: out 	std_logic ;
+ 		SBDATO4			: out 	std_logic ;
+ 		SBDATO3			: out 	std_logic ;
+ 		SBDATO2			: out 	std_logic ;
+ 		SBDATO1			: out 	std_logic ;
+ 		SBDATO0			: out 	std_logic ;
+ 		SBACKO			: out 	std_logic ;
  		I2CIRQ			: out 	std_logic ;
  		I2CWKUP			: out 	std_logic;
- 		SCLO			: out 	std_logic ; 
- 		SCLOE			: out 	std_logic ; 
- 		SDAO			: out 	std_logic ; 
- 		SDAOE			: out 	std_logic  
+ 		SCLO			: out 	std_logic ;
+ 		SCLOE			: out 	std_logic ;
+ 		SDAO			: out 	std_logic ;
+ 		SDAOE			: out 	std_logic
 
         );
 END COMPONENT;
@@ -3496,14 +3496,14 @@ PORT (
                 MCSNOE3                 : out   std_logic ;
                 MCSNOE2                 : out   std_logic ;
                 MCSNOE1                 : out   std_logic ;
-                MCSNOE0                 : out   std_logic 
+                MCSNOE0                 : out   std_logic
     );
 END COMPONENT;
 
 COMPONENT SB_HSOSC
           port(
                 CLKM : out std_logic  ;
-                ENACLKM : in  std_logic 
+                ENACLKM : in  std_logic
                );
 END COMPONENT;
 
@@ -3515,9 +3515,9 @@ COMPONENT SB_LSOSC
 END COMPONENT;
 
 
-COMPONENT  SB_HFOSC   
-	generic( 
-	CLKHF_DIV: string:="0b00" ); 
+COMPONENT  SB_HFOSC
+	generic(
+	CLKHF_DIV: string:="0b00" );
 			port(
 					CLKHF : out std_logic;
 					CLKHFEN  :in std_logic;
@@ -3526,7 +3526,7 @@ COMPONENT  SB_HFOSC
 end COMPONENT ;
 
 
-COMPONENT  SB_LFOSC   
+COMPONENT  SB_LFOSC
 			port(
 			CLKLF : out std_logic;
 			CLKLFEN  :in std_logic;
@@ -3535,13 +3535,13 @@ COMPONENT  SB_LFOSC
 end COMPONENT;
 
 
-COMPONENT  SB_RGB_DRV  
+COMPONENT  SB_RGB_DRV
 	generic(
-	RGB0_CURRENT: string:="0b000000"; 
+	RGB0_CURRENT: string:="0b000000";
 	RGB1_CURRENT: string:="0b000000";
-	RGB2_CURRENT: string:="0b000000");   
+	RGB2_CURRENT: string:="0b000000");
 			port(
-				RGB0: out std_logic;  
+				RGB0: out std_logic;
 				RGB1: out std_logic;
 				RGB2: out std_logic;
 				RGBLEDEN  :in std_logic;
@@ -3553,23 +3553,23 @@ COMPONENT  SB_RGB_DRV
 end COMPONENT ;
 
 
-COMPONENT SB_IR_DRV   
+COMPONENT SB_IR_DRV
 	generic(
-	IR_CURRENT: string:="0b0000000000" ); 
+	IR_CURRENT: string:="0b0000000000" );
 			port(
 				IRLED : out std_logic;
 				IRLEDEN  :in std_logic;
-				IRPU  :in std_logic;						 
+				IRPU  :in std_logic;
 				IRPWM : in std_logic
     );
 end COMPONENT ;
 
-COMPONENT SB_LEDD_IP   
+COMPONENT SB_LEDD_IP
 			port(
-			PWMOUT0 : out std_logic;	
+			PWMOUT0 : out std_logic;
 			PWMOUT1 : out std_logic;
 			PWMOUT2 : out std_logic;
-			LEDDON : out std_logic; 
+			LEDDON : out std_logic;
 			LEDDCS:in std_logic;
 			LEDDCLK:in std_logic;
 			LEDDDAT7:in std_logic;
@@ -3592,11 +3592,11 @@ end COMPONENT ;
 
 component SB_IO_OD
           generic ( PIN_TYPE    : bit_vector( 5  downto 0);
-                    --PULLUP   : bit; 
-                    NEG_TRIGGER : bit 
-                    --IO_STANDARD : string 
+                    --PULLUP   : bit;
+                    NEG_TRIGGER : bit
+                    --IO_STANDARD : string
                   ) ;
-          port( 
+          port(
                DOUT1 		    : in std_logic;
 				DOUT0 		    : in std_logic;
 				CLOCKENABLE		: in std_logic;
@@ -3606,20 +3606,20 @@ component SB_IO_OD
 				DIN0				: out std_logic;
 				OUTPUTENABLE		: in std_logic	:='H';
 				OUTPUTCLK			: in std_logic;
-				PACKAGEPIN			: inout	std_logic                 
+				PACKAGEPIN			: inout	std_logic
                );
 end component;
 
 
-COMPONENT SB_LED_DRV_CUR 
-			Port ( 
+COMPONENT SB_LED_DRV_CUR
+			Port (
 				EN : in  STD_LOGIC;
 				LEDPU : out  STD_LOGIC);
 end COMPONENT;
 
 
-COMPONENT  SB_RGBA_DRV  
- generic ( 
+COMPONENT  SB_RGBA_DRV
+ generic (
 			CURRENT_MODE :string := "0b0";
 			RGB0_CURRENT :string := "0b000000";
 		    RGB1_CURRENT :string := "0b000000";
@@ -3634,14 +3634,14 @@ port (
         RGB0 : out std_logic;
 		 RGB1 : out std_logic;
 		 RGB2 : out std_logic
-	);	 
+	);
 end COMPONENT;
 
 ---------------------------------------------------------------------------
 --   BlackBox : SB_IR400_DRV
 ---------------------------------------------------------------------------
-COMPONENT  SB_IR400_DRV  
- generic ( 
+COMPONENT  SB_IR400_DRV
+ generic (
 	   CURRENT_MODE :string := "0b0";
 	   IR400_CURRENT :string := "0b00000000"
 );
@@ -3650,15 +3650,15 @@ port (
 		 IRLEDEN : in std_logic;
 		 IRPWM : in std_logic;
         IRLED : out std_logic
-	);	 
+	);
 end COMPONENT;
 
 
 ---------------------------------------------------------------------------
 --   BlackBox : SB_BARCODE_DRV
 ---------------------------------------------------------------------------
-COMPONENT  SB_BARCODE_DRV  
- generic ( 
+COMPONENT  SB_BARCODE_DRV
+ generic (
 		CURRENT_MODE :string := "0b0";
 		BARCODE_CURRENT :string := "0b0000"
 );
@@ -3667,13 +3667,13 @@ port (
 		CURREN: in std_logic;
 		BARCODEPWM : in std_logic;
         BARCODE : out std_logic
-	);	 
+	);
 end COMPONENT;
 
 -----------------------------------------------------------------
--- BLACK BOX : IRIP (RxTx) 
------------------------------------------------------------------- 
-COMPONENT  SB_IR_IP  
+-- BLACK BOX : IRIP (RxTx)
+------------------------------------------------------------------
+COMPONENT  SB_IR_IP
 port (
          ADRI3: in std_logic;
 		 ADRI2: in std_logic;
@@ -3693,13 +3693,13 @@ port (
 		 WDATA4: in std_logic;
 		 WDATA3: in std_logic;
 		 WDATA2: in std_logic;
-		 WDATA1: in std_logic;	
+		 WDATA1: in std_logic;
 		 WDATA0 : in std_logic;
          BUSY:out std_logic;
 		 DRDY:out std_logic;
 		 ERR : out std_logic;
 		 IROUT : out std_logic;
-		 RDATA7: out std_logic;	
+		 RDATA7: out std_logic;
 		 RDATA6: out std_logic;
 		 RDATA5: out std_logic;
 		 RDATA4: out std_logic;
@@ -3707,14 +3707,14 @@ port (
 		 RDATA2: out std_logic;
 		 RDATA1: out std_logic;
 		 RDATA0 : out std_logic
-	);	 
+	);
 end COMPONENT;
 
--------------------------------------------------- 
--- BLACKBOX :	SB_I2C_FIFO  
---------------------------------------------------- 
-COMPONENT  SB_I2C_FIFO  
- generic ( 
+--------------------------------------------------
+-- BLACKBOX :	SB_I2C_FIFO
+---------------------------------------------------
+COMPONENT  SB_I2C_FIFO
+ generic (
 	   I2C_SLAVE_ADDR :string := "0b1111100001"
 );
 port (
@@ -3764,15 +3764,15 @@ port (
 		 RXFIFOFULL: out std_logic;
 		 RXFIFOEMPTY: out std_logic;
 		 MRDCMPL : out std_logic
-	);	 
+	);
 end COMPONENT;
 
-COMPONENT SB_LEDDA_IP   
+COMPONENT SB_LEDDA_IP
 			port(
-			PWMOUT0 : out std_logic;	
+			PWMOUT0 : out std_logic;
 			PWMOUT1 : out std_logic;
 			PWMOUT2 : out std_logic;
-			LEDDON : out std_logic; 
+			LEDDON : out std_logic;
 			LEDDCS:in std_logic;
 			LEDDCLK:in std_logic;
 			LEDDDAT7:in std_logic;
@@ -3813,10 +3813,10 @@ port (
 CLK: in std_logic;
 RST: in std_logic;
 PARAMSOK: in std_logic;
-RGBCOLOR: in std_logic_vector (3 downto 0); 
-BRIGHTNESS: in std_logic_vector (3 downto 0); 
-BREATHRAMP: in std_logic_vector (3 downto 0); 
-BLINKRATE: in std_logic_vector (3 downto 0); 
+RGBCOLOR: in std_logic_vector (3 downto 0);
+BRIGHTNESS: in std_logic_vector (3 downto 0);
+BREATHRAMP: in std_logic_vector (3 downto 0);
+BLINKRATE: in std_logic_vector (3 downto 0);
 REDPWM: out std_logic;
 GREENPWM:out std_logic;
 BLUEPWM:out std_logic
@@ -3825,12 +3825,12 @@ end component;
 
 component SB_IO_I3C
           generic ( PIN_TYPE    : bit_vector( 5  downto 0);
-                    PULLUP   : bit := '0'; 
+                    PULLUP   : bit := '0';
 		    WEAK_PULLUP : bit := '0';
-                    NEG_TRIGGER : bit := '0' ; 
+                    NEG_TRIGGER : bit := '0' ;
                     IO_STANDARD : string :="SB_LVCMOS"
                   ) ;
-          port( 
+          port(
                 PACKAGE_PIN        : inout std_logic ;
                 LATCH_INPUT_VALUE  : in  std_logic ;
                 CLOCK_ENABLE       : in  std_logic ;
@@ -3840,11 +3840,11 @@ component SB_IO_I3C
                 D_OUT_1            : in  std_logic ;
                 D_OUT_0            : in  std_logic ;
 	  	PU_ENB		   : in  std_logic ;
-	  	WEAK_PU_ENB	   : in  std_logic ; 
+	  	WEAK_PU_ENB	   : in  std_logic ;
                 D_IN_1             : out std_logic ;
-                D_IN_0             : out std_logic                 
+                D_IN_0             : out std_logic
                );
-end component; 
+end component;
 
 component SB_SPRAM256KA
 port (
