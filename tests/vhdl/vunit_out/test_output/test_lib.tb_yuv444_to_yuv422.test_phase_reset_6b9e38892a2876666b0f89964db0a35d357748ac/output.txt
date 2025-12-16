@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing phase reset on AVID rising edge
-       243000000 fs - default              -    INFO - Phase reset test completed
-simulation stopped @243ns with status 0

@@ -1,3 +1,0 @@
-        [22;96;49m67500000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Testing black level conversion
-       [22;96;49m175500000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Black level test completed
-simulation stopped @175500ps with status 0

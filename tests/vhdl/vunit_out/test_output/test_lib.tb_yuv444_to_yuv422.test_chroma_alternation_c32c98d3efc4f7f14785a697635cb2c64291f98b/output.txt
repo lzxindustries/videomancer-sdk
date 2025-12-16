@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing U/V chroma alternation
-       190000000 fs - default              -    INFO - Chroma alternation test completed
-simulation stopped @190ns with status 0

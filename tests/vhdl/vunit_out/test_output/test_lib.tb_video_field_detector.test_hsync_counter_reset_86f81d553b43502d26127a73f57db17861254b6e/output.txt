@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing HSYNC resets pixel counter
-    116032500000 fs - default              -    INFO - HSYNC counter test completed
-simulation stopped @116032500ps with status 0

@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing progressive video detection
-  52129089000000 fs - default              -    INFO - Progressive detection test completed
-simulation stopped @52129089ns with status 0

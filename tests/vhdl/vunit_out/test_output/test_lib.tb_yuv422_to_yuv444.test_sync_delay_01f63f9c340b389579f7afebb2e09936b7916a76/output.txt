@@ -1,2 +1,0 @@
-        67500000 fs - default              -    INFO - Testing sync signal propagation with 2-cycle delay
-simulation stopped @138ns with status 0

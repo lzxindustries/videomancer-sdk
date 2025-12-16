@@ -1,2 +1,0 @@
-        67500000 fs - default              -    INFO - Testing blanking pixels replaced with black
-simulation stopped @109ns with status 0

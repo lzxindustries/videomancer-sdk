@@ -1,2 +1,0 @@
-               0 fs - default              -    INFO - Testing all bits can be synchronized
-simulation stopped @84ns with status 0

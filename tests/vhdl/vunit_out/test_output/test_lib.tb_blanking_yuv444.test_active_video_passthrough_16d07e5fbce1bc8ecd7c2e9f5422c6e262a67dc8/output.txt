@@ -1,2 +1,0 @@
-        67500000 fs - default              -    INFO - Testing active video passes through unchanged
-simulation stopped @95500ps with status 0
