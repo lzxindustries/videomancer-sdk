@@ -1,201 +1,28 @@
-# Videomancer Program Package Format (`.vmprog`)
+# VMPROG Format Specification
 
-**Version:** 1.0
-**Status:** Production
-**Canonical Reference:** [src/lzx/videomancer/vmprog_format.hpp](../src/lzx/videomancer/vmprog_format.hpp)
-**Audience:** Firmware developers, FPGA toolchain authors, program authors
+Binary container for FPGA programs with Ed25519 signing.
 
----
+**Properties:** Version 1.0 | 1 MB max | Little-endian | `.vmprog` extension
 
-## Table of Contents
+## File Structure
 
-1. [Overview](#1-overview)
-2. [File Structure](#2-file-structure)
-3. [Data Types and Enumerations](#3-data-types-and-enumerations)
-4. [Binary Structures](#4-binary-structures)
-5. [Validation Functions](#5-validation-functions)
-6. [Cryptographic Functions](#6-cryptographic-functions)
-7. [Helper Functions](#7-helper-functions)
-8. [Usage Examples](#8-usage-examples)
-9. [Verification Procedures](#9-verification-procedures)
-10. [Implementation Guidelines](#10-implementation-guidelines)
-11. [References](#11-references)
-
----
-
-## 1. Overview
-
-Binary container for FPGA programs with cryptographic verification (Ed25519 + SHA-256), hardware compatibility checking, ABI management, and user parameter configuration.
-
-**Properties:** Version 1.0 | 1 MB max | Little-endian | Packed structures | UTF-8 strings
-**Extension:** `.vmprog` | MIME: `application/x-vmprog` (proposed)
-
-**Related Documentation:** For developing VHDL programs that generate `.vmprog` packages, see the [Program Development Guide](program-development-guide.md).
-
----
-
-## 2. File Structure
-
-### 2.1 Layout Overview
-
-```text
-┌─────────────────────────────────────────┐
-│ File Header (64 bytes)                  │
-│ - Magic: 'VMPG'                         │
-│ - Version: 1.0                          │
-│ - File metadata                         │
-│ - Package hash (optional)               │
-├─────────────────────────────────────────┤
-│ Table of Contents (TOC)                 │
-│ - N entries × 64 bytes each             │
-│ - Type, offset, size, hash per entry    │
-├─────────────────────────────────────────┤
-│ Payload: Program Config (7368 bytes)    │
-│ - Program metadata                      │
-│ - 12 parameter configurations           │
-├─────────────────────────────────────────┤
-│ Payload: Signed Descriptor (332 bytes)  │
-│ - Config hash                           │
-│ - Artifact hashes (up to 8)             │
-│ - Build ID                              │
-├─────────────────────────────────────────┤
-│ Payload: Signature (64 bytes)           │
-│ - Ed25519 signature over descriptor     │
-├─────────────────────────────────────────┤
-│ Payload: FPGA Bitstream(s)              │
-│ - Variable size                         │
-│ - Multiple variants supported           │
-└─────────────────────────────────────────┘
+```
+File Header (64 bytes) - Magic 'VMPG', version, size, flags
+Table of Contents - N × 64-byte entries with type, offset, size, hash
+Payloads - Config (7368 bytes), descriptor (332 bytes), signature (64 bytes), bitstreams
 ```
 
-### 2.2 Offset Calculation
+## TOC Entry Types
 
-All offsets are absolute byte offsets from the start of the file:
+`config` (1), `signed_descriptor` (2), `signature` (3), `fpga_bitstream` (4), `bitstream_sd_analog/hdmi/dual` (5-7), `bitstream_hd_analog/hdmi/dual` (8-10)
 
-```text
-Header starts at: 0
-TOC starts at: header.toc_offset (typically 64)
-TOC ends at: header.toc_offset + header.toc_bytes
-Payloads start at: TOC end (variable)
-File ends at: header.file_size
-```
+## Reference
 
-### 2.3 Size Constraints
+Complete structures in [src/lzx/videomancer/vmprog_format.hpp](../src/lzx/videomancer/vmprog_format.hpp).
 
-- **Header:** Fixed 64 bytes
-- **TOC entry:** Fixed 64 bytes
-- **Maximum TOC count:** 256 entries (recommended limit)
-- **Maximum file size:** 1,048,576 bytes (1 MB)
-- **Program config:** Fixed 7,240 bytes
-- **Signed descriptor:** Fixed 332 bytes
-- **Ed25519 signature:** Fixed 64 bytes
+For program development, see [Program Development Guide](program-development-guide.md).
 
----
 
-## 3. Data Types and Enumerations
-
-### 3.1 Validation Result Codes
-
-**Enum:** `vmprog_validation_result` (uint32_t)
-
-All validation functions return one of these codes:
-
-| Value | Name | Description |
-|------:|------|-------------|
-| 0 | `ok` | Validation succeeded |
-| 1 | `invalid_magic` | Magic number incorrect |
-| 2 | `invalid_version` | Unsupported version |
-| 3 | `invalid_header_size` | Header size mismatch |
-| 4 | `invalid_file_size` | File size invalid |
-| 5 | `invalid_toc_offset` | TOC offset out of bounds |
-| 6 | `invalid_toc_size` | TOC size incorrect |
-| 7 | `invalid_toc_count` | TOC count invalid |
-| 8 | `invalid_artifact_count` | Artifact count out of range |
-| 9 | `invalid_parameter_count` | Parameter count exceeds limit |
-| 10 | `invalid_value_label_count` | Value label count too high |
-| 11 | `invalid_abi_range` | ABI range invalid |
-| 12 | `string_not_terminated` | Required string not null-terminated |
-| 13 | `invalid_hash` | Hash verification failed |
-| 14 | `invalid_toc_entry` | TOC entry validation failed |
-| 15 | `invalid_payload_offset` | Payload offset out of bounds |
-| 16 | `invalid_parameter_values` | Parameter value constraints violated |
-| 17 | `invalid_enum_value` | Enum value out of valid range |
-| 18 | `reserved_field_not_zero` | Reserved field not zeroed |
-
-### 3.2 TOC Entry Types
-
-**Enum:** `vmprog_toc_entry_type_v1_0` (uint32_t)
-
-Identifies the type of payload referenced by a TOC entry:
-
-| Value | Name | Description |
-|------:|------|-------------|
-| 0 | `none` | Invalid/unused entry |
-| 1 | `config` | Program configuration |
-| 2 | `signed_descriptor` | Cryptographic descriptor |
-| 3 | `signature` | Ed25519 signature (64 bytes) |
-| 4 | `fpga_bitstream` | Generic FPGA bitstream |
-| 5 | `bitstream_sd_analog` | SD analog input bitstream |
-| 6 | `bitstream_sd_hdmi` | SD HDMI input bitstream |
-| 7 | `bitstream_sd_dual` | SD dual input bitstream |
-| 8 | `bitstream_hd_analog` | HD analog input bitstream |
-| 9 | `bitstream_hd_hdmi` | HD HDMI input bitstream |
-| 10 | `bitstream_hd_dual` | HD dual input bitstream |
-
-### 3.3 Header Flags
-
-**Enum:** `vmprog_header_flags_v1_0` (uint32_t, bitmask)
-
-Flags indicating package properties:
-
-| Value | Name | Description |
-|------:|------|-------------|
-| 0x00000000 | `none` | No flags set |
-| 0x00000001 | `signed_pkg` | Package is cryptographically signed |
-
-**Bitwise operations supported:** `|`, `&`, `^`, `~`, `|=`, `&=`, `^=`
-
-### 3.4 TOC Entry Flags
-
-**Enum:** `vmprog_toc_entry_flags_v1_0` (uint32_t, bitmask)
-
-Currently reserved for future use:
-
-| Value | Name | Description |
-|------:|------|-------------|
-| 0x00000000 | `none` | No flags set |
-
-### 3.5 Signed Descriptor Flags
-
-**Enum:** `vmprog_signed_descriptor_flags_v1_0` (uint32_t, bitmask)
-
-Currently reserved for future use:
-
-| Value | Name | Description |
-|------:|------|-------------|
-| 0x00000000 | `none` | No flags set |
-
-### 3.6 Hardware Compatibility Flags
-
-**Enum:** `vmprog_hardware_flags_v1_0` (uint32_t, bitmask)
-
-Indicates compatible hardware platforms:
-
-| Value | Name | Description |
-|------:|------|-------------|
-| 0x00000000 | `none` | No hardware specified |
-| 0x00000001 | `videomancer_core_rev_a` | Videomancer Core Rev A |
-| 0x00000002 | `videomancer_core_rev_b` | Videomancer Core Rev B |
-
-**Usage:** Multiple flags can be combined with bitwise OR.
-
-### 3.7 Parameter Control Modes
-
-**Enum:** `vmprog_parameter_control_mode_v1_0` (uint32_t)
-
-Defines how parameter values are interpreted and displayed:
-
-#### Linear Scaling Modes
 
 | Value | Name | Description |
 |------:|------|-------------|

@@ -91,15 +91,6 @@ architecture rtl of spi_peripheral is
     signal s_last_data_bit : std_logic := '0';  -- Pre-computed s_bit_count = DATA_WIDTH - 1
 
 begin
-    -- Initialize outputs
-    process
-    begin
-        dout  <= (others => '0');
-        wr_en <= '0';
-        rd_en <= '0';
-        addr  <= (others => '0');
-        wait;
-    end process;
     u_sync_to_clk_sdi  : entity work.sync_slv port map(clk => clk, a(0) => sdi, b(0) => s_sdi);
     u_sync_to_clk_sck  : entity work.sync_slv port map(clk => clk, a(0) => sck, b(0) => s_sck);
     u_sync_to_clk_cs_n : entity work.sync_slv port map(clk => clk, a(0) => cs_n, b(0) => s_cs_n);

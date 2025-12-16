@@ -1,108 +1,101 @@
-# Ed25519 Signing Quick Reference
+# Package Signing Guide
 
-This guide covers package signing. For TOML configuration details, see [TOML Configuration Guide](toml-config-guide.md).
+Ed25519 cryptographic signing for Videomancer program packages (`.vmprog` files).
 
-## Installation
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-# Ubuntu/Debian/WSL2 (recommended - avoids PEP 668 issues)
+# Ubuntu/Debian/WSL2 (recommended)
 sudo apt install python3-cryptography
 
-# macOS
+# macOS or other systems
 pip3 install cryptography
-
-# Other Linux (if pip is allowed)
-pip3 install cryptography
-
-# If you get "externally-managed-environment" error:
-# Use system package manager or --user flag:
-sudo apt install python3-cryptography  # Debian/Ubuntu
-pip3 install --user cryptography       # User installation
 ```
 
-## Generate Keys (One-time Setup)
+### 2. Generate Keys (One-time)
 
 ```bash
-# From tools/vmprog-packer directory
-python generate_ed25519_keys.py --output-dir ../../keys
-
-# Or use the setup script
+# Use setup script
 cd scripts/
-./setup_ed25519_signing.sh   # Linux/macOS/WSL2
+./setup_ed25519_signing.sh
+
+# Or manually
+cd tools/vmprog-packer
+python generate_ed25519_keys.py --output-dir ../../keys
 ```
 
-## Create Packages
-
-### Signed Package (Recommended)
-```bash
-python vmprog_pack.py \
-  ../../build/programs/passthru \
-  ../../out/passthru.vmprog
-```
-
-### Unsigned Package
-```bash
-python vmprog_pack.py --no-sign \
-  ../../build/programs/passthru \
-  ../../out/passthru.vmprog
-```
-
-### Custom Key Directory
-```bash
-python vmprog_pack.py --keys-dir ../../my_keys \
-  ../../build/programs/passthru \
-  ../../output/passthru.vmprog
-```
-
-## Test Signing
+### 3. Create Packages
 
 ```bash
-python test_ed25519_signing.py
+# Signed package (default)
+python vmprog_pack.py build/programs/passthru output/passthru.vmprog
+
+# Unsigned package
+python vmprog_pack.py --no-sign build/programs/passthru output/passthru.vmprog
+
+# Custom key location
+python vmprog_pack.py --keys-dir my_keys build/programs/passthru output/passthru.vmprog
 ```
 
-## Key Files
+## Key Management
 
-- **Private:** `../../keys/lzx_official_signed_descriptor_priv.bin` (32 bytes) ⚠️ KEEP SECRET
-- **Public:** `../../keys/lzx_official_signed_descriptor_pub.bin` (32 bytes) ✓ Safe to share
+**Key Files:**
+- Private: `keys/lzx_official_signed_descriptor_priv.bin` (32 bytes) - **Keep secret**
+- Public: `keys/lzx_official_signed_descriptor_pub.bin` (32 bytes) - Safe to share
 
-## Security Checklist
+**Security:**
+- Private keys are protected by `.gitignore`
+- Store private keys in encrypted storage
+- Limit access to authorized personnel only
+- Back up private keys securely
+- Public keys can be freely distributed
 
-- [ ] Private key is NOT committed to version control (protected by `.gitignore`)
-- [ ] Private key is stored securely (encrypted storage recommended)
-- [ ] Access to private key is limited to authorized personnel
-- [ ] Public key is embedded in firmware for verification
-- [ ] Backup of private key exists in secure location
+## What Gets Signed
+
+The signature covers:
+- Program configuration hash
+- All FPGA bitstream hashes
+- Artifact count and metadata
+- Build identifier
+
+This prevents modification of config or bitstreams.
 
 ## Troubleshooting
 
-### "cryptography library not available"
+**"cryptography library not available"**
 ```bash
 pip install cryptography
 ```
 
-### "Private key not found"
+**"Private key not found"**
 ```bash
 python generate_ed25519_keys.py --output-dir ../../keys
 ```
 
-### Package created but unsigned
-- Check that keys exist in `../../keys/` directory
-- Verify `cryptography` library is installed
-- Try running with explicit key directory: `--keys-dir ../../keys`
+**Package created but unsigned**
+- Verify keys exist in `keys/` directory
+- Check `cryptography` is installed
+- Try explicit key directory: `--keys-dir ../../keys`
 
-## Command Reference
+## Testing
 
-| Command | Description |
-|---------|-------------|
-| `generate_ed25519_keys.py` | Generate new Ed25519 key pair |
-| `test_ed25519_signing.py` | Test signing functionality |
-| `vmprog_pack.py` | Create signed/unsigned packages |
-| `vmprog_pack.py --no-sign` | Force unsigned package |
-| `vmprog_pack.py --keys-dir DIR` | Use keys from custom directory |
+```bash
+cd tools/vmprog-packer
+python test_ed25519_signing.py
+```
 
-## Documentation
+## Technical Details
 
-- **Full Documentation:** [ed25519-signing.md](ed25519-signing.md)
-- **Key Management:** [../keys/README.md](../keys/README.md)
-- **Package Format:** [vmprog-format.md](vmprog-format.md)
-- **Tool Usage:** `README.md` (this directory)
+- **Algorithm:** Ed25519 (EdDSA using Curve25519)
+- **Signature size:** 64 bytes
+- **Key size:** 32 bytes (public and private)
+- **Security level:** ~128 bits
+
+## Related Documentation
+
+- [TOML Configuration Guide](toml-config-guide.md)
+- [Package Format Specification](vmprog-format.md)
+- [Key Management](../keys/README.md)
+

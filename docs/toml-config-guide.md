@@ -1,202 +1,87 @@
-# Videomancer Program Configuration Guide
+# TOML Configuration Guide
 
-This guide explains how to create TOML configuration files for Videomancer programs. These files define program metadata and parameter mappings that control how your FPGA program interacts with hardware controls.
-
-For a complete guide to developing VHDL programs including TOML configuration, see the **[Program Development Guide](program-development-guide.md)**.
+Defines program metadata and parameter mappings for Videomancer FPGA programs.
 
 ## File Structure
 
-A program configuration file consists of two main sections:
-
 ```toml
 [program]
-# Program metadata goes here
+program_id = "com.example.my_program"
+program_name = "My Program"
+program_version = "1.0.0"
+abi_version = ">=1.0,<2.0"
+author = "Your Name"           # Optional
+license = "GPL-3.0"            # Optional
+category = "Effects"           # Optional
+description = "Description"   # Optional
+url = "https://example.com"   # Optional
 
 [[parameter]]
-# First parameter configuration
+parameter_id = "rotary_potentiometer_1"
+name_label = "Frequency"
+control_mode = "linear"        # Numeric mode
+min_value = 0                  # Optional, default 0
+max_value = 1023               # Optional, default 1023
+initial_value = 512            # Optional, default 512
 
 [[parameter]]
-# Second parameter configuration
-# ... up to 12 parameters total
+parameter_id = "toggle_switch_7"
+name_label = "Mode"
+[[parameter.value_label]]      # Label mode
+value = 0
+label = "Off"
+[[parameter.value_label]]
+value = 1
+label = "On"
 ```
 
-## Program Section
+## Program Fields
 
-The `[program]` section contains metadata about your program. All fields use strings with maximum lengths specified below.
+**Required:**
+- `program_id` (max 63 chars) - Unique identifier
+- `program_name` (max 31 chars) - Display name
+- `program_version` - SemVer format (e.g., "1.2.3")
+- `abi_version` - Range notation (e.g., ">=1.0,<2.0")
 
-### Required Fields
-
-**program_id** (max 63 characters)
-Unique identifier for your program using reverse DNS notation or a similar naming convention.
-
-```toml
-program_id = "com.lzxindustries.example.waveform_generator"
-```
-
-**program_name** (max 31 characters)
-Human-readable name displayed to users.
-
-```toml
-program_name = "Waveform Generator"
-```
-
-**program_version** (SemVer format)
-Version number in semantic versioning format: `major.minor.patch`
-
-```toml
-program_version = "1.2.3"
-```
-
-**abi_version** (range notation)
-Specifies which ABI versions your program is compatible with using range notation: `>=min_version,<max_version`
-
-```toml
-abi_version = ">=1.0,<2.0"  # Compatible with ABI 1.x
-```
-
-### Optional Fields
-
-All optional fields default to empty strings if not specified.
-
-**author** (max 63 characters)
-Name of the program author or organization.
-
-```toml
-author = "LZX Industries LLC"
-```
-
-**license** (max 31 characters)
-License identifier, preferably in SPDX format.
-
-```toml
-license = "GPL-3.0"
-license = "MIT"
-license = "Proprietary"
-```
-
-**category** (max 31 characters)
-Category for organizing programs.
-
-```toml
-category = "Signal Generation"
-```
-
-**description** (max 127 characters)
-Detailed description of what the program does.
-
-```toml
-description = "A versatile waveform generator with multiple controls."
-```
-
-**url** (max 127 characters)
-Project or documentation URL (http/https).
-
-```toml
-url = "https://github.com/lzxindustries/videomancer-sdk"
-```
+**Optional:**
+- `author`, `license`, `category` (max 31-63 chars)
+- `description`, `url` (max 127 chars)
 
 ## Parameters
 
-Parameters map physical hardware controls to your program's functionality. You can define up to 12 parameters using `[[parameter]]` sections. Each parameter must specify which hardware control it uses and how values are interpreted.
+Up to 12 parameters. Each requires:
+- `parameter_id` - Hardware control (see available controls below)
+- `name_label` (max 31 chars) - Display name
 
-### Parameter Modes
-
-Parameters operate in one of two modes:
-
-1. **Numeric Mode**: Continuous or discrete numeric values with scaling and display options
-2. **Label Mode**: Predefined text labels for discrete positions
-
-### Required Fields (All Parameters)
-
-**parameter_id**
-Hardware control assignment. Each parameter must use a unique control.
-
-Available controls:
-- `rotary_potentiometer_1` through `rotary_potentiometer_6`
-- `toggle_switch_7` through `toggle_switch_11`
-- `linear_potentiometer_12`
-
-```toml
-parameter_id = "rotary_potentiometer_1"
-```
-
-**name_label** (max 31 characters)
-Display name for the parameter.
-
-```toml
-name_label = "Frequency"
-```
+**Available Controls:**
+`rotary_potentiometer_1` through `6`, `toggle_switch_7` through `11`, `linear_potentiometer_12`
 
 ### Numeric Mode
 
-Use numeric mode for parameters with continuous or stepped numeric values. When using numeric mode, you must specify `control_mode`.
+**Control Modes:** `linear`, `linear_half`, `linear_quarter`, `linear_double`, `boolean`, `steps_4/8/16/32/64/128/256`, `polar_degs_90/180/360/720/1440/2880`, easing curves: `quad/sine/circ/quint/quart/expo` with `_in/_out/_in_out`
 
-**control_mode** (required for numeric mode)
-Defines how the hardware value is interpreted and scaled. Available modes:
+### Label Mode
 
-*Linear scaling:*
-- `linear` - Direct 1:1 mapping
-- `linear_half` - Half speed scaling
-- `linear_quarter` - Quarter speed scaling
-- `linear_double` - Double speed scaling
+Define `[[parameter.value_label]]` sections with `value` (0-1023) and `label` (max 31 chars). Up to 256 labels per parameter.
 
-*Discrete steps:*
-- `boolean` - Two-state on/off
-- `steps_4`, `steps_8`, `steps_16`, `steps_32`, `steps_64`, `steps_128`, `steps_256`
+## Tools
 
-*Angular/polar:*
-- `polar_degs_90`, `polar_degs_180`, `polar_degs_360`, `polar_degs_720`, `polar_degs_1440`, `polar_degs_2880`
-
-*Easing curves:*
-- `quad_in`, `quad_out`, `quad_in_out`
-- `sine_in`, `sine_out`, `sine_in_out`
-- `circ_in`, `circ_out`, `circ_in_out`
-- `quint_in`, `quint_out`, `quint_in_out`
-- `quart_in`, `quart_out`, `quart_in_out`
-- `expo_in`, `expo_out`, `expo_in_out`
-
-```toml
-control_mode = "linear"
+**Visual Editor:**
+```bash
+open tools/toml-editor/toml-editor.html
 ```
 
-#### Optional Numeric Fields
+**Command-Line:**
+```bash
+# Validate
+cd tools/toml-validator
+python3 toml_schema_validator.py your_program.toml
 
-**min_value** (0-1023, default: 0)
-Minimum hardware value the parameter will use.
-
-**max_value** (0-1023, default: 1023)
-Maximum hardware value the parameter will use. Must be greater than `min_value`.
-
-**initial_value** (0-1023, default: 512)
-Default value when the program starts. Must be between `min_value` and `max_value`.
-
-```toml
-min_value = 100
-max_value = 900
-initial_value = 500
+# Convert to binary
+cd tools/toml-converter
+python3 toml_to_config_binary.py your_program.toml output.bin
 ```
 
-**display_min_value** (-32768 to 32767, default: same as min_value)
-Minimum value shown in the user interface. Allows scaling for display purposes.
-
-**display_max_value** (-32768 to 32767, default: same as max_value)
-Maximum value shown in the user interface.
-
-```toml
-# Hardware uses 0-1023, but display shows 0-100
-min_value = 0
-max_value = 1023
-display_min_value = 0
-display_max_value = 100
-```
-
-**display_float_digits** (0-255, default: 0)
-Number of decimal places to show when displaying values.
-
-```toml
-display_float_digits = 1  # Shows values like 12.3
-display_float_digits = 2  # Shows values like 12.34
-```
 
 **suffix_label** (max 3 characters)
 Unit suffix displayed after the value.
@@ -369,17 +254,3 @@ cd tools/toml-converter
 python3 toml_to_config_binary.py your_program.toml output.bin
 ```
 
-The converter automatically:
-- Calculates parameter count from the number of `[[parameter]]` sections
-- Applies default values for optional fields
-- Validates all constraints and ranges
-- Generates a 7368-byte binary file in the required format
-
-## Tips
-
-1. **Start simple**: Begin with basic numeric parameters using `linear` control mode, then explore other modes
-2. **Test thoroughly**: Use the validator to catch errors before converting to binary
-3. **Use meaningful names**: Choose descriptive `name_label` values that users will understand
-4. **Consider display scaling**: Use `display_min_value` and `display_max_value` to show user-friendly ranges while maintaining full hardware resolution
-5. **Label mode for discrete choices**: When parameters have distinct states (waveforms, modes, etc.), use `value_labels` instead of numeric mode
-6. **Keep descriptions concise**: The 127-character limit for descriptions requires clear, focused text

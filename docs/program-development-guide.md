@@ -1,19 +1,22 @@
-# Videomancer Program Development Guide
+# Program Development Guide
 
-A practical guide to creating video processing programs for Videomancer using the SDK.
+Create VHDL-based video processing programs for Videomancer FPGA hardware.
 
-## Overview
+## Prerequisites
 
-Videomancer programs are VHDL-based video effects that run on the FPGA hardware. Each program receives a video stream, processes it in real-time, and outputs the modified result. Programs can implement effects like color correction, keying, mixing, geometric transformations, and more.
+**VHDL knowledge** (entities, architectures, processes, signals)
+- [Free Range VHDL](https://github.com/fabriziotappero/Free-Range-VHDL-book) - Open-source VHDL textbook
+- [VHDL Tutorial](https://www.nandland.com/vhdl/tutorials/tutorial-introduction-to-vhdl-for-beginners.html) - Nandland beginner tutorials
+- [VHDL Programming by Example](https://www.doulos.com/knowhow/vhdl/) - Doulos VHDL resources
+- [IEEE VHDL Standards](https://standards.ieee.org/ieee/1076/6832/) - Official language standard
 
-This guide walks you through the complete process of developing a Videomancer program from concept to deployment.
+**Fixed-point arithmetic** (10-bit unsigned, 0-1023)
+- [Fixed-Point Arithmetic: An Introduction](https://inst.eecs.berkeley.edu/~cs61c/sp06/handout/fixedpt.html) - Berkeley CS course notes
+- [Introduction to Fixed Point Number Representation](https://www.allaboutcircuits.com/technical-articles/fixed-point-representation-introduction/) - All About Circuits
+- [VHDL Fixed-Point Guide](https://vhdlwhiz.com/fixed-point-type/) - VHDLwhiz tutorial
 
-## What You'll Need
-
-- **Basic VHDL knowledge**: Understanding of entities, architectures, processes, and signals
-- **Fixed-point arithmetic**: Video data uses 10-bit unsigned values (0-1023)
-- **Pipeline design**: FPGA designs benefit from pipelined architectures
-- **The SDK**: Development tools, build scripts, and examples in this repository
+**The SDK and build tools**
+- Included in this repository
 
 ## Program Architecture
 
@@ -173,112 +176,21 @@ end process p_sync_delay;
 
 ### Step 5: Build and Test
 
-**Build the program:**
 ```bash
-# From SDK root directory
 ./build_programs.sh your_program
 ```
 
-This creates:
-- Synthesized bitstreams for all video formats
-- Program configuration binary
-- Complete `.vmprog` package
+Creates bitstreams, config binary, and `.vmprog` package. Test on hardware.
 
-**Test on hardware:**
-1. Copy the `.vmprog` file to your Videomancer device
-2. Load the program and verify basic functionality
-3. Test all parameter ranges
-4. Verify with different video sources and formats
+## Examples
 
-### Step 6: Documentation and Polish
+- `programs/passthru` - Minimal reference (1 clock latency)
+- `programs/yuv_amplifier` - Multi-stage pipeline with submodules
 
-**Add comprehensive comments:**
-- Header documentation (overview, architecture, registers)
-- Section headers for major code blocks
-- Inline comments for complex logic
-- Process labels that describe functionality
+## Reference
 
-**Verify code quality:**
-- Consistent signal naming (`s_` prefix, descriptive names)
-- Proper indentation and formatting
-- No synthesis warnings
-- All latencies documented
+- [TOML Configuration Guide](toml-config-guide.md)
+- [VMPROG Format](vmprog-format.md)  
+- [ABI Format](abi-format.md)
+- [Package Signing](package-signing-guide.md)
 
-## Best Practices
-
-### Signal Naming
-
-- `s_` prefix for signals, `C_` for constants, `v_` for variables
-- Use descriptive names: `s_contrast_value` not `s_cv`
-
-### Fixed-Point Arithmetic
-
-Video values are 10-bit unsigned (0-1023): Black=0, Gray=512, White=1023
-- Use extra bits to prevent overflow in calculations
-- Scale results back to 10-bit range with rounding
-
-### Resource Management
-
-- **Multipliers**: Limited, use efficiently
-- **Block RAM**: Good for delay lines
-- More pipeline stages = higher throughput but more latency
-
-### Testing Strategies
-
-1. **Passthrough test**: Verify video passes cleanly
-2. **Extreme values**: Test parameters at min/max
-3. **Multiple formats**: Test on both SD and HD sources
-
-## Example Programs
-
-Study these examples in the `programs/` directory:
-
-### passthru
-- **Complexity**: Minimal (1 clock latency)
-- **Purpose**: Reference implementation and testing baseline
-
-### yuv_amplifier
-- **Complexity**: Moderate (14 clock latency)
-- **Purpose**: Contrast, brightness, saturation, and fade effects
-- **Key concepts**: Multi-stage pipeline, submodule instantiation
-
-## Build System Integration
-
-The SDK handles compilation automatically:
-
-1. **VHDL Synthesis**: Uses open-source tools (Yosys, nextpnr)
-2. **Config Processing**: Converts TOML to binary format
-3. **Package Creation**: Bundles bitstreams and config into `.vmprog`
-
-No manual FPGA tool configuration needed!
-
-## Troubleshooting
-
-**Video corruption:**
-- Verify sync signal delays match video latency exactly
-- Check for pipeline bubbles or missing avid propagation
-
-**Wrong colors:**
-- Remember: YUV not RGB! U/V neutral = 512
-- Check signed/unsigned conversions
-
-**Parameters don't work:**
-- Verify TOML register IDs match VHDL mapping
-- Check bit field extraction syntax
-
-## Reference Documentation
-
-- **[TOML Configuration Guide](toml-config-guide.md)**: Complete parameter definition reference
-- **[VMPROG Format Specification](vmprog-format.md)**: Package file structure
-- **[ABI Format Specification](abi-format.md)**: Binary format details
-- **[Package Signing Guide](package-signing-guide.md)**: Code signing for distribution
-
-## Next Steps
-
-1. **Study the examples**: Start with `passthru`, then examine `yuv_amplifier`
-2. **Sketch your design**: Plan pipeline stages and registers on paper
-3. **Start simple**: Implement basic functionality first
-4. **Iterate**: Add features incrementally, testing each change
-5. **Document**: Add comprehensive comments as you code
-
-Welcome to Videomancer development! The community looks forward to seeing what you create.
