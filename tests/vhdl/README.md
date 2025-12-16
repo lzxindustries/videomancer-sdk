@@ -30,35 +30,26 @@ Tests the `yuv422_to_yuv444` video format converter.
 - `test_field_propagation` - Field signal propagates correctly
 - `test_continuous_stream` - Continuous pixel stream processing
 
-### tb_spi_peripheral.vhd
-Tests the `spi_peripheral` SPI peripheral controller module.
+### tb_yuv444_to_yuv422.vhd
+Tests the `yuv444_to_yuv422` video format converter.
 
 **Test Cases:**
-- `test_spi_write` - Basic SPI write operation
-- `test_spi_read` - Basic SPI read operation
-- `test_multiple_writes` - Multiple consecutive write operations
-- `test_multiple_reads` - Multiple consecutive read operations
-- `test_write_read_back` - Write followed by read-back verification
-- `test_cs_abort` - Transaction abort via CS deassertion
-- `test_address_patterns` - Various address bit patterns
-- `test_data_patterns` - Various data bit patterns
+- `test_basic_conversion` - Basic YUV444 to YUV422 pixel conversion
+- `test_sync_delay` - Sync signal propagation timing
+- `test_phase_reset` - Phase reset on AVID rising edge
+- `test_chroma_alternation` - Chroma sample alternation
+- `test_field_propagation` - Field signal propagates correctly
 
-### tb_video_sync_generator.vhd
-Tests the `video_sync_generator` video sync signal generator module.
+### tb_blanking_yuv444.vhd
+Tests the `blanking_yuv444` video blanking module.
 
 **Test Cases:**
-- `test_ntsc_timing` - NTSC video timing configuration
-- `test_pal_timing` - PAL video timing configuration
-- `test_480p_timing` - 480p progressive timing
-- `test_720p60_timing` - 720p60 HD timing
-- `test_1080i60_timing` - 1080i60 interlaced HD timing
-- `test_timing_switch` - Switching between timing formats
-- `test_ref_sync_response` - Reference sync input response
-- `test_trisync_generation` - Tri-level sync generation
-- `test_hsync_frequency` - HSYNC frequency verification
-- `test_vsync_generation` - VSYNC generation
-- `test_all_formats` - Quick test of all timing formats
-- `test_counter_sync` - Counter synchronization on frame/field sync
+- `test_active_video_passthrough` - Active video passes through unchanged
+- `test_blanking_replacement` - Blanking pixels replaced with blanking level
+- `test_sync_passthrough` - Sync signals pass through unchanged
+- `test_transition_to_blanking` - Transition from active to blanking
+- `test_transition_to_active` - Transition from blanking to active
+- `test_continuous_blanking` - Continuous blanking period handling
 
 ## Prerequisites
 
@@ -101,11 +92,11 @@ python3 run.py 'rtl_lib.tb_sync_slv.*'
 # Run only yuv422_to_yuv444 tests
 python3 run.py 'rtl_lib.tb_yuv422_to_yuv444.*'
 
-# Run only spi_peripheral tests
-python3 run.py 'rtl_lib.tb_spi_peripheral.*'
+# Run only yuv444_to_yuv422 tests
+python3 run.py 'rtl_lib.tb_yuv444_to_yuv422.*'
 
-# Run only video_sync_generator tests
-python3 run.py 'rtl_lib.tb_video_sync_generator.*'
+# Run only blanking_yuv444 tests
+python3 run.py 'rtl_lib.tb_blanking_yuv444.*'
 ```
 
 ### Run Specific Test Case
@@ -114,8 +105,8 @@ python3 run.py 'rtl_lib.tb_video_sync_generator.*'
 # Run a single test case
 python3 run.py 'rtl_lib.tb_sync_slv.test_two_ff_delay'
 python3 run.py 'rtl_lib.tb_yuv422_to_yuv444.test_basic_conversion'
-python3 run.py 'rtl_lib.tb_spi_peripheral.test_write_read_back'
-python3 run.py 'rtl_lib.tb_video_sync_generator.test_ntsc_timing'
+python3 run.py 'rtl_lib.tb_yuv444_to_yuv422.test_basic_conversion'
+python3 run.py 'rtl_lib.tb_blanking_yuv444.test_active_video_passthrough'
 ```
 
 ### Verbose Output
@@ -172,11 +163,11 @@ VHDL tests are integrated into:
 Current coverage:
 - ✅ Clock domain synchronizer (`sync_slv`)
 - ✅ YUV422 to YUV444 converter (`yuv422_to_yuv444`)
-- ✅ SPI peripheral controller (`spi_peripheral`)
-- ✅ Video sync generator (`video_sync_generator`)
-- 🔲 YUV444 to YUV422 converter
-- 🔲 Video field detector
-- 🔲 Blanking modules
+- ✅ YUV444 to YUV422 converter (`yuv444_to_yuv422`)
+- ✅ Blanking module (`blanking_yuv444`)
+- 🔲 SPI peripheral controller (`spi_peripheral`)
+- 🔲 Video sync generator (`video_sync_generator`)
+- 🔲 Video field detector (`video_field_detector`)
 
 ## Resources
 

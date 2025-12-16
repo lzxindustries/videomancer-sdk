@@ -8,12 +8,14 @@ Added comprehensive VHDL unit testing infrastructure using VUnit framework and G
 ### 1. VHDL Test Directory Structure
 ```
 tests/vhdl/
-├── README.md              # Comprehensive documentation
-├── run.py                 # VUnit test runner script
-├── requirements.txt       # Python dependencies (vunit-hdl)
-├── setup.sh              # Quick setup script
-├── tb_sync_slv.vhd       # Testbench for clock domain synchronizer
-└── tb_yuv422_to_yuv444.vhd  # Testbench for YUV422→YUV444 converter
+├── README.md                 # Comprehensive documentation
+├── run.py                    # VUnit test runner script
+├── requirements.txt          # Python dependencies (vunit-hdl)
+├── setup.sh                  # Quick setup script
+├── tb_sync_slv.vhd          # Testbench for clock domain synchronizer
+├── tb_yuv422_to_yuv444.vhd  # Testbench for YUV422→YUV444 converter
+├── tb_yuv444_to_yuv422.vhd  # Testbench for YUV444→YUV422 converter
+└── tb_blanking_yuv444.vhd   # Testbench for video blanking module
 ```
 
 ### 2. Test Coverage
@@ -36,33 +38,24 @@ Tests the YUV422 to YUV444 video format converter:
 - `test_field_propagation` - Field signal handling
 - `test_continuous_stream` - Continuous pixel stream
 
-#### tb_spi_peripheral.vhd (8 test cases) ✨ NEW
-Tests the SPI peripheral controller module:
-- `test_spi_write` - Basic SPI write operation
-- `test_spi_read` - Basic SPI read operation
-- `test_multiple_writes` - Multiple consecutive write operations
-- `test_multiple_reads` - Multiple consecutive read operations
-- `test_write_read_back` - Write followed by read-back verification
-- `test_cs_abort` - Transaction abort via CS deassertion
-- `test_address_patterns` - Various address bit patterns
-- `test_data_patterns` - Various data bit patterns
+#### tb_yuv444_to_yuv422.vhd (5 test cases)
+Tests the YUV444 to YUV422 video format converter:
+- `test_basic_conversion` - Basic YUV444 to YUV422 pixel conversion
+- `test_sync_delay` - Sync signal propagation timing
+- `test_phase_reset` - Phase reset on AVID rising edge
+- `test_chroma_alternation` - Chroma sample alternation
+- `test_field_propagation` - Field signal propagates correctly
 
-#### tb_video_sync_generator.vhd (12 test cases) ✨ NEW
-Tests the video sync signal generator module:
-- `test_ntsc_timing` - NTSC video timing configuration
-- `test_pal_timing` - PAL video timing configuration
-- `test_480p_timing` - 480p progressive timing
-- `test_720p60_timing` - 720p60 HD timing
-- `test_1080i60_timing` - 1080i60 interlaced HD timing
-- `test_timing_switch` - Switching between timing formats
-- `test_ref_sync_response` - Reference sync input response
-- `test_trisync_generation` - Tri-level sync generation
-- `test_hsync_frequency` - HSYNC frequency verification
-- `test_vsync_generation` - VSYNC generation
-- `test_all_formats` - Quick test of all timing formats
-- `test_counter_sync` - Counter synchronization on frame/field sync
+#### tb_blanking_yuv444.vhd (6 test cases)
+Tests the video blanking module:
+- `test_active_video_passthrough` - Active video passes through unchanged
+- `test_blanking_replacement` - Blanking pixels replaced with blanking level
+- `test_sync_passthrough` - Sync signals pass through unchanged
+- `test_transition_to_blanking` - Transition from active to blanking
+- `test_transition_to_active` - Transition from blanking to active
+- `test_continuous_blanking` - Continuous blanking period handling
 
-**Total: 32 VHDL unit tests (20 new tests added)**
+**Total: 23 VHDL unit tests**
 
 ### 3. Integration with Test Suite
 
@@ -181,10 +174,9 @@ On every push/PR to main/develop:
 ## Future Expansion
 
 Easily add tests for other FPGA modules:
-- `tb_yuv444_to_yuv422.vhd`
+- `tb_spi_peripheral.vhd`
 - `tb_video_sync_generator.vhd`
 - `tb_video_field_detector.vhd`
-- `tb_blanking_yuv444.vhd`
 - User program modules from `programs/` directory
 
 ## Benefits

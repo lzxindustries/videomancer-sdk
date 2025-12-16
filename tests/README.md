@@ -11,9 +11,11 @@ Comprehensive test suite for the Videomancer SDK C++ headers and Python tools.
   - test_vmprog_stream_reader: 37 tests
   - test_vmprog_public_keys: 8 tests
   - test_videomancer_fpga_controller: 11 tests
-- **VHDL Unit Tests**: 12 tests across 2 test suites
+- **VHDL Unit Tests**: 22 tests across 4 test suites
   - tb_sync_slv: 5 tests
   - tb_yuv422_to_yuv444: 7 tests
+  - tb_yuv444_to_yuv422: 5 tests
+  - tb_blanking_yuv444: 6 tests
 - **Python Tests**: 2 test modules
 - **Shell Tests**: 2 integration tests
 - **Test Coverage**: All SDK C++ headers and core FPGA RTL modules are tested
@@ -36,6 +38,8 @@ tests/
 │   ├── run.py             # VUnit test runner
 │   ├── tb_sync_slv.vhd
 │   ├── tb_yuv422_to_yuv444.vhd
+│   ├── tb_yuv444_to_yuv422.vhd
+│   ├── tb_blanking_yuv444.vhd
 │   └── README.md
 ├── python/                 # Python tool tests
 │   ├── test_converter.py
