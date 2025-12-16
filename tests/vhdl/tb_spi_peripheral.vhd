@@ -388,20 +388,18 @@ begin
       elsif run("test_data_patterns") then
         info("Testing various data patterns");
         
-        constant test_addr : unsigned(C_ADDR_WIDTH - 1 downto 0) := to_unsigned(16#40#, C_ADDR_WIDTH);
+        -- Test different data patterns at a fixed address
+        spi_transaction_write(to_unsigned(16#40#, C_ADDR_WIDTH), x"00", cs_n, sck, sdi);
+        check_equal(memory(16#40#), std_logic_vector'(x"00"), "Data 0x00");
         
-        -- Test different data patterns
-        spi_transaction_write(test_addr, x"00", cs_n, sck, sdi);
-        check_equal(memory(to_integer(test_addr)), std_logic_vector'(x"00"), "Data 0x00");
+        spi_transaction_write(to_unsigned(16#40#, C_ADDR_WIDTH), x"FF", cs_n, sck, sdi);
+        check_equal(memory(16#40#), std_logic_vector'(x"FF"), "Data 0xFF");
         
-        spi_transaction_write(test_addr, x"FF", cs_n, sck, sdi);
-        check_equal(memory(to_integer(test_addr)), std_logic_vector'(x"FF"), "Data 0xFF");
+        spi_transaction_write(to_unsigned(16#40#, C_ADDR_WIDTH), x"AA", cs_n, sck, sdi);
+        check_equal(memory(16#40#), std_logic_vector'(x"AA"), "Data 0xAA");
         
-        spi_transaction_write(test_addr, x"AA", cs_n, sck, sdi);
-        check_equal(memory(to_integer(test_addr)), std_logic_vector'(x"AA"), "Data 0xAA");
-        
-        spi_transaction_write(test_addr, x"55", cs_n, sck, sdi);
-        check_equal(memory(to_integer(test_addr)), std_logic_vector'(x"55"), "Data 0x55");
+        spi_transaction_write(to_unsigned(16#40#, C_ADDR_WIDTH), x"55", cs_n, sck, sdi);
+        check_equal(memory(16#40#), std_logic_vector'(x"55"), "Data 0x55");
         
       end if;
       
