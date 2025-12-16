@@ -1,7 +1,7 @@
 # Ed25519 Signing for Videomancer Program Packages
 
-**Version:** 1.0  
-**Status:** Production  
+**Version:** 1.0
+**Status:** Production
 **Audience:** Firmware developers, program authors, release engineers
 
 ---

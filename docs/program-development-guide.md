@@ -114,8 +114,8 @@ use work.video_timing_pkg.all;
 
 architecture your_program of program_yuv444 is
     -- Constants
-    constant C_LATENCY_CLKS : integer := ...; 
-    
+    constant C_LATENCY_CLKS : integer := ...;
+
     -- Signals for pipeline stages
     -- ...
 begin
@@ -164,7 +164,7 @@ begin
     if rising_edge(clk) then
         v_hsync := data_in.hsync_n & v_hsync(0 to C_LATENCY_CLKS - 2);
         -- Shift other signals
-        
+
         data_out.hsync_n <= v_hsync(C_LATENCY_CLKS - 1);
         -- Output other delayed signals
     end if;

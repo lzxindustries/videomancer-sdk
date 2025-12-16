@@ -1,6 +1,6 @@
 # Videomancer ABI Format Specification
 
-**Version:** 1.0  
+**Version:** 1.0
 **Date:** December 15, 2025
 
 ## Overview
@@ -100,15 +100,15 @@ MOSI ────────┤ 0 │A4 │A3 │A2 │A1 │A0 │D9 │D8 │
 
 #### Potentiometer Registers (0x00-0x05, 0x07)
 
-**Format:** 10-bit unsigned integer  
-**Range:** 0-1023 (0x000-0x3FF)  
+**Format:** 10-bit unsigned integer
+**Range:** 0-1023 (0x000-0x3FF)
 **Resolution:** 10 bits (~0.1% per step)
 
 Potentiometer values are read from ADC inputs and transmitted to the FPGA for real-time video parameter control. The FPGA program is responsible for scaling and mapping these values to meaningful video processing parameters.
 
 #### Switch Register (0x06)
 
-**Format:** Bit field  
+**Format:** Bit field
 **Active Bits:** [4:0]
 
 Individual toggle switches are mapped to bits 0-4. Each bit represents the state of one toggle switch:
@@ -119,7 +119,7 @@ Bits [9:5] are reserved and should be written as 0.
 
 #### Video Timing ID (0x08)
 
-**Format:** 4-bit unsigned integer  
+**Format:** 4-bit unsigned integer
 **Range:** 0-15 (0x0-0xF)
 
 Selects the video timing mode for the output generator. The following timing modes are defined in the video timing package:
@@ -160,7 +160,7 @@ Selects the video timing mode for the output generator. The following timing mod
        uint16_t frame = (0 << 15) |          // Write bit
                         ((addr & 0x1F) << 10) | // 5-bit address
                         (data & 0x3FF);        // 10-bit data
-       
+
        gpio_put(CS_PIN, 0);              // Assert CS̅
        spi_write16_blocking(spi0, &frame, 1);
        gpio_put(CS_PIN, 1);              // De-assert CS̅

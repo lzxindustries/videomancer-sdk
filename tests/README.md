@@ -235,9 +235,9 @@ bool test_your_function() {
 int main() {
     int passed = 0;
     int total = 1;
-    
+
     if (test_your_function()) passed++;
-    
+
     return (passed == total) ? 0 : 1;
 }
 ```
@@ -306,7 +306,7 @@ Tests can be integrated into CI/CD pipelines:
 - name: Build and Test
   run: |
     ./build_sdk.sh --test
-    
+
 - name: Run All Tests
   run: |
     cd tests
@@ -370,5 +370,5 @@ For issues or questions about tests:
 
 ---
 
-**Copyright (C) 2025 LZX Industries LLC**  
+**Copyright (C) 2025 LZX Industries LLC**
 Licensed under GPL-3.0-only

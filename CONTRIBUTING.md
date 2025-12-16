@@ -50,17 +50,17 @@ Steps to reproduce:
 **Expected Behavior**
 What should happen
 
-**Actual Behavior**  
+**Actual Behavior**
 What actually happens
 
-**Environment**  
+**Environment**
 
 - OS: [e.g., Windows 11, Ubuntu 22.04]
 - Compiler: [e.g., GCC 11.2, MSVC 2022]
 - CMake Version: [e.g., 3.25]
 - SDK Version: [e.g., 0.1.7]
 
-**Additional Context**  
+**Additional Context**
 Any other relevant information, logs, or files
 
 ## Feature Requests

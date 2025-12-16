@@ -6,12 +6,12 @@ This document lists all third-party software components included in the Videoman
 
 ## 1. Monocypher
 
-**Version:** 4.0.2  
-**Location:** `third_party/monocypher/`  
-**Author:** Loup Vaillant  
-**Copyright:** Copyright (c) 2017-2019, Loup Vaillant  
-**License:** BSD-2-Clause OR CC0-1.0  
-**Website:** <https://monocypher.org>  
+**Version:** 4.0.2
+**Location:** `third_party/monocypher/`
+**Author:** Loup Vaillant
+**Copyright:** Copyright (c) 2017-2019, Loup Vaillant
+**License:** BSD-2-Clause OR CC0-1.0
+**Website:** <https://monocypher.org>
 **Purpose:** Cryptographic primitives for Ed25519 signature verification and BLAKE2b hashing
 
 ### BSD 2-Clause License
@@ -65,12 +65,12 @@ with this software.  If not, see
 
 ## 2. SiliconBlue ICE40 Component Library
 
-**Location:** `third_party/SiliconBlue/rtl/`  
-**Author:** jglong (SiliconBlue Technologies, Inc.)  
-**Copyright:** SiliconBlue Technologies, Inc. (now Lattice Semiconductor)  
-**License:** Proprietary (vendor-provided component library)  
-**Initial Release:** February 18, 2008  
-**Last Modified:** August 28, 2015  
+**Location:** `third_party/SiliconBlue/rtl/`
+**Author:** jglong (SiliconBlue Technologies, Inc.)
+**Copyright:** SiliconBlue Technologies, Inc. (now Lattice Semiconductor)
+**License:** Proprietary (vendor-provided component library)
+**Initial Release:** February 18, 2008
+**Last Modified:** August 28, 2015
 **Purpose:** VHDL component declarations for Lattice ICE40 FPGA primitives
 
 **Note:** This file (`sb_ice40_components_syn.vhd`) is provided by Lattice Semiconductor as part of their ICE40 FPGA design tools. It contains component declarations for FPGA hardware primitives (LUTs, flip-flops, RAM, PLLs, I/O buffers, etc.) required for FPGA synthesis. The file is typically distributed with Lattice's development tools and is used for simulation and synthesis purposes.

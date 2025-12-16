@@ -8,7 +8,7 @@ Validates a TOML configuration file against the JSON schema specification.
 
 Usage:
     python toml_schema_validator.py input.toml [schema.json]
-    
+
     If schema.json is not provided, defaults to:
     ../../docs/schemas/vmprog_program_config_schema_v1_0.json
 """
@@ -39,14 +39,14 @@ def simplify_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
     """
     import copy
     schema = copy.deepcopy(schema)
-    
+
     def remove_data_refs(obj):
         """Recursively remove $data references"""
         if isinstance(obj, dict):
             # Remove allOf sections that contain $data references
             if 'allOf' in obj:
                 del obj['allOf']
-            
+
             # Recursively process all dict values
             for key, value in list(obj.items()):
                 if isinstance(value, dict) and '$data' in value:
@@ -57,7 +57,7 @@ def simplify_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
         elif isinstance(obj, list):
             for item in obj:
                 remove_data_refs(item)
-    
+
     remove_data_refs(schema)
     return schema
 
@@ -85,12 +85,12 @@ def load_schema(schema_path: Path) -> Dict[str, Any]:
 def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
     """
     Validate TOML data against JSON schema
-    
+
     Returns:
         List of error messages (empty if valid)
     """
     errors = []
-    
+
     # First try simple validation
     try:
         validator = Draft7Validator(schema)
@@ -98,7 +98,7 @@ def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str
     except Exception as e:
         errors.append(f"Schema error: {e}")
         return errors
-    
+
     # Collect all validation errors
     validation_errors = []
     try:
@@ -112,7 +112,7 @@ def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str
     except Exception as e:
         errors.append(f"Unexpected validation error: {e}")
         return errors
-    
+
     # Sort and format errors
     for error in sorted(validation_errors, key=lambda e: (e.absolute_path, str(e))):
         # Build a readable error message
@@ -121,10 +121,10 @@ def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str
             location = f"at '{path}'"
         else:
             location = "at root"
-        
+
         # Format the error message
         msg = f"{location}: {error.message}"
-        
+
         # Add additional context for specific error types
         if error.validator == 'required':
             missing = error.validator_value
@@ -142,9 +142,9 @@ def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str
             if isinstance(error.instance, (int, float, str, bool, list, dict)):
                 actual = type(error.instance).__name__
                 msg += f" (expected {expected}, got {actual})"
-        
+
         errors.append(msg)
-    
+
     return errors
 
 
@@ -155,9 +155,9 @@ def main():
         print("", file=sys.stderr)
         print("Validates a TOML configuration file against a JSON schema.", file=sys.stderr)
         sys.exit(1)
-    
+
     toml_path = Path(sys.argv[1])
-    
+
     # Determine schema path
     if len(sys.argv) >= 3:
         schema_path = Path(sys.argv[2])
@@ -166,34 +166,34 @@ def main():
         script_dir = Path(__file__).parent
         schema_path = script_dir / ".." / ".." / "docs" / "schemas" / "vmprog_program_config_schema_v1_0.json"
         schema_path = schema_path.resolve()
-    
+
     # Check if files exist
     if not toml_path.exists():
         print(f"ERROR: TOML file not found: {toml_path}", file=sys.stderr)
         sys.exit(1)
-    
+
     if not schema_path.exists():
         print(f"ERROR: Schema file not found: {schema_path}", file=sys.stderr)
         print(f"Provide schema path as second argument or ensure default schema exists.", file=sys.stderr)
         sys.exit(1)
-    
+
     # Load files
     print(f"Loading TOML file: {toml_path}")
     toml_data = load_toml(toml_path)
-    
+
     print(f"Loading schema: {schema_path}")
     schema = load_schema(schema_path)
-    
+
     # Simplify schema to remove unsupported $data references
     schema = simplify_schema(schema)
-    
+
     print("")
     print("Validating...")
     print("")
-    
+
     # Validate
     errors = validate_toml(toml_data, schema)
-    
+
     # Deduplicate errors (same location and message)
     unique_errors = []
     seen = set()
@@ -201,7 +201,7 @@ def main():
         if error not in seen:
             unique_errors.append(error)
             seen.add(error)
-    
+
     if unique_errors:
         print(f"VALIDATION FAILED: Found {len(unique_errors)} error(s):")
         print("")

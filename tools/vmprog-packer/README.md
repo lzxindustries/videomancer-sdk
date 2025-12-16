@@ -25,10 +25,10 @@
   ```bash
   # Ubuntu/Debian/WSL2 (recommended)
   sudo apt install python3-cryptography
-  
+
   # macOS or if system allows pip
   pip3 install cryptography
-  
+
   # If you get "externally-managed-environment" error
   pip3 install --user cryptography
   ```
@@ -322,5 +322,5 @@ For complete details on the `.vmprog` format, see:
 
 ## License
 
-Copyright (C) 2025 LZX Industries LLC  
+Copyright (C) 2025 LZX Industries LLC
 SPDX-License-Identifier: GPL-3.0-only

@@ -1,8 +1,8 @@
 # Videomancer Program Package Format (`.vmprog`)
 
-**Version:** 1.0  
-**Status:** Production  
-**Canonical Reference:** [src/lzx/videomancer/vmprog_format.hpp](../src/lzx/videomancer/vmprog_format.hpp)  
+**Version:** 1.0
+**Status:** Production
+**Canonical Reference:** [src/lzx/videomancer/vmprog_format.hpp](../src/lzx/videomancer/vmprog_format.hpp)
 **Audience:** Firmware developers, FPGA toolchain authors, program authors
 
 ---
@@ -27,7 +27,7 @@
 
 Binary container for FPGA programs with cryptographic verification (Ed25519 + SHA-256), hardware compatibility checking, ABI management, and user parameter configuration.
 
-**Properties:** Version 1.0 | 1 MB max | Little-endian | Packed structures | UTF-8 strings  
+**Properties:** Version 1.0 | 1 MB max | Little-endian | Packed structures | UTF-8 strings
 **Extension:** `.vmprog` | MIME: `application/x-vmprog` (proposed)
 
 **Related Documentation:** For developing VHDL programs that generate `.vmprog` packages, see the [Program Development Guide](program-development-guide.md).
@@ -502,7 +502,7 @@ auto result = validate_vmprog_package(data, size, true, false);
 
 // Complete validation with signature
 auto result = validate_vmprog_package(
-    data, size, true, true, 
+    data, size, true, true,
     lzx::vmprog_public_keys[0]
 );
 ```
@@ -793,13 +793,13 @@ Converts 16-bit values to/from little-endian.
 lzx::vmprog_program_config_v1_0 config = {};
 
 // Set string fields
-lzx::safe_strncpy(config.program_id, "com.example.test", 
+lzx::safe_strncpy(config.program_id, "com.example.test",
                   sizeof(config.program_id));
-lzx::safe_strncpy(config.program_name, "My Test Program", 
+lzx::safe_strncpy(config.program_name, "My Test Program",
                   sizeof(config.program_name));
-lzx::safe_strncpy(config.author, "Test Author", 
+lzx::safe_strncpy(config.author, "Test Author",
                   sizeof(config.author));
-lzx::safe_strncpy(config.description, "A simple test program", 
+lzx::safe_strncpy(config.description, "A simple test program",
                   sizeof(config.description));
 
 // Set version and ABI fields
@@ -818,7 +818,7 @@ config.parameter_count = 0; // No parameters for this example
 // Validate configuration
 auto result = lzx::validate_vmprog_program_config_v1_0(config);
 if (result != lzx::vmprog_validation_result::ok) {
-    printf("Config validation failed: %s\n", 
+    printf("Config validation failed: %s\n",
            lzx::validation_result_string(result));
     return;
 }
@@ -856,7 +856,7 @@ auto result = lzx::validate_vmprog_package(
 );
 
 if (result != lzx::vmprog_validation_result::ok) {
-    printf("Validation failed: %s\n", 
+    printf("Validation failed: %s\n",
            lzx::validation_result_string(result));
     return;
 }
@@ -898,10 +898,10 @@ if (!lzx::is_package_signed(*header)) {
 
 // Find signed descriptor and signature entries
 const lzx::vmprog_toc_entry_v1_0* desc_entry = lzx::find_toc_entry(
-    toc, header->toc_count, 
+    toc, header->toc_count,
     lzx::vmprog_toc_entry_type_v1_0::signed_descriptor);
 const lzx::vmprog_toc_entry_v1_0* sig_entry = lzx::find_toc_entry(
-    toc, header->toc_count, 
+    toc, header->toc_count,
     lzx::vmprog_toc_entry_type_v1_0::signature);
 
 if (!desc_entry || !sig_entry) {
@@ -944,14 +944,14 @@ const auto* config = reinterpret_cast<const lzx::vmprog_program_config_v1_0*>(
 // Enumerate parameters
 for (uint32_t i = 0; i < config->parameter_count; ++i) {
     const auto& param = config->parameters[i];
-    
+
     printf("Parameter %u:\n", i);
     printf("  Name: %s\n", param.name_label);
     printf("  ID: %u\n", static_cast<uint32_t>(param.parameter_id));
     printf("  Range: [%u, %u]\n", param.min_value, param.max_value);
     printf("  Initial: %u\n", param.initial_value);
     printf("  Control mode: %u\n", static_cast<uint32_t>(param.control_mode));
-    
+
     // Print value labels if any
     if (param.value_label_count > 0) {
         printf("  Value labels:\n");
@@ -959,7 +959,7 @@ for (uint32_t i = 0; i < config->parameter_count; ++i) {
             printf("    %u: %s\n", j, param.value_labels[j]);
         }
     }
-    
+
     if (param.suffix_label[0] != '\0') {
         printf("  Suffix: %s\n", param.suffix_label);
     }
@@ -972,21 +972,21 @@ for (uint32_t i = 0; i < config->parameter_count; ++i) {
 
 ### 9.1 Validation Levels
 
-**Basic:** `validate_vmprog_package(data, size, false, false)` - Structure only  
-**Integrity:** `validate_vmprog_package(data, size, true, false)` - Structure + hashes  
+**Basic:** `validate_vmprog_package(data, size, false, false)` - Structure only
+**Integrity:** `validate_vmprog_package(data, size, true, false)` - Structure + hashes
 **Authenticated:** `validate_vmprog_package(data, size, true, true, pubkey)` - Full verification
 
 ### 9.2 Compatibility Check
 
 ```cpp
-bool is_compatible(const vmprog_program_config_v1_0& config, 
-                   uint16_t fw_abi_maj, uint16_t fw_abi_min, 
+bool is_compatible(const vmprog_program_config_v1_0& config,
+                   uint16_t fw_abi_maj, uint16_t fw_abi_min,
                    vmprog_hardware_flags_v1_0 device_hw) {
     // ABI range check
     if (fw_abi_maj < config.abi_min_major || fw_abi_maj >= config.abi_max_major) return false;
     if (fw_abi_maj == config.abi_min_major && fw_abi_min < config.abi_min_minor) return false;
     if (fw_abi_maj == config.abi_max_major && fw_abi_min >= config.abi_max_minor) return false;
-    
+
     // Hardware check
     return (config.hw_mask & device_hw) != vmprog_hardware_flags_v1_0::none;
 }
@@ -1061,7 +1061,7 @@ config.reserved_pad = 0;
 
 ```cpp
 // Correct
-lzx::safe_strncpy(config.program_name, "My Program", 
+lzx::safe_strncpy(config.program_name, "My Program",
                   sizeof(config.program_name));
 
 // Wrong - may not null-terminate
@@ -1097,7 +1097,7 @@ strncpy(config.program_name, "My Program", sizeof(config.program_name));
 ```cpp
 auto result = lzx::validate_vmprog_package(data, size);
 if (result != lzx::vmprog_validation_result::ok) {
-    fprintf(stderr, "Validation failed: %s\n", 
+    fprintf(stderr, "Validation failed: %s\n",
             lzx::validation_result_string(result));
     // Log error, display to user, reject package
     return false;
@@ -1131,7 +1131,7 @@ if (!lzx::verify_with_builtin_keys(sig, descriptor)) {
 
 ```cpp
 // Safe
-if (lzx::is_string_terminated(config.program_name, 
+if (lzx::is_string_terminated(config.program_name,
                                sizeof(config.program_name))) {
     printf("%s\n", config.program_name);
 }

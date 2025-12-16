@@ -26,28 +26,28 @@ The `[program]` section contains metadata about your program. All fields use str
 
 ### Required Fields
 
-**program_id** (max 63 characters)  
+**program_id** (max 63 characters)
 Unique identifier for your program using reverse DNS notation or a similar naming convention.
 
 ```toml
 program_id = "com.lzxindustries.example.waveform_generator"
 ```
 
-**program_name** (max 31 characters)  
+**program_name** (max 31 characters)
 Human-readable name displayed to users.
 
 ```toml
 program_name = "Waveform Generator"
 ```
 
-**program_version** (SemVer format)  
+**program_version** (SemVer format)
 Version number in semantic versioning format: `major.minor.patch`
 
 ```toml
 program_version = "1.2.3"
 ```
 
-**abi_version** (range notation)  
+**abi_version** (range notation)
 Specifies which ABI versions your program is compatible with using range notation: `>=min_version,<max_version`
 
 ```toml
@@ -58,14 +58,14 @@ abi_version = ">=1.0,<2.0"  # Compatible with ABI 1.x
 
 All optional fields default to empty strings if not specified.
 
-**author** (max 63 characters)  
+**author** (max 63 characters)
 Name of the program author or organization.
 
 ```toml
 author = "LZX Industries LLC"
 ```
 
-**license** (max 31 characters)  
+**license** (max 31 characters)
 License identifier, preferably in SPDX format.
 
 ```toml
@@ -74,21 +74,21 @@ license = "MIT"
 license = "Proprietary"
 ```
 
-**category** (max 31 characters)  
+**category** (max 31 characters)
 Category for organizing programs.
 
 ```toml
 category = "Signal Generation"
 ```
 
-**description** (max 127 characters)  
+**description** (max 127 characters)
 Detailed description of what the program does.
 
 ```toml
 description = "A versatile waveform generator with multiple controls."
 ```
 
-**url** (max 127 characters)  
+**url** (max 127 characters)
 Project or documentation URL (http/https).
 
 ```toml
@@ -108,7 +108,7 @@ Parameters operate in one of two modes:
 
 ### Required Fields (All Parameters)
 
-**parameter_id**  
+**parameter_id**
 Hardware control assignment. Each parameter must use a unique control.
 
 Available controls:
@@ -120,7 +120,7 @@ Available controls:
 parameter_id = "rotary_potentiometer_1"
 ```
 
-**name_label** (max 31 characters)  
+**name_label** (max 31 characters)
 Display name for the parameter.
 
 ```toml
@@ -131,7 +131,7 @@ name_label = "Frequency"
 
 Use numeric mode for parameters with continuous or stepped numeric values. When using numeric mode, you must specify `control_mode`.
 
-**control_mode** (required for numeric mode)  
+**control_mode** (required for numeric mode)
 Defines how the hardware value is interpreted and scaled. Available modes:
 
 *Linear scaling:*
@@ -161,13 +161,13 @@ control_mode = "linear"
 
 #### Optional Numeric Fields
 
-**min_value** (0-1023, default: 0)  
+**min_value** (0-1023, default: 0)
 Minimum hardware value the parameter will use.
 
-**max_value** (0-1023, default: 1023)  
+**max_value** (0-1023, default: 1023)
 Maximum hardware value the parameter will use. Must be greater than `min_value`.
 
-**initial_value** (0-1023, default: 512)  
+**initial_value** (0-1023, default: 512)
 Default value when the program starts. Must be between `min_value` and `max_value`.
 
 ```toml
@@ -176,10 +176,10 @@ max_value = 900
 initial_value = 500
 ```
 
-**display_min_value** (-32768 to 32767, default: same as min_value)  
+**display_min_value** (-32768 to 32767, default: same as min_value)
 Minimum value shown in the user interface. Allows scaling for display purposes.
 
-**display_max_value** (-32768 to 32767, default: same as max_value)  
+**display_max_value** (-32768 to 32767, default: same as max_value)
 Maximum value shown in the user interface.
 
 ```toml
@@ -190,7 +190,7 @@ display_min_value = 0
 display_max_value = 100
 ```
 
-**display_float_digits** (0-255, default: 0)  
+**display_float_digits** (0-255, default: 0)
 Number of decimal places to show when displaying values.
 
 ```toml
@@ -198,7 +198,7 @@ display_float_digits = 1  # Shows values like 12.3
 display_float_digits = 2  # Shows values like 12.34
 ```
 
-**suffix_label** (max 3 characters)  
+**suffix_label** (max 3 characters)
 Unit suffix displayed after the value.
 
 ```toml
@@ -228,7 +228,7 @@ suffix_label = "Hz"
 
 Use label mode for parameters with discrete, named positions. This mode is mutually exclusive with numeric mode fields.
 
-**value_labels** (2-16 labels, max 31 characters each)  
+**value_labels** (2-16 labels, max 31 characters each)
 Array of text labels for discrete parameter positions. The hardware range is automatically divided evenly across the labels.
 
 ```toml
@@ -236,7 +236,7 @@ value_labels = ["Off", "Low", "Medium", "High"]
 value_labels = ["Sine", "Triangle", "Sawtooth", "Square"]
 ```
 
-**initial_value_label** (optional)  
+**initial_value_label** (optional)
 Specifies which label should be the default. Must exactly match one of the strings in `value_labels`.
 
 ```toml

@@ -127,12 +127,12 @@ Using the generated code in your C++ project:
 
 int main() {
     std::cout << "Firmware size: " << firmware_size << " bytes" << std::endl;
-    
+
     // Access the data
     for (size_t i = 0; i < firmware_size; ++i) {
         // Process firmware_data[i]
     }
-    
+
     return 0;
 }
 ```

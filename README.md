@@ -249,5 +249,5 @@ See [LICENSE](LICENSE) for complete terms.
 
 ---
 
-**Videomancer** is a trademark of LZX Industries LLC.  
+**Videomancer** is a trademark of LZX Industries LLC.
 For hardware and support: [lzxindustries.net](https://lzxindustries.net)
