@@ -26,8 +26,6 @@ Create VHDL-based video processing programs for Videomancer FPGA hardware.
 
 - [FPGA Numerical Formats](https://zipcpu.com/dsp/2017/07/22/rounding.html) - ZipCPU fixed-point tutorial
 
-- [Understanding Fixed Point and Floating Point](https://en.wikibooks.org/wiki/Embedded_Systems/Fixed-Point_Arithmetic) - Wikibooks embedded systems guide
-
 
 
 **The SDK and build tools**
