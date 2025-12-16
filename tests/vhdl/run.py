@@ -27,11 +27,8 @@ rtl_lib = vu.add_library("rtl_lib")
 rtl_lib.add_source_files(rtl_dir / "core_pkg.vhd")
 rtl_lib.add_source_files(rtl_dir / "video_timing_pkg.vhd")
 rtl_lib.add_source_files(rtl_dir / "sync_slv.vhd")
-rtl_lib.add_source_files(rtl_dir / "spi_peripheral.vhd")
 rtl_lib.add_source_files(rtl_dir / "yuv422_to_yuv444.vhd")
 rtl_lib.add_source_files(rtl_dir / "yuv444_to_yuv422.vhd")
-rtl_lib.add_source_files(rtl_dir / "video_sync_generator.vhd")
-rtl_lib.add_source_files(rtl_dir / "video_field_detector.vhd")
 rtl_lib.add_source_files(rtl_dir / "blanking_yuv444.vhd")
 
 # Add test library

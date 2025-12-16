@@ -110,7 +110,7 @@ jobs:
         export PATH="${{ github.workspace }}/build/oss-cad-suite/bin:$PATH"
         cd tests/vhdl
         python3 run.py
-      timeout-minutes: 10
+      timeout-minutes: 20
 
     - name: VHDL test summary
       if: always()

@@ -20,6 +20,16 @@
 -- Description:
 --   SPI peripheral controller allows an external SPI host to read and write to
 --   local data over a typical RAM access port interface.
+--
+--   Default SPI Mode: Mode 1 (CPOL=0, CPHA=1)
+--   - Clock idle state: LOW
+--   - Data sampled on: FALLING edge (trailing edge)
+--   - Data changes on: RISING edge (leading edge)
+--
+--   Note: CPHA is not fully implemented. The edge detection logic determines
+--   which clock edge is used for sampling vs. outputting data based on the
+--   CPOL and CPHA generics, but Mode 1 (CPOL=0, CPHA=1) is the tested and
+--   recommended configuration.
 
 --------------------------------------------------------------------------------
 
@@ -33,8 +43,9 @@ entity spi_peripheral is
     generic (
         DATA_WIDTH : natural   := 8;
         ADDR_WIDTH : natural   := 7;
-        CPOL       : std_logic := '0'; -- Clock polarity
-        CPHA       : std_logic := '0'  -- Clock phase -- not entirely supported, only used to determine rising/falling edge
+        CPOL       : std_logic := '0'; -- Clock polarity (0 = idle LOW, 1 = idle HIGH)
+        CPHA       : std_logic := '1'  -- Clock phase (0 = sample on first edge, 1 = sample on second edge)
+                                       -- Default Mode 1: CPOL=0, CPHA=1 (tested configuration)
     );
     port (
         clk   : in std_logic;
@@ -80,6 +91,15 @@ architecture rtl of spi_peripheral is
     signal s_last_data_bit : std_logic := '0';  -- Pre-computed s_bit_count = DATA_WIDTH - 1
 
 begin
+    -- Initialize outputs
+    process
+    begin
+        dout  <= (others => '0');
+        wr_en <= '0';
+        rd_en <= '0';
+        addr  <= (others => '0');
+        wait;
+    end process;
     u_sync_to_clk_sdi  : entity work.sync_slv port map(clk => clk, a(0) => sdi, b(0) => s_sdi);
     u_sync_to_clk_sck  : entity work.sync_slv port map(clk => clk, a(0) => sck, b(0) => s_sck);
     u_sync_to_clk_cs_n : entity work.sync_slv port map(clk => clk, a(0) => cs_n, b(0) => s_cs_n);
@@ -96,8 +116,8 @@ begin
             s_sdi_d  <= s_sdi;
 
             -- Register edge detections to break critical path
-            s_output_en_reg <= '1' when (s_sck xor CPOL xor CPHA) = '1' and (s_sck_d xor CPOL xor CPHA) = '0' else '0';
-            s_input_en_reg  <= '1' when (s_sck xor CPOL xor CPHA) = '0' and (s_sck_d xor CPOL xor CPHA) = '1' else '0';
+            s_output_en_reg <= '1' when (s_sck xor CPOL xor CPHA) = '0' and (s_sck_d xor CPOL xor CPHA) = '1' else '0';
+            s_input_en_reg  <= '1' when (s_sck xor CPOL xor CPHA) = '1' and (s_sck_d xor CPOL xor CPHA) = '0' else '0';
             s_stop_reg      <= '1' when s_cs_n = '1' and s_cs_n_d = '0' else '0';
             s_start_reg     <= '1' when s_cs_n = '0' and s_cs_n_d = '1' else '0';
 
@@ -108,10 +128,10 @@ begin
     end process;
 
     -- Combinatorial versions for compatibility
-    s_output_en <= '1' when (s_sck xor CPOL xor CPHA) = '1' and (s_sck_d xor CPOL xor CPHA) = '0' else
-        '0'; -- rising edge
-    s_input_en <= '1' when (s_sck xor CPOL xor CPHA) = '0' and (s_sck_d xor CPOL xor CPHA) = '1' else
+    s_output_en <= '1' when (s_sck xor CPOL xor CPHA) = '0' and (s_sck_d xor CPOL xor CPHA) = '1' else
         '0'; -- falling edge
+    s_input_en <= '1' when (s_sck xor CPOL xor CPHA) = '1' and (s_sck_d xor CPOL xor CPHA) = '0' else
+        '0'; -- rising edge
 
     s_stop <= '1' when s_cs_n = '1' and s_cs_n_d = '0' else
         '0';
@@ -169,10 +189,10 @@ begin
                     when RECEIVING_COMMAND =>
                         if s_input_en_reg = '1' then
                             addr  <= s_addr_buf;
-                            rd_en <= '1';
                             if s_sdi = '1' then
                                 s_state <= RECEIVING_DATA;
                             else
+                                rd_en <= '1';
                                 s_state <= REQUESTING_READ;
                             end if;
                         end if;

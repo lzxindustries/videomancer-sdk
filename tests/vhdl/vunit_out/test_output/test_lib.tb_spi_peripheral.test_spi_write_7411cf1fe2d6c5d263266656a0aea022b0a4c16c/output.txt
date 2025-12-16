@@ -1,2 +1,5 @@
        100000000 fs - default              -    INFO - Testing SPI write operation
-simulation stopped @2150ns with status 0
+      2150000000 fs - check                -   ERROR - Memory should contain written value - Got 0000_0000 (0). Expected 1010_0101 (165).
+/home/lars/.local/lib/python3.12/site-packages/vunit/vhdl/core/src/core_pkg.vhd:84:7:@2150ns:(report failure): Stop simulation on log level error
+ghdl:error: report failed
+ghdl:error: simulation failed

@@ -1,2 +1,5 @@
        [22;96;49m100000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Testing multiple consecutive SPI writes
-simulation stopped @32100ns with status 0
+     [22;96;49m32100000000 fs[0m - [1;37;49mcheck[0m                -   [1;31;49mERROR[0m - Memory location 1 should contain correct value - Got 0000_0000 (0). Expected 0001_0000 (16).
+/home/lars/.local/lib/python3.12/site-packages/vunit/vhdl/core/src/core_pkg.vhd:84:7:@32100ns:(report failure): Stop simulation on log level error
+ghdl:error: report failed
+ghdl:error: simulation failed
