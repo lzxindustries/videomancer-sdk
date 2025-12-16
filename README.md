@@ -131,6 +131,7 @@ cd ~/videomancer-sdk
 - `VIDEOMANCER_PROGRAMS_DIR` - Directory containing program subdirectories (default: `programs/`)
 - `VIDEOMANCER_BUILD_DIR` - Build artifacts output (default: `build/programs/`)
 - `VIDEOMANCER_OUT_DIR` - Final `.vmprog` packages output (default: `out/`)
+- `VIDEOMANCER_KEYS_DIR` - Ed25519 signing keys directory (default: `keys/`)
 
 ## Creating Your Own Programs
 

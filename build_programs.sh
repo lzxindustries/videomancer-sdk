@@ -27,6 +27,7 @@ VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT:-${SCRIPT_DIR}}"
 VIDEOMANCER_PROGRAMS_DIR="${VIDEOMANCER_PROGRAMS_DIR:-${SCRIPT_DIR}/programs/}"
 VIDEOMANCER_BUILD_DIR="${VIDEOMANCER_BUILD_DIR:-${SCRIPT_DIR}/build/programs/}"
 VIDEOMANCER_OUT_DIR="${VIDEOMANCER_OUT_DIR:-${SCRIPT_DIR}/out/}"
+VIDEOMANCER_KEYS_DIR="${VIDEOMANCER_KEYS_DIR:-${SCRIPT_DIR}/keys/}"
 
 # Hardware configuration
 DEVICE=hx4k
@@ -69,7 +70,7 @@ fi
 # Check for Ed25519 signing keys BEFORE loading OSS CAD Suite environment
 # (OSS CAD Suite may use its own Python that doesn't see system packages)
 SIGN_PACKAGES=false
-if [ -f "keys/lzx_official_signed_descriptor_priv.bin" ] && [ -f "keys/lzx_official_signed_descriptor_pub.bin" ]; then
+if [ -f "${VIDEOMANCER_KEYS_DIR%/}/lzx_official_signed_descriptor_priv.bin" ] && [ -f "${VIDEOMANCER_KEYS_DIR%/}/lzx_official_signed_descriptor_pub.bin" ]; then
     # Check if cryptography library is available
     if python3 -c "import cryptography" 2>/dev/null; then
         SIGN_PACKAGES=true
@@ -244,7 +245,7 @@ for PROGRAM in $PROGRAMS; do
     PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then
         echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-        if ! python3 vmprog_pack.py "${BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+        if ! python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" "${BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
             echo -e "${RED}Packaging failed. Error output:${NC}"
             cat "$PACK_LOG"
             rm -f "$PACK_LOG"
