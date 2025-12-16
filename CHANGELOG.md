@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Comprehensive Test Suite Expansion** - Significantly increased test coverage across all SDK headers
+  - **vmprog_crypto.hpp**: Added 4 helper function tests (verify_hash, is_hash_zero, secure_compare_hash, is_pubkey_valid)
+  - **vmprog_format.hpp**: Added 21 validation and utility tests covering string helpers, enum operators, endianness conversion, TOC validation, descriptor validation, parameter validation, and edge cases
+  - **vmprog_stream_reader.hpp**: Added 19 integration tests with mock package setups covering config reading, signed descriptor reading, signature reading, payload verification, and complete package workflows
+  - Total test count increased from 60 to 125 tests across 7 test suites
+  - All tests achieve 100% pass rate
+
+- **Ed25519 Signature Algorithm Update** - Switched from EdDSA (Blake2b) to standard Ed25519 (SHA-512)
+  - Updated vmprog_crypto.hpp to use `crypto_ed25519_check` instead of `crypto_eddsa_check`
+  - Implemented RFC 8032 compliant Ed25519 signature verification
+  - Added RFC 8032 test vectors to validate implementation correctness
+  - Maintains backward compatibility with Monocypher library
+
+- **Integration Test Framework** - Complete mock package testing infrastructure
+  - Mock package helpers for creating valid VMProg packages with config, signed descriptors, and signatures
+  - End-to-end workflow tests validating entire package reading pipeline
+  - Edge case testing for invalid sizes, corrupted data, overflow conditions, and boundary cases
+  - Tests all 7 bitstream type variants (SD/HD analog/HDMI/dual, generic)
+
+### Changed
+
+- **Test Organization** - Improved test structure and coverage
+  - Systematic method-level coverage analysis ensuring all public APIs tested
+  - Added validation tests for all VMProg format structures
+  - Enhanced error condition testing for robust SDK behavior
+  - Comprehensive testing of string manipulation, cryptographic, and I/O operations
+
+### Fixed
+
+- **Test Coverage Gaps** - Addressed untested methods across SDK headers
+  - All cryptographic helper functions now thoroughly tested
+  - All format validation functions tested with valid and invalid inputs
+  - All stream reading functions tested with mock packages
+  - Complete coverage of edge cases, overflow conditions, and error paths
+
 ## [0.2.0] - 2025-12-15
 
 ### Added

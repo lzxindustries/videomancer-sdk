@@ -1,0 +1,23 @@
+# Test artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+*.o
+*.so
+*.a
+*.out
+test_vmprog_crypto
+test_videomancer_abi
+test_vmprog_format
+test_vmprog_stream_reader
+
+# Test output files
+*.log
+*.tmp
+*.vmprog

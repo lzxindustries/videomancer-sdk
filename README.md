@@ -27,7 +27,7 @@ bash scripts/setup.sh
 # 3. Build all FPGA programs
 bash build_programs.sh
 
-# Output: Programs packaged in out/ directory (e.g., out/passthru.vmprog)
+# Output: Programs packaged in out/ directory (e.g., out/passthru.vmprog, out/yuv_amplifier.vmprog)
 ```
 
 ### Prerequisites
@@ -149,11 +149,19 @@ Place in `programs/myprogram/` directory.
 
 Program parameters are defined in TOML files. See the [TOML Configuration Guide](docs/toml-config-guide.md) for complete documentation.
 
+**Example Programs:**
+- **passthru** - Simple pass-through program (minimal example)
+- **yuv_amplifier** - Multi-parameter video processor with gain/offset controls (advanced example)
+
 ```bash
 cd examples/templates
 
 # See template.toml for a complete example
 cat template.toml
+
+# View working examples
+cat programs/passthru/passthru.toml
+cat programs/yuv_amplifier/yuv_amplifier.toml
 ```
 
 ## SDK Components
@@ -171,6 +179,14 @@ VHDL components for video processing (in `fpga/rtl/`):
 - YUV format converters
 - SPI peripheral for RP2040 communication
 
+### Development Tools
+
+- **[toml-editor/](tools/toml-editor/)** - Browser-based visual editor for TOML configuration files
+- **[toml-converter/](tools/toml-converter/)** - Converts TOML files to binary configuration format
+- **[toml-validator/](tools/toml-validator/)** - Validates TOML files against JSON schema
+- **[vmprog-packer/](tools/vmprog-packer/)** - Creates and signs `.vmprog` packages
+- **[binary-to-header/](tools/binary-to-header/)** - Converts binary files to C++ header/source files
+
 ### Documentation
 
 - **[program-development-guide.md](docs/program-development-guide.md)** - Complete guide to developing VHDL programs
@@ -178,30 +194,33 @@ VHDL components for video processing (in `fpga/rtl/`):
 - **[vmprog-format.md](docs/vmprog-format.md)** - Binary format specification
 - **[package-signing-guide.md](docs/package-signing-guide.md)** - Package signing with Ed25519
 - **[ed25519-signing.md](docs/ed25519-signing.md)** - Detailed Ed25519 implementation
+- **[abi-format.md](docs/abi-format.md)** - ABI versioning specification
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
-
-For tools and examples, see `tools/` and `examples/` directories.
 
 ## Project Structure
 
 ```
 videomancer-sdk/
 ├── docs/                  # Documentation
+│   ├── program-development-guide.md
 │   ├── toml-config-guide.md
 │   ├── vmprog-format.md
 │   ├── package-signing-guide.md
 │   ├── ed25519-signing.md
 │   ├── abi-format.md
 │   └── schemas/
-├── examples/             # Example programs and templates
-│   ├── passthru/
+├── examples/             # Configuration templates
 │   └── templates/
+├── programs/             # Example FPGA programs
+│   ├── passthru/         # Simple pass-through example
+│   └── yuv_amplifier/    # Advanced multi-parameter example
 ├── tools/                # Development tools
 │   ├── toml-editor/      # Visual TOML configuration editor (HTML)
 │   ├── toml-converter/   # TOML to binary converter
 │   ├── toml-validator/   # Schema validation tool
-│   └── vmprog-packer/    # Package creation tool
+│   ├── vmprog-packer/    # Package creation and signing tool
+│   └── binary-to-header/ # Binary to C++ header/source converter
 ├── scripts/              # Build automation
 │   ├── setup.sh
 │   ├── setup_ed25519_signing.sh
@@ -210,9 +229,10 @@ videomancer-sdk/
 ├── fpga/                 # FPGA synthesis and RTL
 │   ├── Makefile
 │   └── rtl/
-├── programs/             # Your programs go here
 ├── src/                  # C++ SDK headers
-└── build_programs.sh     # Main build script
+├── keys/                 # Ed25519 signing keys (optional)
+├── build_programs.sh     # Main build script
+└── build_sdk.sh          # SDK library build script
 ```
 
 ## Contributing

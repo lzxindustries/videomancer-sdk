@@ -69,3 +69,12 @@ target_include_directories(videomancer-sdk INTERFACE
 target_link_libraries(videomancer-sdk INTERFACE
     monocypher
 )
+
+# Optional: Enable testing
+option(BUILD_TESTS "Build unit tests" ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests/cpp)
+    message(STATUS "Unit tests enabled")
+endif()

@@ -20,7 +20,7 @@
 // Overview:
 //   Provides cryptographic primitives for vmprog package security:
 //   - BLAKE2b-256 hashing (used as SHA-256 equivalent)
-//   - Ed25519 signature verification
+//   - Ed25519 signature verification (RFC 8032 with SHA-512)
 //   - Constant-time memory comparison
 //   - Secure memory operations
 //
@@ -130,10 +130,11 @@ namespace lzx {
      * @brief Verify Ed25519 signature.
      * 
      * Ed25519 provides:
-     * - Fast signature verification
+     * - Fast signature verification using SHA-512
      * - 256-bit security level
      * - Deterministic signatures (no random number needed)
      * - Small key and signature sizes
+     * - RFC 8032 compliant (Ed25519 with SHA-512)
      * 
      * @param sig Signature (64 bytes)
      * @param pub Public key (32 bytes)
@@ -146,8 +147,9 @@ namespace lzx {
                                const uint8_t* msg,
                                uint32_t msg_len)
     {
+        // Use Ed25519 (SHA-512) from monocypher-ed25519
         // Monocypher returns 0 on success, -1 on failure
-        return crypto_eddsa_check(sig, pub, msg, msg_len) == 0;
+        return crypto_ed25519_check(sig, pub, msg, msg_len) == 0;
     }
 
     // ============================================================================
