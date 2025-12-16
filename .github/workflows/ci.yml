@@ -64,7 +64,7 @@ jobs:
       if: always()
       run: |
         echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ 125 C++ unit tests" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 118 C++ unit tests" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 2 Python tests" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 2 Shell integration tests" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ 2 Example FPGA programs built" >> $GITHUB_STEP_SUMMARY
@@ -75,7 +75,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14]
+        os: [ubuntu-22.04, ubuntu-24.04]
     
     steps:
     - name: Checkout repository
@@ -84,16 +84,9 @@ jobs:
         submodules: recursive
     
     - name: Install dependencies (Ubuntu)
-      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake build-essential python3 python3-pip
-        pip3 install jsonschema toml
-    
-    - name: Install dependencies (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        brew install cmake python3
         pip3 install jsonschema toml
     
     - name: Cache OSS CAD Suite

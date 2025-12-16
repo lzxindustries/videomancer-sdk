@@ -3,10 +3,10 @@
 ## Summary
 
 **Test Suite Status**: ✅ All tests passing  
-**Total C++ Unit Tests**: 125 tests across 7 test suites  
+**Total C++ Unit Tests**: 118 tests across 6 test suites  
 **Python Tests**: 2 test modules  
 **Shell Tests**: 2 integration tests  
-**Header Coverage**: 9/9 headers (100%)  
+**Header Coverage**: 8/9 headers (89%)  
 **Last Updated**: 2025-12-15
 
 ## C++ Header Coverage
@@ -16,7 +16,7 @@
 | `videomancer_abi.hpp` | test_videomancer_abi | 6 | ✅ Passed |
 | `videomancer_fpga.hpp` | (tested via mock) | - | ✅ Covered |
 | `videomancer_fpga_controller.hpp` | test_videomancer_fpga_controller | 11 | ✅ Passed |
-| `videomancer_sdk_version.hpp` | test_videomancer_sdk_version | 7 | ✅ Passed |
+| `videomancer_sdk_version.hpp` | - | - | ⚠️ Not tested |
 | `vmprog_crypto.hpp` | test_vmprog_crypto | 15 | ✅ Passed |
 | `vmprog_format.hpp` | test_vmprog_format | 41 | ✅ Passed |
 | `vmprog_public_keys.hpp` | test_vmprog_public_keys | 8 | ✅ Passed |
@@ -106,16 +106,6 @@ Validates stream-based reading:
 - ✅ Stream boundary conditions
 - ✅ Invalid data handling
 - ✅ Large payload support
-
-### test_videomancer_sdk_version (7 tests)
-Validates version constants:
-- ✅ Version numbers (major, minor, patch)
-- ✅ Git tag format
-- ✅ Git hash format
-- ✅ Git commits count
-- ✅ Version consistency
-- ✅ Namespace accessibility
-- ✅ String safety and null-termination
 
 ### test_vmprog_public_keys (8 tests)
 Validates public key definitions:
@@ -218,7 +208,6 @@ cd build/tests/cpp
 ./test_videomancer_abi
 ./test_vmprog_format
 ./test_vmprog_stream_reader
-./test_videomancer_sdk_version
 ./test_vmprog_public_keys
 ./test_videomancer_fpga_controller
 ```
@@ -227,7 +216,7 @@ cd build/tests/cpp
 ```Test Suite Improvements (Version 0.3.0)
 
 Recent enhancements to the test suite:
-- ✅ Expanded from 60 to 125 C++ tests (108% increase)
+- ✅ Expanded from 60 to 118 C++ tests (97% increase)
 - ✅ Added comprehensive integration tests with mock package framework
 - ✅ Switched to RFC 8032-compliant Ed25519 (SHA-512) from EdDSA (Blake2b)
 - ✅ Added test documentation (README.md, COVERAGE.md)

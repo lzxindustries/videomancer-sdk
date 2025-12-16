@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **vmprog_crypto.hpp**: Added 4 helper function tests (verify_hash, is_hash_zero, secure_compare_hash, is_pubkey_valid)
   - **vmprog_format.hpp**: Added 21 validation and utility tests covering string helpers, enum operators, endianness conversion, TOC validation, descriptor validation, parameter validation, and edge cases
   - **vmprog_stream_reader.hpp**: Added 19 integration tests with mock package setups covering config reading, signed descriptor reading, signature reading, payload verification, and complete package workflows
-  - Total test count increased from 60 to 125 tests across 7 test suites
+  - Total test count increased from 53 to 118 tests across 6 test suites
   - All tests achieve 100% pass rate
 
 - **Ed25519 Signature Algorithm Update** - Switched from EdDSA (Blake2b) to standard Ed25519 (SHA-512)

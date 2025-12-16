@@ -74,4 +74,4 @@ jobs:
           ### Build Information
           - Platform: Ubuntu Linux
           - Toolchain: OSS CAD Suite
-          - Tests: 129 tests passing (125 C++, 2 Python, 2 Shell)
+          - Tests: 122 tests passing (118 C++, 2 Python, 2 Shell)

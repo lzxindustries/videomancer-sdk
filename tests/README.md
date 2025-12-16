@@ -4,12 +4,11 @@ Comprehensive test suite for the Videomancer SDK C++ headers and Python tools.
 
 ## Test Summary
 
-- **Total C++ Unit Tests**: 60 tests across 7 test suites
-  - test_vmprog_crypto: 8 tests
+- **Total C++ Unit Tests**: 118 tests across 6 test suites
+  - test_vmprog_crypto: 15 tests
   - test_videomancer_abi: 6 tests
-  - test_vmprog_format: 11 tests
-  - test_vmprog_stream_reader: 9 tests
-  - test_videomancer_sdk_version: 7 tests
+  - test_vmprog_format: 41 tests
+  - test_vmprog_stream_reader: 37 tests
   - test_vmprog_public_keys: 8 tests
   - test_videomancer_fpga_controller: 11 tests
 - **Python Tests**: 2 test modules
@@ -27,7 +26,6 @@ tests/
 │   ├── test_videomancer_abi.cpp
 │   ├── test_vmprog_format.cpp
 │   ├── test_vmprog_stream_reader.cpp
-│   ├── test_videomancer_sdk_version.cpp
 │   ├── test_vmprog_public_keys.cpp
 │   ├── test_videomancer_fpga_controller.cpp
 │   └── CMakeLists.txt
@@ -150,15 +148,6 @@ Tests stream-based reading from `vmprog_stream_reader.hpp`:
 - TOC entry reading with buffer size checks
 - Payload data reading and verification
 - Stream seeking and boundary conditions
-
-#### `test_videomancer_sdk_version.cpp`
-Tests version constants from `videomancer_sdk_version.hpp`:
-- Version number validation (major, minor, patch)
-- Git tag and hash format verification
-- Git commits count validation
-- Version consistency checks
-- String safety and null-termination
-- Namespace accessibility
 
 #### `test_vmprog_public_keys.cpp`
 Tests public key definitions from `vmprog_public_keys.hpp`:

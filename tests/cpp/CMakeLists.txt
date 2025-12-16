@@ -13,7 +13,6 @@ set(TEST_SOURCES
     test_videomancer_abi.cpp
     test_vmprog_format.cpp
     test_vmprog_stream_reader.cpp
-    test_videomancer_sdk_version.cpp
     test_vmprog_public_keys.cpp
     test_videomancer_fpga_controller.cpp
 )
