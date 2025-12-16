@@ -61,6 +61,15 @@ architecture tb of tb_video_sync_generator is
   signal hsync_low_count  : integer := 0;
   signal vsync_high_count : integer := 0;
   signal vsync_low_count  : integer := 0;
+  
+  -- Type for all timing formats test
+  type t_timing_array is array (natural range <>) of std_logic_vector(3 downto 0);
+  constant C_ALL_TIMINGS : t_timing_array := (
+    C_NTSC, C_PAL, C_480P, C_576P, 
+    C_720P60, C_720P5994, C_720P50,
+    C_1080I60, C_1080I5994, C_1080I50,
+    C_1080P30, C_1080P2997, C_1080P25
+  );
 
 begin
 
@@ -338,16 +347,8 @@ begin
       elsif run("test_all_formats") then
         info("Quick test of all supported timing formats");
         
-        type t_timing_array is array (natural range <>) of std_logic_vector(3 downto 0);
-        constant timings : t_timing_array := (
-          C_NTSC, C_PAL, C_480P, C_576P, 
-          C_720P60, C_720P5994, C_720P50,
-          C_1080I60, C_1080I5994, C_1080I50,
-          C_1080P30, C_1080P2997, C_1080P25
-        );
-        
-        for i in timings'range loop
-          timing <= timings(i);
+        for i in C_ALL_TIMINGS'range loop
+          timing <= C_ALL_TIMINGS(i);
           wait for 20 us;
           
           -- Basic sanity check that sync is toggling
