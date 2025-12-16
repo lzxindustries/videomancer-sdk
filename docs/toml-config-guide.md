@@ -2,6 +2,8 @@
 
 This guide explains how to create TOML configuration files for Videomancer programs. These files define program metadata and parameter mappings that control how your FPGA program interacts with hardware controls.
 
+For a complete guide to developing VHDL programs including TOML configuration, see the **[Program Development Guide](program-development-guide.md)**.
+
 ## File Structure
 
 A program configuration file consists of two main sections:

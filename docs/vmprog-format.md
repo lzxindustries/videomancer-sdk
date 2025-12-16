@@ -30,6 +30,8 @@ Binary container for FPGA programs with cryptographic verification (Ed25519 + SH
 **Properties:** Version 1.0 | 1 MB max | Little-endian | Packed structures | UTF-8 strings  
 **Extension:** `.vmprog` | MIME: `application/x-vmprog` (proposed)
 
+**Related Documentation:** For developing VHDL programs that generate `.vmprog` packages, see the [Program Development Guide](program-development-guide.md).
+
 ---
 
 ## 2. File Structure

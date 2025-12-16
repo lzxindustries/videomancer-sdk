@@ -1,0 +1,114 @@
+# Copyright (C) 2025 LZX Industries LLC
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# YUV Amplifier Program Configuration
+
+[program]
+program_id = "com.lzxindustries.yuv_amplifier"
+program_name = "YUV Amplifier"
+program_version = "1.0.0"
+abi_version = ">=1.0,<2.0"
+author = "Lars Larsen"
+license = "GPL-3.0"
+category = "Video Processing"
+description = "YUV Amplifier video processing program"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_1"
+name_label = "Y Gain"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 200
+initial_value = 512
+display_float_digits = 1
+suffix_label = "%"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_2"
+name_label = "U Gain"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 200
+initial_value = 512
+display_float_digits = 1
+suffix_label = "%"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_3"
+name_label = "V Gain"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 200
+initial_value = 512
+display_float_digits = 1
+suffix_label = "%"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_4"
+name_label = "Y Offset"
+control_mode = "linear"
+display_min_value = -100
+display_max_value = 100
+initial_value = 512
+display_float_digits = 1
+suffix_label = "%"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_5"
+name_label = "U Offset"
+control_mode = "linear"
+display_min_value = -100
+display_max_value = 100
+initial_value = 512
+display_float_digits = 1
+suffix_label = "%"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_6"
+name_label = "V Offset"
+control_mode = "linear"
+display_min_value = -100
+display_max_value = 100
+initial_value = 512
+display_float_digits = 1
+suffix_label = "%"
+
+[[parameter]]
+parameter_id = "toggle_switch_7"
+name_label = "Y Invert"
+value_labels = ["Off", "On"]
+initial_value_label = "Off"
+
+[[parameter]]
+parameter_id = "toggle_switch_8"
+name_label = "U Invert"
+value_labels = ["Off", "On"]
+initial_value_label = "Off"
+
+[[parameter]]
+parameter_id = "toggle_switch_9"
+name_label = "V Invert"
+value_labels = ["Off", "On"]
+initial_value_label = "Off"
+
+[[parameter]]
+parameter_id = "toggle_switch_10"
+name_label = "Fade Color"
+value_labels = ["Black", "White"]
+initial_value_label = "Black"
+
+[[parameter]]
+parameter_id = "toggle_switch_11"
+name_label = "Bypass"
+value_labels = ["Off", "On"]
+initial_value_label = "Off"
+
+[[parameter]]
+parameter_id = "linear_potentiometer_12"
+name_label = "Fade Amount"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 1023
+display_float_digits = 1
+suffix_label = "%"

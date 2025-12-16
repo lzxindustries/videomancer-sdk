@@ -91,9 +91,9 @@ source environment
 cd ../..
 
 # Create output directories
-mkdir -p build
-mkdir -p build/programs
-mkdir -p out
+
+mkdir -p "${VIDEOMANCER_BUILD_DIR}"
+mkdir -p "${VIDEOMANCER_OUT_DIR}"
 
 # Track build statistics
 TOTAL_PROGRAMS=0
@@ -102,9 +102,10 @@ FAILED_PROGRAMS=0
     
 for PROGRAM in $PROGRAMS; do
     TOTAL_PROGRAMS=$((TOTAL_PROGRAMS + 1))
-    PROJECT_ROOT="${VIDEOMANCER_PROGRAMS_DIR}${PROGRAM}/"
-    BUILD_ROOT="${VIDEOMANCER_BUILD_DIR}${PROGRAM}/"
-    
+    PROJECT_ROOT="${VIDEOMANCER_PROGRAMS_DIR}/${PROGRAM}/"
+    BUILD_ROOT="${VIDEOMANCER_BUILD_DIR}/${PROGRAM}/"
+    mkdir -p "${BUILD_ROOT}"
+    mkdir -p "${BUILD_ROOT}/bitstreams"
     echo ""
     echo -e "${BLUE}====================================${NC}"
     echo -e "${BLUE}Program ${TOTAL_PROGRAMS}/${PROGRAM_COUNT}: ${PROGRAM}${NC}"
@@ -120,7 +121,7 @@ for PROGRAM in $PROGRAMS; do
     
     # Create output directories
     echo -e "${GREEN}Creating output directories...${NC}"
-    mkdir -p "${BUILD_ROOT}bitstreams"
+    mkdir -p "${BUILD_ROOT}/bitstreams"
     
     # Synthesize FPGA bitstreams (6 variants)
     echo -e "${GREEN}Synthesizing FPGA bitstreams...${NC}"
@@ -132,9 +133,9 @@ for PROGRAM in $PROGRAMS; do
     # Track total bitstream generation time
     BITSTREAM_START=$(date +%s.%N)
     
-    echo -e "${CYAN}  [1/6] HD Analog (80 MHz)...${NC}"
+    echo -e "${CYAN}  [1/6] HD Analog (75 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=75 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -160,9 +161,9 @@ for PROGRAM in $PROGRAMS; do
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
-    echo -e "${CYAN}  [3/6] HD HDMI (80 MHz)...${NC}"
+    echo -e "${CYAN}  [3/6] HD HDMI (75 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=75 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -188,9 +189,9 @@ for PROGRAM in $PROGRAMS; do
     ELAPSED=$(echo "$END - $START" | bc)
     echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
     
-    echo -e "${CYAN}  [5/6] HD Dual (80 MHz)...${NC}"
+    echo -e "${CYAN}  [5/6] HD Dual (75 MHz)...${NC}"
     START=$(date +%s.%N)
-    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=80 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
+    if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=75 HARDWARE=$HARDWARE > "$MAKE_LOG" 2>&1; then
         echo -e "${RED}Build failed. Error output:${NC}"
         cat "$MAKE_LOG"
         rm -f "$MAKE_LOG"
@@ -232,13 +233,13 @@ for PROGRAM in $PROGRAMS; do
     
     # Clean up intermediate files
     echo -e "${GREEN}Cleaning intermediate files...${NC}"
-    cd build/programs/${PROGRAM}/bitstreams
+    cd "${BUILD_ROOT}/bitstreams"
     rm -f *.asc *.json
     cd ../../../..
     
     # Package into .vmprog format
     echo -e "${GREEN}Packaging ${PROGRAM}.vmprog...${NC}"
-    cd tools/vmprog-packer
+    cd ${VIDEOMANCER_SDK_ROOT}/tools/vmprog-packer
     
     PACK_LOG=$(mktemp)
     if [ "$SIGN_PACKAGES" = true ]; then
@@ -266,7 +267,7 @@ for PROGRAM in $PROGRAMS; do
     cd ../..
     
     # Verify output file
-    if [ -f "out/${PROGRAM}.vmprog" ]; then
+    if [ -f "${VIDEOMANCER_OUT_DIR}/${PROGRAM}.vmprog" ]; then
         FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog" 2>/dev/null)
         if [ "$SIGN_PACKAGES" = true ]; then
             echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"

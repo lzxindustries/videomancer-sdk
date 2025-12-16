@@ -134,6 +134,8 @@ cd ~/videomancer-sdk
 
 ## Creating Your Own Programs
 
+For a complete guide to developing VHDL programs for Videomancer, see the **[Program Development Guide](docs/program-development-guide.md)**.
+
 ### Program Structure
 
 Each program needs:
@@ -170,6 +172,7 @@ VHDL components for video processing (in `fpga/rtl/`):
 
 ### Documentation
 
+- **[program-development-guide.md](docs/program-development-guide.md)** - Complete guide to developing VHDL programs
 - **[toml-config-guide.md](docs/toml-config-guide.md)** - Complete guide to creating TOML configuration files
 - **[vmprog-format.md](docs/vmprog-format.md)** - Binary format specification
 - **[package-signing-guide.md](docs/package-signing-guide.md)** - Package signing with Ed25519

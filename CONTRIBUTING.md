@@ -75,6 +75,8 @@ Use GitHub Discussions for questions. Issues for bugs only.
 
 This section provides technical information for those interested in understanding the SDK architecture.
 
+For developers creating new VHDL programs, see the **[Program Development Guide](docs/program-development-guide.md)**.
+
 ### Build Requirements
 
 - CMake 3.13+
