@@ -18,17 +18,15 @@ Create VHDL-based video processing programs for Videomancer FPGA hardware.
 
 - [VHDL Programming by Example](https://www.doulos.com/knowhow/vhdl/) - Doulos VHDL resources
 
-- [IEEE VHDL Standards](https://standards.ieee.org/ieee/1076/6832/) - Official language standard
-
 
 
 **Fixed-point arithmetic** (10-bit unsigned, 0-1023)
 
 - [Fixed-Point Arithmetic: An Introduction](https://inst.eecs.berkeley.edu/~cs61c/sp06/handout/fixedpt.html) - Berkeley CS course notes
 
-- [Introduction to Fixed Point Number Representation](https://www.allaboutcircuits.com/technical-articles/fixed-point-representation-introduction/) - All About Circuits
+- [FPGA Numerical Formats](https://zipcpu.com/dsp/2017/07/22/rounding.html) - ZipCPU fixed-point tutorial
 
-- [VHDL Fixed-Point Guide](https://vhdlwhiz.com/fixed-point-type/) - VHDLwhiz tutorial
+- [Digital Signal Processing in FPGAs](https://www.dsprelated.com/showarticle/561.php) - Fixed-point arithmetic guide
 
 
 
