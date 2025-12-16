@@ -1,0 +1,2 @@
+       100000000 fs - default              -    INFO - Testing multiple consecutive SPI writes
+simulation stopped @32100ns with status 0

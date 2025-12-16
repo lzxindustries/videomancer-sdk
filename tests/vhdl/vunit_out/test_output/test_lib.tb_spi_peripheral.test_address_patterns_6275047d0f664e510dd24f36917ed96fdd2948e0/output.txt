@@ -1,0 +1,2 @@
+       100000000 fs - default              -    INFO - Testing various address patterns
+simulation stopped @8100ns with status 0

@@ -1,0 +1,5 @@
+       100000000 fs - default              -    INFO - Testing write followed by read back
+      4100000000 fs - check                -   ERROR - Read back value should match written value - Got 0000_0000 (0). Expected 1010_1011 (171).
+/home/lars/.local/lib/python3.12/site-packages/vunit/vhdl/core/src/core_pkg.vhd:84:7:@4100ns:(report failure): Stop simulation on log level error
+ghdl:error: report failed
+ghdl:error: simulation failed

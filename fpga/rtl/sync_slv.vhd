@@ -34,8 +34,8 @@ entity sync_slv is
 end entity sync_slv;
 
 architecture rtl of sync_slv is
-  signal a_ff  : std_logic_vector(a'range);
-  signal a_ff2 : std_logic_vector(a'range);
+  signal a_ff  : std_logic_vector(a'range) := (others => '0');
+  signal a_ff2 : std_logic_vector(a'range) := (others => '0');
 
 begin
   process(clk)

@@ -1,0 +1,5 @@
+       100000000 fs - default              -    INFO - Testing multiple consecutive SPI reads
+      2110000000 fs - check                -   ERROR - Read from address 0 should match expected value - Got 0000_0000 (0). Expected 0000_1000 (8).
+/home/lars/.local/lib/python3.12/site-packages/vunit/vhdl/core/src/core_pkg.vhd:84:7:@2110ns:(report failure): Stop simulation on log level error
+ghdl:error: report failed
+ghdl:error: simulation failed

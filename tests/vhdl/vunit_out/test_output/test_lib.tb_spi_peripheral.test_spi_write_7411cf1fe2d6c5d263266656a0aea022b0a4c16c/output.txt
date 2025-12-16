@@ -1,0 +1,2 @@
+       100000000 fs - default              -    INFO - Testing SPI write operation
+simulation stopped @2150ns with status 0

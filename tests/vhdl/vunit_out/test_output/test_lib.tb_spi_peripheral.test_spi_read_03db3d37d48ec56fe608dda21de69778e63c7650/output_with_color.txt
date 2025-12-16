@@ -1,0 +1,5 @@
+       [22;96;49m100000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Testing SPI read operation
+      [22;96;49m2110000000 fs[0m - [1;37;49mcheck[0m                -   [1;31;49mERROR[0m - Read data should match memory value - Got 0000_0000 (0). Expected 0101_1010 (90).
+/home/lars/.local/lib/python3.12/site-packages/vunit/vhdl/core/src/core_pkg.vhd:84:7:@2110ns:(report failure): Stop simulation on log level error
+ghdl:error: report failed
+ghdl:error: simulation failed
