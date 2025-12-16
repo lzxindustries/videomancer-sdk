@@ -106,122 +106,123 @@ begin
     end if;
   end process;
 
-  -- SPI transaction procedures
-  procedure spi_write_byte(
-    constant byte_val : in std_logic_vector(7 downto 0);
-    signal sck_sig    : out std_logic;
-    signal sdi_sig    : out std_logic
-  ) is
-  begin
-    for i in 7 downto 0 loop
-      sdi_sig <= byte_val(i);
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '1';
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '0';
-    end loop;
-  end procedure;
-
-  procedure spi_read_byte(
-    variable byte_val : out std_logic_vector(7 downto 0);
-    signal sck_sig    : out std_logic;
-    signal sdo_sig    : in std_logic
-  ) is
-  begin
-    for i in 7 downto 0 loop
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '1';
-      wait for C_SCK_PERIOD/4;
-      byte_val(i) := sdo_sig;
-      wait for C_SCK_PERIOD/4;
-      sck_sig <= '0';
-    end loop;
-  end procedure;
-
-  procedure spi_transaction_write(
-    constant address  : in unsigned(C_ADDR_WIDTH - 1 downto 0);
-    constant data     : in std_logic_vector(C_DATA_WIDTH - 1 downto 0);
-    signal cs_sig     : out std_logic;
-    signal sck_sig    : out std_logic;
-    signal sdi_sig    : out std_logic
-  ) is
-    variable addr_byte : std_logic_vector(C_ADDR_WIDTH - 1 downto 0);
-  begin
-    addr_byte := std_logic_vector(address);
-    
-    -- Assert CS
-    cs_sig <= '0';
-    wait for C_SCK_PERIOD;
-    
-    -- Send address (7 bits)
-    for i in C_ADDR_WIDTH - 1 downto 0 loop
-      sdi_sig <= addr_byte(i);
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '1';
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '0';
-    end loop;
-    
-    -- Send write command (1 bit, '1' for write)
-    sdi_sig <= '1';
-    wait for C_SCK_PERIOD/2;
-    sck_sig <= '1';
-    wait for C_SCK_PERIOD/2;
-    sck_sig <= '0';
-    
-    -- Send data (8 bits)
-    spi_write_byte(data, sck_sig, sdi_sig);
-    
-    -- Deassert CS
-    wait for C_SCK_PERIOD;
-    cs_sig <= '1';
-    wait for C_SCK_PERIOD * 2;
-  end procedure;
-
-  procedure spi_transaction_read(
-    constant address  : in unsigned(C_ADDR_WIDTH - 1 downto 0);
-    variable data     : out std_logic_vector(C_DATA_WIDTH - 1 downto 0);
-    signal cs_sig     : out std_logic;
-    signal sck_sig    : out std_logic;
-    signal sdi_sig    : out std_logic;
-    signal sdo_sig    : in std_logic
-  ) is
-    variable addr_byte : std_logic_vector(C_ADDR_WIDTH - 1 downto 0);
-  begin
-    addr_byte := std_logic_vector(address);
-    
-    -- Assert CS
-    cs_sig <= '0';
-    wait for C_SCK_PERIOD;
-    
-    -- Send address (7 bits)
-    for i in C_ADDR_WIDTH - 1 downto 0 loop
-      sdi_sig <= addr_byte(i);
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '1';
-      wait for C_SCK_PERIOD/2;
-      sck_sig <= '0';
-    end loop;
-    
-    -- Send read command (1 bit, '0' for read)
-    sdi_sig <= '0';
-    wait for C_SCK_PERIOD/2;
-    sck_sig <= '1';
-    wait for C_SCK_PERIOD/2;
-    sck_sig <= '0';
-    
-    -- Read data (8 bits)
-    spi_read_byte(data, sck_sig, sdo_sig);
-    
-    -- Deassert CS
-    wait for C_SCK_PERIOD;
-    cs_sig <= '1';
-    wait for C_SCK_PERIOD * 2;
-  end procedure;
-
   -- Main test process
   main: process
     variable read_data : std_logic_vector(C_DATA_WIDTH - 1 downto 0);
+    
+    -- SPI transaction procedures
+    procedure spi_write_byte(
+      constant byte_val : in std_logic_vector(7 downto 0);
+      signal sck_sig    : out std_logic;
+      signal sdi_sig    : out std_logic
+    ) is
+    begin
+      for i in 7 downto 0 loop
+        sdi_sig <= byte_val(i);
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '1';
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '0';
+      end loop;
+    end procedure;
+
+    procedure spi_read_byte(
+      variable byte_val : out std_logic_vector(7 downto 0);
+      signal sck_sig    : out std_logic;
+      signal sdo_sig    : in std_logic
+    ) is
+    begin
+      for i in 7 downto 0 loop
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '1';
+        wait for C_SCK_PERIOD/4;
+        byte_val(i) := sdo_sig;
+        wait for C_SCK_PERIOD/4;
+        sck_sig <= '0';
+      end loop;
+    end procedure;
+
+    procedure spi_transaction_write(
+      constant address  : in unsigned(C_ADDR_WIDTH - 1 downto 0);
+      constant data     : in std_logic_vector(C_DATA_WIDTH - 1 downto 0);
+      signal cs_sig     : out std_logic;
+      signal sck_sig    : out std_logic;
+      signal sdi_sig    : out std_logic
+    ) is
+      variable addr_byte : std_logic_vector(C_ADDR_WIDTH - 1 downto 0);
+    begin
+      addr_byte := std_logic_vector(address);
+      
+      -- Assert CS
+      cs_sig <= '0';
+      wait for C_SCK_PERIOD;
+      
+      -- Send address (7 bits)
+      for i in C_ADDR_WIDTH - 1 downto 0 loop
+        sdi_sig <= addr_byte(i);
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '1';
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '0';
+      end loop;
+      
+      -- Send write command (1 bit, '1' for write)
+      sdi_sig <= '1';
+      wait for C_SCK_PERIOD/2;
+      sck_sig <= '1';
+      wait for C_SCK_PERIOD/2;
+      sck_sig <= '0';
+      
+      -- Send data (8 bits)
+      spi_write_byte(data, sck_sig, sdi_sig);
+      
+      -- Deassert CS
+      wait for C_SCK_PERIOD;
+      cs_sig <= '1';
+      wait for C_SCK_PERIOD * 2;
+    end procedure;
+
+    procedure spi_transaction_read(
+      constant address  : in unsigned(C_ADDR_WIDTH - 1 downto 0);
+      variable data     : out std_logic_vector(C_DATA_WIDTH - 1 downto 0);
+      signal cs_sig     : out std_logic;
+      signal sck_sig    : out std_logic;
+      signal sdi_sig    : out std_logic;
+      signal sdo_sig    : in std_logic
+    ) is
+      variable addr_byte : std_logic_vector(C_ADDR_WIDTH - 1 downto 0);
+    begin
+      addr_byte := std_logic_vector(address);
+      
+      -- Assert CS
+      cs_sig <= '0';
+      wait for C_SCK_PERIOD;
+      
+      -- Send address (7 bits)
+      for i in C_ADDR_WIDTH - 1 downto 0 loop
+        sdi_sig <= addr_byte(i);
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '1';
+        wait for C_SCK_PERIOD/2;
+        sck_sig <= '0';
+      end loop;
+      
+      -- Send read command (1 bit, '0' for read)
+      sdi_sig <= '0';
+      wait for C_SCK_PERIOD/2;
+      sck_sig <= '1';
+      wait for C_SCK_PERIOD/2;
+      sck_sig <= '0';
+      
+      -- Read data (8 bits)
+      spi_read_byte(data, sck_sig, sdo_sig);
+      
+      -- Deassert CS
+      wait for C_SCK_PERIOD;
+      cs_sig <= '1';
+      wait for C_SCK_PERIOD * 2;
+    end procedure;
+    
   begin
     test_runner_setup(runner, runner_cfg);
     
