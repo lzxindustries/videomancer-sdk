@@ -232,7 +232,9 @@ if [ "$RUN_VHDL" = true ]; then
 
     if [ $VHDL_FAILED -eq 0 ]; then
         cd tests/vhdl
-        if [ "$VERBOSE" = true ]; then
+        # Note: -v (verbose) flag can produce excessive output in CI
+        # Only use verbose mode for local debugging
+        if [ "$VERBOSE" = true ] && [ -z "$CI" ]; then
             python3 run.py -v
         else
             python3 run.py
