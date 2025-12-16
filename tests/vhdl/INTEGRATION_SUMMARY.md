@@ -36,7 +36,33 @@ Tests the YUV422 to YUV444 video format converter:
 - `test_field_propagation` - Field signal handling
 - `test_continuous_stream` - Continuous pixel stream
 
-**Total: 12 VHDL unit tests**
+#### tb_spi_peripheral.vhd (8 test cases) ✨ NEW
+Tests the SPI peripheral controller module:
+- `test_spi_write` - Basic SPI write operation
+- `test_spi_read` - Basic SPI read operation
+- `test_multiple_writes` - Multiple consecutive write operations
+- `test_multiple_reads` - Multiple consecutive read operations
+- `test_write_read_back` - Write followed by read-back verification
+- `test_cs_abort` - Transaction abort via CS deassertion
+- `test_address_patterns` - Various address bit patterns
+- `test_data_patterns` - Various data bit patterns
+
+#### tb_video_sync_generator.vhd (12 test cases) ✨ NEW
+Tests the video sync signal generator module:
+- `test_ntsc_timing` - NTSC video timing configuration
+- `test_pal_timing` - PAL video timing configuration
+- `test_480p_timing` - 480p progressive timing
+- `test_720p60_timing` - 720p60 HD timing
+- `test_1080i60_timing` - 1080i60 interlaced HD timing
+- `test_timing_switch` - Switching between timing formats
+- `test_ref_sync_response` - Reference sync input response
+- `test_trisync_generation` - Tri-level sync generation
+- `test_hsync_frequency` - HSYNC frequency verification
+- `test_vsync_generation` - VSYNC generation
+- `test_all_formats` - Quick test of all timing formats
+- `test_counter_sync` - Counter synchronization on frame/field sync
+
+**Total: 32 VHDL unit tests (20 new tests added)**
 
 ### 3. Integration with Test Suite
 
