@@ -47,7 +47,7 @@ if ! command -v ghdl &> /dev/null; then
     echo "  1. Run scripts/setup.sh from project root to get GHDL via OSS CAD Suite"
     echo "  2. Install GHDL separately: sudo apt-get install ghdl"
     echo ""
-    
+
     # Check if OSS CAD Suite is available
     if [ -f "../../build/oss-cad-suite/bin/ghdl" ]; then
         echo "Found GHDL in oss-cad-suite. Adding to PATH for this session..."
