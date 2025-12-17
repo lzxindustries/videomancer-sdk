@@ -1667,6 +1667,7 @@ bool test_string_max_decimals() {
     config.display_min_value = 0;
     config.display_max_value = 10000;
     config.display_float_digits = 6;
+    config.value_label_count = 0;
     config.suffix_label[0] = '\0';
 
     char buffer[30];
