@@ -135,6 +135,14 @@ namespace lzx {
         videomancer_core_rev_b = 0x00000002,
     };
 
+    // Core architecture identifiers
+    enum class vmprog_core_id_v1_0 : uint32_t
+    {
+        none = 0,
+        yuv444_30b = 1,
+        yuv422_20b = 2,
+    };
+
     // Parameter control mode - defines how parameter values are interpreted and displayed
     // Categories:
     //   - Linear scaling: linear, linear_half, linear_quarter, linear_double
@@ -368,7 +376,7 @@ namespace lzx {
         static constexpr uint32_t description_max_length = 128;
         static constexpr uint32_t url_max_length = 128;
         static constexpr uint32_t num_parameters = 12;
-        static constexpr uint32_t struct_size = 7368;
+        static constexpr uint32_t struct_size = 7372;
 
         // All string fields must be null-terminated
         char program_id[program_id_max_length];      // Unique program identifier
@@ -380,6 +388,7 @@ namespace lzx {
         uint16_t abi_max_major;       // Maximum ABI major version (exclusive)
         uint16_t abi_max_minor;       // Maximum ABI minor version (exclusive)
         vmprog_hardware_flags_v1_0 hw_mask;  // Compatible hardware mask
+        vmprog_core_id_v1_0 core_id;         // Core architecture identifier
         char program_name[program_name_max_length];
         char author[author_max_length];
         char license[license_max_length];
@@ -440,6 +449,9 @@ namespace lzx {
 
     static_assert(std::is_same<std::underlying_type<vmprog_hardware_flags_v1_0>::type, uint32_t>::value,
         "vmprog_hardware_flags_v1_0 must use uint32_t as underlying type");
+
+    static_assert(std::is_same<std::underlying_type<vmprog_core_id_v1_0>::type, uint32_t>::value,
+        "vmprog_core_id_v1_0 must use uint32_t as underlying type");
 
     static_assert(std::is_same<std::underlying_type<vmprog_parameter_control_mode_v1_0>::type, uint32_t>::value,
         "vmprog_parameter_control_mode_v1_0 must use uint32_t as underlying type");
@@ -982,6 +994,11 @@ namespace lzx {
             return vmprog_validation_result::invalid_enum_value;
         }
 
+        // Check core_id is valid (not none)
+        if (config.core_id == vmprog_core_id_v1_0::none) {
+            return vmprog_validation_result::invalid_enum_value;
+        }
+
         // Verify reserved fields are zeroed
         if (config.reserved_pad != 0 || config.reserved[0] != 0 || config.reserved[1] != 0) {
             return vmprog_validation_result::reserved_field_not_zero;
@@ -1339,6 +1356,7 @@ namespace lzx {
         config.abi_max_major = 2;
         config.abi_max_minor = 0;
         config.hw_mask = vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
+        config.core_id = vmprog_core_id_v1_0::yuv444_30b;
         config.parameter_count = 0;
     }
 

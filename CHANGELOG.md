@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Core Architecture Field** - Added core_id field to vmprog_program_config_v1_0
+  - New `vmprog_core_id_v1_0` enum: none (0), yuv444_30b (1), yuv422_20b (2)
+  - Core architecture field at offset 82 (4 bytes)
+  - Struct size increased from 7368 to 7372 bytes
+  - Build system parses core field from TOML and passes to Makefile
+  - Updated all tools (toml-converter, vmprog-packer) to handle new field
+  - Updated JSON schema with core enum validation
+  - Documentation updated throughout
+
+- **Build System Enhancements** - Added timing and resource utilization reporting
+  - Extracts actual max frequency (Fmax) from nextpnr timing analysis
+  - Reports resource usage: Logic Cells (LCs), IOs, RAMs, PLLs with used/max values
+  - Build completion messages show: "Fmax: XX.X MHz, LCs: XXXX/YYYY, IOs: XX/YY"
+  - Start messages updated to show minimum frequency requirement: "Fmin: XX MHz"
+
+- **Clean Script** - Added clean_programs.sh for artifact cleanup
+  - Removes all build artifacts from build/programs/ directory
+  - Cleans packaged .vmprog files from out/ directory
+  - Preserves build/ directory structure and OSS CAD Suite toolchain
+  - Provides summary of files removed
+
 ### Changed
 
 - **Parameter Control Curve API** - Enhanced to support full int32_t input range

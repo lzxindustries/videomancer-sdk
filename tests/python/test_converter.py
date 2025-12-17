@@ -43,9 +43,9 @@ def verify_binary_output(binary_path: Path):
     with open(binary_path, 'rb') as f:
         data = f.read()
 
-    print(f"File size: {len(data)} bytes (expected: 7368)")
+    print(f"File size: {len(data)} bytes (expected: 7372)")
 
-    if len(data) != 7368:
+    if len(data) != 7372:
         print("✗ Size mismatch!")
         return False
 

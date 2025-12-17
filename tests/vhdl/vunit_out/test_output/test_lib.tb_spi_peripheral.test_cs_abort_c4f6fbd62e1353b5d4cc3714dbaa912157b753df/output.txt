@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing transaction abort with CS deassertion
-simulation stopped @900ns with status 0

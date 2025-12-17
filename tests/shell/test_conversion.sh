@@ -47,9 +47,9 @@ if [ -f "/tmp/test_config.bin" ]; then
     SIZE=$(stat -f%z "/tmp/test_config.bin" 2>/dev/null || stat -c%s "/tmp/test_config.bin")
     echo "=== Verification ==="
     echo "Output file: /tmp/test_config.bin"
-    echo "Size: $SIZE bytes (expected: 7368)"
+    echo "Size: $SIZE bytes (expected: 7372)"
 
-    if [ "$SIZE" -eq 7368 ]; then
+    if [ "$SIZE" -eq 7372 ]; then
         echo "✓ Size matches!"
         rm /tmp/test_config.bin
         exit 0

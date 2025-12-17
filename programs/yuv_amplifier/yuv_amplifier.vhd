@@ -92,6 +92,7 @@ use ieee.numeric_std.all;
 library work;
 use work.all;
 use work.core_pkg.all;
+use work.video_stream_pkg.all;
 use work.video_timing_pkg.all;
 
 --------------------------------------------------------------------------------
@@ -107,7 +108,7 @@ use work.video_timing_pkg.all;
 -- end entity program_yuv444;
 --------------------------------------------------------------------------------
 
-architecture yuv_amplifier of program_yuv444 is
+architecture yuv_amplifier of yuv444_30b_top is
     --------------------------------------------------------------------------------
     -- Constants
     --------------------------------------------------------------------------------

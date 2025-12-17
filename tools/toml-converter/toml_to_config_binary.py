@@ -13,7 +13,7 @@ Usage:
 
 Structure sizes (bytes):
     - vmprog_parameter_config_v1_0: 572 bytes
-    - vmprog_program_config_v1_0: 7368 bytes
+    - vmprog_program_config_v1_0: 7372 bytes
 """
 
 import struct
@@ -48,7 +48,7 @@ CATEGORY_MAX_LENGTH = 32
 DESCRIPTION_MAX_LENGTH = 128
 URL_MAX_LENGTH = 128
 NUM_PARAMETERS = 12
-CONFIG_STRUCT_SIZE = 7368
+CONFIG_STRUCT_SIZE = 7372
 
 # Enum value bounds
 MAX_PARAMETER_ID = 12  # linear_potentiometer_12
@@ -108,6 +108,19 @@ CONTROL_MODE_MAP = {
     'expo_in': 33,
     'expo_out': 34,
     'expo_in_out': 35
+}
+
+# Hardware compatibility flags
+HARDWARE_FLAGS_MAP = {
+    'videomancer_core_reva': 0x00000001,
+    'videomancer_core_revb': 0x00000002,
+}
+
+# Core architecture identifiers
+CORE_ID_MAP = {
+    'none': 0,
+    'yuv444_30b': 1,
+    'yuv422_20b': 2,
 }
 
 # Global flag for quiet mode
@@ -552,7 +565,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     """
     Pack a complete program configuration into binary format.
 
-    Structure layout (7368 bytes):
+    Structure layout (7372 bytes):
         - program_id: char[64] (64 bytes)
         - program_version_major: uint16_t (2 bytes)
         - program_version_minor: uint16_t (2 bytes)
@@ -561,7 +574,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         - abi_min_minor: uint16_t (2 bytes)
         - abi_max_major: uint16_t (2 bytes)
         - abi_max_minor: uint16_t (2 bytes)
-        - hw_mask: uint32_t (4 bytes)
+        - hw_mask: uint32_t (4 bytes) - built from hardware_compatibility array
         - program_name: char[32] (32 bytes)
         - author: char[64] (64 bytes)
         - license: char[32] (32 bytes)
@@ -577,7 +590,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         config: Dictionary containing program configuration from TOML
 
     Returns:
-        7368 bytes of packed binary data
+        7372 bytes of packed binary data
     """
     data = bytearray()
 
@@ -614,8 +627,33 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         data += struct.pack('<H', program.get('abi_max_major', 2))
         data += struct.pack('<H', program.get('abi_max_minor', 0))
 
-    # Hardware mask (4 bytes) - always set to 0x00000003
-    data += struct.pack('<I', 0x00000003)
+    # Hardware mask (4 bytes) - build from hardware_compatibility array
+    hw_mask = 0
+    hardware_compat = program.get('hardware_compatibility', [])
+    if hardware_compat:
+        for hw_name in hardware_compat:
+            if hw_name in HARDWARE_FLAGS_MAP:
+                hw_mask |= HARDWARE_FLAGS_MAP[hw_name]
+            else:
+                if not QUIET:
+                    print(f"WARNING: Unknown hardware platform '{hw_name}', ignoring", file=sys.stderr)
+    else:
+        # Default to all platforms if not specified
+        hw_mask = 0x00000003  # videomancer_core_reva | videomancer_core_revb
+        if not QUIET:
+            print("WARNING: No hardware_compatibility specified, defaulting to all platforms", file=sys.stderr)
+
+    data += struct.pack('<I', hw_mask)
+
+    # Core ID (4 bytes)
+    core_str = program.get('core', 'yuv444_30b')
+    if core_str in CORE_ID_MAP:
+        core_id = CORE_ID_MAP[core_str]
+    else:
+        if not QUIET:
+            print(f"WARNING: Unknown core '{core_str}', defaulting to yuv444_30b", file=sys.stderr)
+        core_id = CORE_ID_MAP['yuv444_30b']
+    data += struct.pack('<I', core_id)
 
     # String metadata fields (288 bytes)
     data += pack_string(program.get('program_name', ''), PROGRAM_NAME_MAX_LENGTH)
@@ -700,9 +738,18 @@ def convert_toml_to_binary(toml_path: Path, output_path: Path) -> None:
             patch = program.get('program_version_patch', 0)
             version_str = f"{major}.{minor}.{patch}"
 
+        # Display hardware compatibility
+        hw_compat = program.get('hardware_compatibility', [])
+        hw_str = ', '.join(hw_compat) if hw_compat else 'all platforms (default)'
+
+        # Display core architecture
+        core_str = program.get('core', 'yuv444_10b')
+
         print(f"✓ Successfully converted {toml_path.name} → {output_path.name}")
         print(f"  Program: {program.get('program_name', 'Unknown')}")
         print(f"  Version: {version_str}")
+        print(f"  Hardware: {hw_str}")
+        print(f"  Core: {core_str}")
         print(f"  Parameters: {param_count}/{NUM_PARAMETERS}")
         print(f"  Binary size: {len(binary_data)} bytes")
 

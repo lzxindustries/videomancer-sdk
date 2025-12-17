@@ -16,6 +16,10 @@ program_version = "1.0.0"
 
 abi_version = ">=1.0,<2.0"
 
+hardware_compatibility = ["videomancer_core_revb"]
+
+core = "yuv444_30b"           # Optional, default yuv444_30b
+
 author = "Your Name"           # Optional
 
 license = "GPL-3.0"            # Optional
@@ -72,11 +76,20 @@ label = "On"
 
 - `abi_version` - Range notation (e.g., ">=1.0,<2.0")
 
+- `hardware_compatibility` - Array of compatible platforms (e.g., ["videomancer_core_revb"])
+
 **Optional:**
+
+- `core` - Core architecture: "yuv444_30b" (default) or "yuv422_20b"
 
 - `author`, `license`, `category` (max 31-63 chars)
 
 - `description`, `url` (max 127 chars)
+
+**Hardware Platforms:**
+
+- `videomancer_core_reva` - Videomancer Core Rev A hardware
+- `videomancer_core_revb` - Videomancer Core Rev B hardware
 
 ## Parameters
 

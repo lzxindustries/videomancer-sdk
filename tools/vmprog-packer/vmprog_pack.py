@@ -16,7 +16,7 @@ Usage:
 
 Input directory structure:
     input_dir/
-        program_config.bin          # Required: 7368 bytes
+        program_config.bin          # Required: 7372 bytes
         bitstreams/                 # Required directory
             sd_analog.bin           # Optional: SD analog bitstream
             sd_hdmi.bin             # Optional: SD HDMI bitstream
@@ -59,7 +59,7 @@ VERSION_MINOR = 0
 # Structure sizes
 HEADER_SIZE = 64
 TOC_ENTRY_SIZE = 64
-PROGRAM_CONFIG_SIZE = 7368
+PROGRAM_CONFIG_SIZE = 7372
 SIGNED_DESCRIPTOR_SIZE = 332
 SIGNATURE_SIZE = 64
 ARTIFACT_HASH_SIZE = 36
@@ -847,7 +847,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Input directory must contain:
-  - program_config.bin (7368 bytes)
+  - program_config.bin (7372 bytes)
   - bitstreams/ directory with *.bin files
 
 Example:

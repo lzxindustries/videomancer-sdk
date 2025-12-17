@@ -19,17 +19,34 @@ vu.add_vhdl_builtins()
 
 # Get project root directory
 project_root = Path(__file__).parent.parent.parent
-rtl_dir = project_root / "fpga" / "rtl"
+fpga_dir = project_root / "fpga"
 test_dir = Path(__file__).parent
 
 # Add RTL source library
 rtl_lib = vu.add_library("rtl_lib")
-rtl_lib.add_source_files(rtl_dir / "core_pkg.vhd")
-rtl_lib.add_source_files(rtl_dir / "video_timing_pkg.vhd")
-rtl_lib.add_source_files(rtl_dir / "sync_slv.vhd")
-rtl_lib.add_source_files(rtl_dir / "yuv422_to_yuv444.vhd")
-rtl_lib.add_source_files(rtl_dir / "yuv444_to_yuv422.vhd")
-rtl_lib.add_source_files(rtl_dir / "blanking_yuv444.vhd")
+
+# Add common video packages (in dependency order)
+video_stream_dir = fpga_dir / "common" / "rtl" / "video_stream"
+video_timing_dir = fpga_dir / "common" / "rtl" / "video_timing"
+video_sync_dir = fpga_dir / "common" / "rtl" / "video_sync"
+
+# Add packages first
+rtl_lib.add_source_files(video_stream_dir / "video_stream_pkg.vhd")
+rtl_lib.add_source_files(video_timing_dir / "video_timing_pkg.vhd")
+rtl_lib.add_source_files(video_sync_dir / "video_sync_pkg.vhd")
+
+# Add core package files (using yuv444_30b as default for testing)
+core_rtl_dir = fpga_dir / "core" / "yuv444_30b" / "rtl"
+rtl_lib.add_source_files(core_rtl_dir / "core_pkg.vhd")
+
+# Add utility modules
+utils_dir = fpga_dir / "common" / "rtl" / "utils"
+rtl_lib.add_source_files(utils_dir / "sync_slv.vhd")
+
+# Add video processing modules
+rtl_lib.add_source_files(video_stream_dir / "yuv422_20b_to_yuv444_30b.vhd")
+rtl_lib.add_source_files(video_stream_dir / "yuv444_30b_to_yuv422_20b.vhd")
+rtl_lib.add_source_files(video_stream_dir / "yuv444_30b_blanking.vhd")
 
 # Add test library
 test_lib = vu.add_library("test_lib")

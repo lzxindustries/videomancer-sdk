@@ -30,7 +30,7 @@ echo "========================================================================"
 echo "Test 1: Package passthru program"
 echo "========================================================================"
 
-INPUT_DIR="$PROJECT_ROOT/build/programs/passthru"
+INPUT_DIR="$PROJECT_ROOT/build/programs/passthru/videomancer_core_reva"
 OUTPUT_FILE="$PROJECT_ROOT/build/passthru.vmprog"
 
 if [ ! -d "$INPUT_DIR" ]; then
@@ -41,7 +41,7 @@ else
     echo "Output: $OUTPUT_FILE"
     echo
 
-    python3 "$SCRIPT_DIR/vmprog_pack.py" "$INPUT_DIR" "$OUTPUT_FILE"
+    python3 "$PROJECT_ROOT/tools/vmprog-packer/vmprog_pack.py" --no-sign "$INPUT_DIR" "$OUTPUT_FILE"
 
     if [ -f "$OUTPUT_FILE" ]; then
         echo
@@ -62,7 +62,7 @@ echo "========================================================================"
 echo "Test 2: Package yuv_amplifier program"
 echo "========================================================================"
 
-INPUT_DIR="$PROJECT_ROOT/build/programs/yuv_amplifier"
+INPUT_DIR="$PROJECT_ROOT/build/programs/yuv_amplifier/videomancer_core_reva"
 OUTPUT_FILE="$PROJECT_ROOT/build/yuv_amplifier.vmprog"
 
 if [ ! -d "$INPUT_DIR" ]; then
@@ -73,7 +73,7 @@ else
     echo "Output: $OUTPUT_FILE"
     echo
 
-    python3 "$SCRIPT_DIR/vmprog_pack.py" "$INPUT_DIR" "$OUTPUT_FILE"
+    python3 "$PROJECT_ROOT/tools/vmprog-packer/vmprog_pack.py" --no-sign "$INPUT_DIR" "$OUTPUT_FILE"
 
     if [ -f "$OUTPUT_FILE" ]; then
         echo

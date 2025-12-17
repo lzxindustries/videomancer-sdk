@@ -1,2 +1,0 @@
-       [22;96;49m100000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Testing transaction abort with CS deassertion
-simulation stopped @900ns with status 0

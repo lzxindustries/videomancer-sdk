@@ -159,6 +159,35 @@
             ">=1.5,<2.0",
             ">=2.0,<3.0"
           ]
+        },
+        "hardware_compatibility": {
+          "type": "array",
+          "description": "List of compatible hardware platforms",
+          "items": {
+            "type": "string",
+            "enum": [
+              "videomancer_core_reva",
+              "videomancer_core_revb"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "examples": [
+            ["videomancer_core_revb"],
+            ["videomancer_core_reva", "videomancer_core_revb"]
+          ]
+        },
+        "core": {
+          "type": "string",
+          "description": "Core architecture identifier",
+          "enum": [
+            "yuv444_30b",
+            "yuv422_20b"
+          ],
+          "examples": [
+            "yuv444_30b",
+            "yuv422_20b"
+          ]
         }
       },
       "additionalProperties": false,

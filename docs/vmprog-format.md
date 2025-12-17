@@ -12,7 +12,7 @@ File Header (64 bytes) - Magic 'VMPG', version, size, flags
 
 Table of Contents - N × 64-byte entries with type, offset, size, hash
 
-Payloads - Config (7368 bytes), descriptor (332 bytes), signature (64 bytes), bitstreams
+Payloads - Config (7372 bytes), descriptor (332 bytes), signature (64 bytes), bitstreams
 
 ```
 
@@ -101,6 +101,18 @@ Maps parameters to physical hardware controls:
 | 10 | `toggle_switch_10` | Toggle switch #10 |
 | 11 | `toggle_switch_11` | Toggle switch #11 |
 | 12 | `linear_potentiometer_12` | Linear fader #12 |
+
+### 3.9 Core Architecture IDs
+
+**Enum:** `vmprog_core_id_v1_0` (uint32_t)
+
+Identifies the core architecture that the program is designed for:
+
+| Value | Name | Description |
+|------:|------|-------------|
+| 0 | `none` | No core specified (invalid) |
+| 1 | `yuv444_30b` | YUV 4:4:4 30-bit core |
+| 2 | `yuv422_20b` | YUV 4:2:2 20-bit core |
 
 ---
 
@@ -230,7 +242,7 @@ Configures one user-controllable parameter:
 
 ### 4.6 Program Configuration
 
-**Structure:** `vmprog_program_config_v1_0` (7368 bytes)
+**Structure:** `vmprog_program_config_v1_0` (7372 bytes)
 
 Main program metadata structure:
 
@@ -245,16 +257,17 @@ Main program metadata structure:
 | 74 | uint16_t | abi_max_major | 2 | Max ABI major (exclusive) |
 | 76 | uint16_t | abi_max_minor | 2 | Max ABI minor (exclusive) |
 | 78 | uint32_t | hw_mask | 4 | Hardware compatibility mask |
-| 82 | char[32] | program_name | 32 | Display name |
-| 114 | char[64] | author | 64 | Author name |
-| 178 | char[32] | license | 32 | License identifier |
-| 210 | char[32] | category | 32 | Program category |
-| 242 | char[128] | description | 128 | Program description |
-| 370 | char[128] | url | 128 | Project or documentation URL |
-| 498 | uint16_t | parameter_count | 2 | Number of parameters |
-| 500 | uint16_t | reserved_pad | 2 | Reserved padding |
-| 502 | param[12] | parameters | 6864 | Parameter configs (12×572) |
-| 7366 | uint8_t[2] | reserved | 2 | Reserved |
+| 82 | uint32_t | core_id | 4 | Core architecture identifier |
+| 86 | char[32] | program_name | 32 | Display name |
+| 118 | char[64] | author | 64 | Author name |
+| 182 | char[32] | license | 32 | License identifier |
+| 214 | char[32] | category | 32 | Program category |
+| 246 | char[128] | description | 128 | Program description |
+| 374 | char[128] | url | 128 | Project or documentation URL |
+| 502 | uint16_t | parameter_count | 2 | Number of parameters |
+| 504 | uint16_t | reserved_pad | 2 | Reserved padding |
+| 506 | param[12] | parameters | 6864 | Parameter configs (12×572) |
+| 7370 | uint8_t[2] | reserved | 2 | Reserved |
 
 **Constants:**
 
@@ -274,7 +287,7 @@ Main program metadata structure:
 
 - `num_parameters` = 12
 
-- `struct_size` = 7368
+- `struct_size` = 7372
 
 ---
 

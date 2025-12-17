@@ -60,6 +60,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.video_timing_pkg.all;
+use work.video_stream_pkg.all;
 use work.core_pkg.all;
 use work.all;
 
@@ -76,7 +77,7 @@ use work.all;
 -- end entity program_yuv444;
 --------------------------------------------------------------------------------
 
-architecture passthru of program_yuv444 is
+architecture passthru of yuv444_30b_top is
 begin
     --------------------------------------------------------------------------------
     -- Single-Stage Pipeline: Direct Video Forwarding

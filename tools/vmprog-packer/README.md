@@ -208,7 +208,7 @@ The tool creates a `.vmprog` file with the following structure:
 
 **Notes:**
 
-- `program_config.bin` is **required** and must be exactly 7368 bytes
+- `program_config.bin` is **required** and must be exactly 7372 bytes
 
 - At least one bitstream file is **required**
 
@@ -238,7 +238,7 @@ The tool creates a `.vmprog` file with the following structure:
 
 3. **Payloads**
 
-   - Program configuration (7368 bytes)
+   - Program configuration (7372 bytes)
 
    - FPGA bitstreams (variable size)
 
@@ -268,7 +268,7 @@ The tool performs comprehensive validation after package creation:
 
 ### Program Config Validation
 
-- ✓ Size exactly 7368 bytes
+- ✓ Size exactly 7372 bytes
 
 - ✓ All strings null-terminated
 
@@ -302,7 +302,7 @@ Input directory: ./build/programs/passthru
 
 Output file: ./output/passthru.vmprog
 
-Loaded program config: 7368 bytes
+Loaded program config: 7372 bytes
 
 Found bitstream: sd_analog.bin (104090 bytes)
 
@@ -320,7 +320,7 @@ TOC Entry 0: CONFIG
 
   Offset: 512
 
-  Size: 7368
+  Size: 7372
 
   Hash: a3f2d8e9b1c4...
 
@@ -390,7 +390,7 @@ Entry 0: CONFIG
 
   Offset: 512
 
-  Size: 7368
+  Size: 7372
 
   Hash: a3f2d8e9b1c4...
 

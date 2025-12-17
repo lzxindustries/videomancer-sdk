@@ -32,6 +32,7 @@ context vunit_lib.vunit_context;
 
 library rtl_lib;
 use rtl_lib.video_timing_pkg.all;
+use rtl_lib.video_stream_pkg.all;
 use rtl_lib.core_pkg.all;
 
 entity tb_yuv444_to_yuv422 is
@@ -44,15 +45,15 @@ architecture tb of tb_yuv444_to_yuv422 is
   constant C_BIT_DEPTH  : integer := 10;
 
   signal clk       : std_logic := '0';
-  signal i_data    : t_video_stream_yuv444;
-  signal o_data    : t_video_stream_yuv422;
+  signal i_data    : t_video_stream_yuv444_30b;
+  signal o_data    : t_video_stream_yuv422_20b;
   signal test_done : boolean := false;
 
 begin
 
   clk <= not clk after C_CLK_PERIOD/2 when not test_done;
 
-  dut: entity rtl_lib.yuv444_to_yuv422
+  dut: entity rtl_lib.yuv444_30b_to_yuv422_20b
     port map (
       clk    => clk,
       i_data => i_data,

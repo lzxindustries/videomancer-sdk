@@ -32,6 +32,7 @@ context vunit_lib.vunit_context;
 
 library rtl_lib;
 use rtl_lib.video_timing_pkg.all;
+use rtl_lib.video_stream_pkg.all;
 use rtl_lib.core_pkg.all;
 
 entity tb_yuv422_to_yuv444 is
@@ -46,8 +47,8 @@ architecture tb of tb_yuv422_to_yuv444 is
 
   -- DUT signals
   signal clk     : std_logic := '0';
-  signal i_data  : t_video_stream_yuv422;
-  signal o_data  : t_video_stream_yuv444;
+  signal i_data  : t_video_stream_yuv422_20b;
+  signal o_data  : t_video_stream_yuv444_30b;
 
   -- Test control
   signal test_done : boolean := false;
@@ -58,7 +59,7 @@ begin
   clk <= not clk after C_CLK_PERIOD/2 when not test_done;
 
   -- Device Under Test
-  dut: entity rtl_lib.yuv422_to_yuv444
+  dut: entity rtl_lib.yuv422_20b_to_yuv444_30b
     port map (
       clk    => clk,
       i_data => i_data,

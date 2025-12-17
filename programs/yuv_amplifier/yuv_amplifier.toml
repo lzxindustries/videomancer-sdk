@@ -12,6 +12,8 @@ author = "Lars Larsen"
 license = "GPL-3.0"
 category = "Video Processing"
 description = "YUV Amplifier video processing program"
+hardware_compatibility = ["videomancer_core_revb"]
+core = "yuv444_30b"
 
 [[parameter]]
 parameter_id = "rotary_potentiometer_1"

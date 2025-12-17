@@ -32,6 +32,7 @@ context vunit_lib.vunit_context;
 
 library rtl_lib;
 use rtl_lib.video_timing_pkg.all;
+use rtl_lib.video_stream_pkg.all;
 
 entity tb_blanking_yuv444 is
   generic (runner_cfg : string);
@@ -48,15 +49,15 @@ architecture tb of tb_blanking_yuv444 is
   constant C_BLACK_V : unsigned(C_BIT_DEPTH-1 downto 0) := to_unsigned(512, C_BIT_DEPTH);
 
   signal clk       : std_logic := '0';
-  signal data_in   : t_video_stream_yuv444;
-  signal data_out  : t_video_stream_yuv444;
+  signal data_in   : t_video_stream_yuv444_30b;
+  signal data_out  : t_video_stream_yuv444_30b;
   signal test_done : boolean := false;
 
 begin
 
   clk <= not clk after C_CLK_PERIOD/2 when not test_done;
 
-  dut: entity rtl_lib.blanking_yuv444
+  dut: entity rtl_lib.yuv444_30b_blanking
     port map (
       clk      => clk,
       data_in  => data_in,

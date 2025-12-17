@@ -22,6 +22,9 @@ bash scripts/setup.sh
 
 bash build_programs.sh
 
+# Clean build artifacts
+bash clean_programs.sh
+
 # Output: out/*.vmprog
 
 ```
