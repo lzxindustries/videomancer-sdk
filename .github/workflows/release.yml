@@ -44,14 +44,14 @@ jobs:
     - name: Generate checksums
       run: |
         cd out
-        sha256sum *.vmprog > checksums.sha256
+        find . -name "*.vmprog" -type f -exec sha256sum {} \; > checksums.sha256
         cat checksums.sha256
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          out/*.vmprog
+          out/*/*.vmprog
           out/checksums.sha256
         generate_release_notes: true
         draft: false
@@ -62,11 +62,14 @@ jobs:
           This release includes pre-built FPGA program packages.
 
           ### Included Programs
-          - `passthru.vmprog` - Pass-through example program
-          - `yuv_amplifier.vmprog` - YUV signal amplifier with proc amp controls
+          Programs are organized by hardware revision:
+          - `rev_a/passthru.vmprog` - Pass-through example (Rev A hardware)
+          - `rev_a/yuv_amplifier.vmprog` - YUV signal amplifier (Rev A hardware)
+          - `rev_b/passthru.vmprog` - Pass-through example (Rev B hardware)
+          - `rev_b/yuv_amplifier.vmprog` - YUV signal amplifier (Rev B hardware)
 
           ### Installation
-          Upload `.vmprog` files to your Videomancer hardware via the web interface.
+          Upload the appropriate `.vmprog` file for your hardware revision via the web interface.
 
           ### Checksums
           See `checksums.sha256` for SHA-256 verification hashes.

@@ -62,7 +62,8 @@ jobs:
       if: success()
       with:
         name: vmprog-packages
-        path: out/*.vmprog
+        path: |
+          out/*/*.vmprog
         retention-days: 7
 
     - name: Test summary
