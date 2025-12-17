@@ -142,8 +142,8 @@ bool test_toc_entry_init() {
         return false;
     }
 
-    // Verify reserved fields are zeroed
-    for (size_t i = 0; i < sizeof(entry.reserved); ++i) {
+    // Verify reserved fields are zeroed (4 uint32_t elements)
+    for (size_t i = 0; i < 4; ++i) {
         if (entry.reserved[i] != 0) {
             std::cerr << "FAILED: TOC entry init test - reserved field not zeroed" << std::endl;
             return false;

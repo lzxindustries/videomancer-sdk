@@ -1362,6 +1362,15 @@ namespace lzx {
         entry = {}; // Zero everything
         entry.type = vmprog_toc_entry_type_v1_0::none;
         entry.flags = vmprog_toc_entry_flags_v1_0::none;
+        entry.offset = 0;
+        entry.size = 0;
+        // Explicitly zero sha256 and reserved arrays
+        for (size_t i = 0; i < sizeof(entry.sha256); ++i) {
+            entry.sha256[i] = 0;
+        }
+        for (size_t i = 0; i < 4; ++i) {
+            entry.reserved[i] = 0;
+        }
     }
 
     /**
