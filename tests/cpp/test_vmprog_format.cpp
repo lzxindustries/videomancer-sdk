@@ -24,9 +24,9 @@ bool test_struct_sizes() {
         return false;
     }
 
-    if (sizeof(vmprog_program_config_v1_0) != 7368) {
+    if (sizeof(vmprog_program_config_v1_0) != 7372) {
         std::cerr << "FAILED: Struct size test - program config size is "
-                  << sizeof(vmprog_program_config_v1_0) << ", expected 7368" << std::endl;
+                  << sizeof(vmprog_program_config_v1_0) << ", expected 7372" << std::endl;
         return false;
     }
 
