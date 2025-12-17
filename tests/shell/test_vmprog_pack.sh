@@ -30,7 +30,7 @@ echo "========================================================================"
 echo "Test 1: Package passthru program"
 echo "========================================================================"
 
-INPUT_DIR="$PROJECT_ROOT/build/programs/passthru/videomancer_core_reva"
+INPUT_DIR="$PROJECT_ROOT/build/programs/passthru/rev_a"
 OUTPUT_FILE="$PROJECT_ROOT/build/passthru.vmprog"
 
 if [ ! -d "$INPUT_DIR" ]; then
@@ -62,7 +62,7 @@ echo "========================================================================"
 echo "Test 2: Package yuv_amplifier program"
 echo "========================================================================"
 
-INPUT_DIR="$PROJECT_ROOT/build/programs/yuv_amplifier/videomancer_core_reva"
+INPUT_DIR="$PROJECT_ROOT/build/programs/yuv_amplifier/rev_a"
 OUTPUT_FILE="$PROJECT_ROOT/build/yuv_amplifier.vmprog"
 
 if [ ! -d "$INPUT_DIR" ]; then

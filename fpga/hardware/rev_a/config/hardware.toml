@@ -1,10 +1,10 @@
 # Copyright (C) 2025 LZX Industries LLC
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Videomancer Core RevB Hardware Configuration
+# Videomancer Core RevA Hardware Configuration
 
 [hardware]
-name = "videomancer_core_revb"
+name = "rev_a"
 platform = "ice40"
 device = "hx4k"
 package = "tq144"

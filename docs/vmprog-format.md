@@ -659,7 +659,7 @@ Initializes program config with defaults:
 
 - ABI range: [1.0, 2.0)
 
-- Hardware: videomancer_core_rev_a
+- Hardware: rev_a
 
 - Parameter count: 0
 
@@ -801,7 +801,7 @@ config.abi_max_minor = 0;
 
 // Set hardware compatibility
 
-config.hw_mask = lzx::vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
+config.hw_mask = lzx::vmprog_hardware_flags_v1_0::rev_a;
 
 config.parameter_count = 0; // No parameters for this example
 

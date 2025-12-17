@@ -490,14 +490,17 @@ for PROGRAM in $PROGRAMS; do
         rm -f *.asc *.json
         cd ../../../..
 
-        # Package into .vmprog format with hardware suffix
-        echo -e "${GREEN}Packaging ${PROGRAM}_${HARDWARE}.vmprog...${NC}"
+        # Create hardware-specific output directory
+        mkdir -p "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}"
+
+        # Package into .vmprog format
+        echo -e "${GREEN}Packaging ${PROGRAM}.vmprog for ${HARDWARE}...${NC}"
         cd ${VIDEOMANCER_SDK_ROOT}/tools/vmprog-packer
 
         PACK_LOG=$(mktemp)
         if [ "$SIGN_PACKAGES" = true ]; then
             echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-            if ! python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}_${HARDWARE}.vmprog" > "$PACK_LOG" 2>&1; then
+            if ! python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
                 echo -e "${RED}Packaging failed. Error output:${NC}"
                 cat "$PACK_LOG"
                 rm -f "$PACK_LOG"
@@ -506,7 +509,7 @@ for PROGRAM in $PROGRAMS; do
                 continue 2
             fi
         else
-            if ! python3 vmprog_pack.py --no-sign "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}_${HARDWARE}.vmprog" > "$PACK_LOG" 2>&1; then
+            if ! python3 vmprog_pack.py --no-sign --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
                 echo -e "${RED}Packaging failed. Error output:${NC}"
                 cat "$PACK_LOG"
                 rm -f "$PACK_LOG"
@@ -520,12 +523,12 @@ for PROGRAM in $PROGRAMS; do
         cd ../..
 
         # Verify output file
-        if [ -f "${VIDEOMANCER_OUT_DIR}/${PROGRAM}_${HARDWARE}.vmprog" ]; then
-            FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}_${HARDWARE}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}_${HARDWARE}.vmprog" 2>/dev/null)
+        if [ -f "${VIDEOMANCER_OUT_DIR}/${HARDWARE}/${PROGRAM}.vmprog" ]; then
+            FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" 2>/dev/null)
             if [ "$SIGN_PACKAGES" = true ]; then
-                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}_${HARDWARE}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
+                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
             else
-                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${PROGRAM}_${HARDWARE}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
+                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
             fi
         else
             echo -e "${RED}✗ Failed to create output file${NC}"

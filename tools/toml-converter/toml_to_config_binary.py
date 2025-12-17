@@ -112,8 +112,8 @@ CONTROL_MODE_MAP = {
 
 # Hardware compatibility flags
 HARDWARE_FLAGS_MAP = {
-    'videomancer_core_reva': 0x00000001,
-    'videomancer_core_revb': 0x00000002,
+    'rev_a': 0x00000001,
+    'rev_b': 0x00000002,
 }
 
 # Core architecture identifiers
@@ -639,7 +639,7 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
                     print(f"WARNING: Unknown hardware platform '{hw_name}', ignoring", file=sys.stderr)
     else:
         # Default to all platforms if not specified
-        hw_mask = 0x00000003  # videomancer_core_reva | videomancer_core_revb
+        hw_mask = 0x00000003  # rev_a | rev_b
         if not QUIET:
             print("WARNING: No hardware_compatibility specified, defaulting to all platforms", file=sys.stderr)
 

@@ -12,7 +12,7 @@ CONFIG = hd_analog
 DEVICE = hx4k
 PACKAGE = tq144
 FREQUENCY = 74.25
-HARDWARE = videomancer_core_rev_b
+HARDWARE = rev_b
 CORE = yuv444_30b
 PLATFORM = ice40
 

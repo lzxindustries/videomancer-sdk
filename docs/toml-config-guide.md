@@ -16,7 +16,7 @@ program_version = "1.0.0"
 
 abi_version = ">=1.0,<2.0"
 
-hardware_compatibility = ["videomancer_core_revb"]
+hardware_compatibility = ["rev_b"]
 
 core = "yuv444_30b"           # Optional, default yuv444_30b
 
@@ -76,7 +76,7 @@ label = "On"
 
 - `abi_version` - Range notation (e.g., ">=1.0,<2.0")
 
-- `hardware_compatibility` - Array of compatible platforms (e.g., ["videomancer_core_revb"])
+- `hardware_compatibility` - Array of compatible platforms (e.g., ["rev_b"])
 
 **Optional:**
 
@@ -88,8 +88,8 @@ label = "On"
 
 **Hardware Platforms:**
 
-- `videomancer_core_reva` - Videomancer Core Rev A hardware
-- `videomancer_core_revb` - Videomancer Core Rev B hardware
+- `rev_a` - Videomancer Core Rev A hardware
+- `rev_b` - Videomancer Core Rev B hardware
 
 ## Parameters
 

@@ -12,7 +12,7 @@ author = "Lars Larsen"
 license = "GPL-3.0"
 category = "Video Processing"
 description = "YUV Amplifier video processing program"
-hardware_compatibility = ["videomancer_core_revb"]
+hardware_compatibility = ["rev_b"]
 core = "yuv444_30b"
 
 [[parameter]]

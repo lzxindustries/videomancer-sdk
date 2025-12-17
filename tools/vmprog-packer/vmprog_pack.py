@@ -34,6 +34,11 @@ from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 
 try:
+    import tomli as tomllib  # Python 3.10 and below
+except ImportError:
+    import tomllib  # Python 3.11+
+
+try:
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
     from cryptography.hazmat.primitives import serialization
     CRYPTO_AVAILABLE = True
@@ -87,6 +92,12 @@ class TOCEntryType:
 class HeaderFlags:
     NONE = 0x00000000
     SIGNED_PKG = 0x00000001
+
+# Hardware compatibility flags
+HARDWARE_FLAGS_MAP = {
+    'rev_a': 0x00000001,
+    'rev_b': 0x00000002,
+}
 
 # Validation result codes
 class ValidationResult:
@@ -314,7 +325,7 @@ def find_bitstreams(input_dir: Path) -> List[BitstreamFile]:
 # Package Building
 # =============================================================================
 
-def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, keys_dir: Optional[Path] = None) -> bool:
+def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, keys_dir: Optional[Path] = None, hardware: Optional[str] = None, toml_path: Optional[Path] = None) -> bool:
     """
     Build a complete .vmprog package from input directory.
 
@@ -323,6 +334,8 @@ def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, 
         output_path: Output .vmprog file path
         sign: If True, sign the package with Ed25519 (default: True)
         keys_dir: Directory containing Ed25519 keys (default: ./keys relative to script)
+        hardware: Hardware name to build for (e.g., 'rev_a')
+        toml_path: Path to program TOML file for validation
 
     Returns:
         True if successful, False otherwise
@@ -346,6 +359,47 @@ def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, 
         return False
 
     print(f"Loaded program config: {len(config_data)} bytes")
+
+    # Validate hardware if specified
+    if hardware:
+        if hardware not in HARDWARE_FLAGS_MAP:
+            print(f"ERROR: Unknown hardware '{hardware}'")
+            print(f"Valid hardware names: {', '.join(HARDWARE_FLAGS_MAP.keys())}")
+            return False
+
+        # If TOML path provided, validate hardware is in hardware_compatibility array
+        if toml_path:
+            if not toml_path.exists():
+                print(f"ERROR: TOML file not found: {toml_path}")
+                return False
+
+            try:
+                with open(toml_path, 'rb') as f:
+                    toml_data = tomllib.load(f)
+
+                hardware_compat = toml_data.get('program', {}).get('hardware_compatibility', [])
+                if not hardware_compat:
+                    print(f"ERROR: No hardware_compatibility field found in {toml_path}")
+                    return False
+
+                if hardware not in hardware_compat:
+                    print(f"ERROR: Hardware '{hardware}' not in hardware_compatibility list: {hardware_compat}")
+                    return False
+
+                print(f"✓ Validated hardware '{hardware}' is in compatibility list")
+
+            except Exception as e:
+                print(f"ERROR: Failed to read TOML file: {e}")
+                return False
+
+        # Modify config_data to only enable the specified hardware flag
+        config_data = bytearray(config_data)
+        # hw_mask is at offset 78 (after program_id[64] + 8 uint16_t fields)
+        hw_mask_offset = 64 + 16
+        hw_mask = HARDWARE_FLAGS_MAP[hardware]
+        struct.pack_into('<I', config_data, hw_mask_offset, hw_mask)
+        config_data = bytes(config_data)
+        print(f"✓ Set hardware mask to 0x{hw_mask:08X} for {hardware}")
 
     # Find bitstreams
     bitstreams = find_bitstreams(input_dir)
@@ -865,6 +919,10 @@ Example:
                        help='Do not sign the package (unsigned package)')
     parser.add_argument('--keys-dir', type=Path, default=None,
                        help='Directory containing Ed25519 keys (default: ./keys)')
+    parser.add_argument('--hardware', type=str, default=None,
+                       help='Hardware name to build for (e.g., rev_a). Will validate against hardware_compatibility field.')
+    parser.add_argument('--toml-path', type=Path, default=None,
+                       help='Path to program TOML file for hardware validation')
 
     args = parser.parse_args()
 
@@ -882,7 +940,8 @@ Example:
         sys.exit(1)
 
     # Build package
-    success = build_vmprog_package(input_dir, output_path, sign=sign, keys_dir=keys_dir)
+    success = build_vmprog_package(input_dir, output_path, sign=sign, keys_dir=keys_dir,
+                                   hardware=args.hardware, toml_path=args.toml_path)
     if not success:
         print("\nERROR: Package creation failed")
         sys.exit(1)

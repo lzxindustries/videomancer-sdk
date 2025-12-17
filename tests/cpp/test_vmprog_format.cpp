@@ -406,23 +406,23 @@ bool test_safe_strcmp() {
 // Test enum bitwise operators
 bool test_enum_bitwise_operators() {
     // Test flag combination with hardware flags (has multiple values)
-    auto hw_flags = vmprog_hardware_flags_v1_0::videomancer_core_rev_a | vmprog_hardware_flags_v1_0::videomancer_core_rev_b;
+    auto hw_flags = vmprog_hardware_flags_v1_0::rev_a | vmprog_hardware_flags_v1_0::rev_b;
 
     // Test flag check (AND)
-    if ((hw_flags & vmprog_hardware_flags_v1_0::videomancer_core_rev_a) == vmprog_hardware_flags_v1_0::none) {
+    if ((hw_flags & vmprog_hardware_flags_v1_0::rev_a) == vmprog_hardware_flags_v1_0::none) {
         std::cerr << "FAILED: enum bitwise operators - OR/AND test failed" << std::endl;
         return false;
     }
 
     // Test flag removal (AND NOT)
-    auto hw_flags2 = hw_flags & ~vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
-    if ((hw_flags2 & vmprog_hardware_flags_v1_0::videomancer_core_rev_a) != vmprog_hardware_flags_v1_0::none) {
+    auto hw_flags2 = hw_flags & ~vmprog_hardware_flags_v1_0::rev_a;
+    if ((hw_flags2 & vmprog_hardware_flags_v1_0::rev_a) != vmprog_hardware_flags_v1_0::none) {
         std::cerr << "FAILED: enum bitwise operators - NOT test failed" << std::endl;
         return false;
     }
 
     // Test XOR
-    auto hw_flags3 = vmprog_hardware_flags_v1_0::videomancer_core_rev_a ^ vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
+    auto hw_flags3 = vmprog_hardware_flags_v1_0::rev_a ^ vmprog_hardware_flags_v1_0::rev_a;
     if (hw_flags3 != vmprog_hardware_flags_v1_0::none) {
         std::cerr << "FAILED: enum bitwise operators - XOR test failed" << std::endl;
         return false;
@@ -430,8 +430,8 @@ bool test_enum_bitwise_operators() {
 
     // Test |= operator
     auto test_flags = vmprog_hardware_flags_v1_0::none;
-    test_flags |= vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
-    if ((test_flags & vmprog_hardware_flags_v1_0::videomancer_core_rev_a) == vmprog_hardware_flags_v1_0::none) {
+    test_flags |= vmprog_hardware_flags_v1_0::rev_a;
+    if ((test_flags & vmprog_hardware_flags_v1_0::rev_a) == vmprog_hardware_flags_v1_0::none) {
         std::cerr << "FAILED: enum bitwise operators - |= test failed" << std::endl;
         return false;
     }

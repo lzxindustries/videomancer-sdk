@@ -166,15 +166,15 @@
           "items": {
             "type": "string",
             "enum": [
-              "videomancer_core_reva",
-              "videomancer_core_revb"
+              "rev_a",
+              "rev_b"
             ]
           },
           "minItems": 1,
           "uniqueItems": true,
           "examples": [
-            ["videomancer_core_revb"],
-            ["videomancer_core_reva", "videomancer_core_revb"]
+            ["rev_b"],
+            ["rev_a", "rev_b"]
           ]
         },
         "core": {
@@ -673,11 +673,11 @@
       "description": "Hardware compatibility flags",
       "type": "object",
       "properties": {
-        "videomancer_core_rev_a": {
+        "rev_a": {
           "const": 1,
           "description": "0x00000001 - Videomancer Core Rev A"
         },
-        "videomancer_core_rev_b": {
+        "rev_b": {
           "const": 2,
           "description": "0x00000002 - Videomancer Core Rev B"
         }

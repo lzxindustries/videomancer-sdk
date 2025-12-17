@@ -20,7 +20,7 @@ license = "GPL-3.0"
 category = "Signal Generation"
 description = "A versatile waveform generator with multiple controls for frequency, amplitude, and shape modulation."
 url = "https://github.com/lzxindustries/videomancer-sdk"
-hardware_compatibility = ["videomancer_core_reva", "videomancer_core_revb"]
+hardware_compatibility = ["rev_a", "rev_b"]
 core = "yuv444_30b"
 
 # Parameter 1: Frequency Control

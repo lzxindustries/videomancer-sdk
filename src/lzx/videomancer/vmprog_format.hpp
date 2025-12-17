@@ -131,8 +131,8 @@ namespace lzx {
     enum class vmprog_hardware_flags_v1_0 : uint32_t
     {
         none = 0x00000000,
-        videomancer_core_rev_a = 0x00000001,
-        videomancer_core_rev_b = 0x00000002,
+        rev_a = 0x00000001,
+        rev_b = 0x00000002,
     };
 
     // Core architecture identifiers
@@ -1356,7 +1356,7 @@ namespace lzx {
         config.abi_min_minor = 0;
         config.abi_max_major = 2;
         config.abi_max_minor = 0;
-        config.hw_mask = vmprog_hardware_flags_v1_0::videomancer_core_rev_a;
+        config.hw_mask = vmprog_hardware_flags_v1_0::rev_a;
         config.core_id = vmprog_core_id_v1_0::yuv444_30b;
         config.parameter_count = 0;
     }
@@ -1658,7 +1658,7 @@ namespace lzx {
      *
      * // Set hardware compatibility
      * config.hw_mask = static_cast<lzx::vmprog_hardware_flags_v1_0>(
-     *     lzx::to_little_endian_32(static_cast<uint32_t>(lzx::vmprog_hardware_flags_v1_0::videomancer_core_rev_a)));
+     *     lzx::to_little_endian_32(static_cast<uint32_t>(lzx::vmprog_hardware_flags_v1_0::rev_a)));
      *
      * config.parameter_count = 0; // No parameters for this example
      *
