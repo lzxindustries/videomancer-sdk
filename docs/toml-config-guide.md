@@ -1,14 +1,8 @@
 # TOML Configuration Guide
 
-
-
 Defines program metadata and parameter mappings for Videomancer FPGA programs.
 
-
-
 ## File Structure
-
-
 
 ```toml
 
@@ -32,8 +26,6 @@ description = "Description"   # Optional
 
 url = "https://example.com"   # Optional
 
-
-
 [[parameter]]
 
 parameter_id = "rotary_potentiometer_1"
@@ -47,8 +39,6 @@ min_value = 0                  # Optional, default 0
 max_value = 1023               # Optional, default 1023
 
 initial_value = 512            # Optional, default 512
-
-
 
 [[parameter]]
 
@@ -70,11 +60,7 @@ label = "On"
 
 ```
 
-
-
 ## Program Fields
-
-
 
 **Required:**
 
@@ -86,19 +72,13 @@ label = "On"
 
 - `abi_version` - Range notation (e.g., ">=1.0,<2.0")
 
-
-
 **Optional:**
 
 - `author`, `license`, `category` (max 31-63 chars)
 
 - `description`, `url` (max 127 chars)
 
-
-
 ## Parameters
-
-
 
 Up to 12 parameters. Each requires:
 
@@ -106,33 +86,19 @@ Up to 12 parameters. Each requires:
 
 - `name_label` (max 31 chars) - Display name
 
-
-
 **Available Controls:**
 
 `rotary_potentiometer_1` through `6`, `toggle_switch_7` through `11`, `linear_potentiometer_12`
 
-
-
 ### Numeric Mode
-
-
 
 **Control Modes:** `linear`, `linear_half`, `linear_quarter`, `linear_double`, `boolean`, `steps_4/8/16/32/64/128/256`, `polar_degs_90/180/360/720/1440/2880`, easing curves: `quad/sine/circ/quint/quart/expo` with `_in/_out/_in_out`
 
-
-
 ### Label Mode
-
-
 
 Define `[[parameter.value_label]]` sections with `value` (0-1023) and `label` (max 31 chars). Up to 256 labels per parameter.
 
-
-
 ## Tools
-
-
 
 **Visual Editor:**
 
@@ -141,8 +107,6 @@ Define `[[parameter.value_label]]` sections with `value` (0-1023) and `label` (m
 open tools/toml-editor/toml-editor.html
 
 ```
-
-
 
 **Command-Line:**
 
@@ -154,8 +118,6 @@ cd tools/toml-validator
 
 python3 toml_schema_validator.py your_program.toml
 
-
-
 # Convert to binary
 
 cd tools/toml-converter
@@ -164,15 +126,9 @@ python3 toml_to_config_binary.py your_program.toml output.bin
 
 ```
 
-
-
-
-
 **suffix_label** (max 3 characters)
 
 Unit suffix displayed after the value.
-
-
 
 ```toml
 
@@ -186,11 +142,7 @@ suffix_label = "dB"   # Decibels
 
 ```
 
-
-
 #### Complete Numeric Example
-
-
 
 ```toml
 
@@ -218,21 +170,13 @@ suffix_label = "Hz"
 
 ```
 
-
-
 ### Label Mode
 
-
-
 Use label mode for parameters with discrete, named positions. This mode is mutually exclusive with numeric mode fields.
-
-
 
 **value_labels** (2-16 labels, max 31 characters each)
 
 Array of text labels for discrete parameter positions. The hardware range is automatically divided evenly across the labels.
-
-
 
 ```toml
 
@@ -242,13 +186,9 @@ value_labels = ["Sine", "Triangle", "Sawtooth", "Square"]
 
 ```
 
-
-
 **initial_value_label** (optional)
 
 Specifies which label should be the default. Must exactly match one of the strings in `value_labels`.
-
-
 
 ```toml
 
@@ -258,11 +198,7 @@ initial_value_label = "Sine"
 
 ```
 
-
-
 #### Complete Label Example
-
-
 
 ```toml
 
@@ -278,25 +214,15 @@ initial_value_label = "Sine"
 
 ```
 
-
-
 ## Important Constraints
 
-
-
 ### Parameter Mode Rules
-
-
 
 - **Cannot mix modes**: If you use `value_labels`, you cannot use numeric mode fields (`min_value`, `max_value`, `initial_value`, `display_min_value`, `display_max_value`, `suffix_label`, `display_float_digits`, `control_mode`)
 
 - **Numeric mode requires control_mode**: If you don't use `value_labels`, you must specify `control_mode`
 
-
-
 ### Hardware Limits
-
-
 
 - Maximum 12 parameters per program
 
@@ -304,11 +230,7 @@ initial_value_label = "Sine"
 
 - Hardware values range from 0 to 1023 (10-bit resolution)
 
-
-
 ### Value Ranges
-
-
 
 - `min_value` must be less than `max_value`
 
@@ -316,11 +238,7 @@ initial_value_label = "Sine"
 
 - Display values can be negative (range: -32768 to 32767) for signed display purposes
 
-
-
 ## Complete Example
-
-
 
 ```toml
 
@@ -344,8 +262,6 @@ description = "Advanced color processing with hue, saturation, and brightness co
 
 url = "https://github.com/example/colorizer"
 
-
-
 # Hue control with full range
 
 [[parameter]]
@@ -357,8 +273,6 @@ control_mode = "polar_degs_360"
 name_label = "Hue"
 
 suffix_label = "°"
-
-
 
 # Saturation control (0-100%)
 
@@ -382,8 +296,6 @@ display_max_value = 100
 
 suffix_label = "%"
 
-
-
 # Brightness with quadratic easing
 
 [[parameter]]
@@ -397,8 +309,6 @@ name_label = "Brightness"
 display_min_value = -100
 
 display_max_value = 100
-
-
 
 # Mode selector with discrete options
 
@@ -414,19 +324,11 @@ initial_value_label = "Normal"
 
 ```
 
-
-
 ## Validation and Conversion
-
-
 
 ### Visual Editor (Recommended)
 
-
-
 The easiest way to create and validate TOML configuration files is using the **TOML Editor** web application:
-
-
 
 ```bash
 
@@ -439,8 +341,6 @@ open tools/toml-editor/toml-editor.html
 xdg-open tools/toml-editor/toml-editor.html
 
 ```
-
-
 
 **Features:**
 
@@ -456,8 +356,6 @@ xdg-open tools/toml-editor/toml-editor.html
 
 - **Schema-aware** - Automatically enforces all validation rules and constraints
 
-
-
 The editor provides instant feedback on:
 
 - Required fields and data types
@@ -472,19 +370,11 @@ The editor provides instant feedback on:
 
 - ABI version compatibility
 
-
-
 ### Command-Line Tools
-
-
 
 For automated workflows or CI/CD integration, use the command-line tools:
 
-
-
 **Validate a TOML file:**
-
-
 
 ```bash
 
@@ -494,11 +384,7 @@ python3 toml_schema_validator.py your_program.toml
 
 ```
 
-
-
 **Convert to binary format:**
-
-
 
 ```bash
 
@@ -507,6 +393,4 @@ cd tools/toml-converter
 python3 toml_to_config_binary.py your_program.toml output.bin
 
 ```
-
-
 

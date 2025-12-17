@@ -1,20 +1,12 @@
 # Videomancer SDK
 
-
-
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 [![CI](https://github.com/lzxindustries/videomancer-sdk/workflows/CI/badge.svg)](https://github.com/lzxindustries/videomancer-sdk/actions/workflows/ci.yml)
 
-
-
 Official SDK for Videomancer FPGA hardware by LZX Industries
 
-
-
 ## Quick Start
-
-
 
 ```bash
 
@@ -26,27 +18,17 @@ cd videomancer-sdk
 
 bash scripts/setup.sh
 
-
-
 # Build programs
 
 bash build_programs.sh
-
-
 
 # Output: out/*.vmprog
 
 ```
 
-
-
 **Requirements:** Linux, WSL2, or macOS | Python 3.7+ | ~2 GB disk space
 
-
-
 ## Documentation
-
-
 
 - [Program Development Guide](docs/program-development-guide.md) - Create VHDL programs
 
@@ -58,11 +40,7 @@ bash build_programs.sh
 
 - [Package Signing](docs/package-signing-guide.md) - Ed25519 signing
 
-
-
 ## Tools
-
-
 
 - `tools/toml-editor/` - Visual TOML editor (browser-based)
 
@@ -72,31 +50,17 @@ bash build_programs.sh
 
 - `tools/vmprog-packer/` - Package creator
 
-
-
 ## Examples
-
-
 
 - `programs/passthru/` - Minimal pass-through program
 
 - `programs/yuv_amplifier/` - Multi-parameter processor
 
-
-
 ## License
-
-
 
 GPL-3.0-only - Copyright (C) 2025 LZX Industries LLC
 
-
-
 ---
 
-
-
 [lzxindustries.net](https://lzxindustries.net)
-
-
 

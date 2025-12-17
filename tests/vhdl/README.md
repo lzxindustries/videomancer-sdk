@@ -1,28 +1,16 @@
 # VHDL Tests
 
-
-
 VUnit-based testbenches for Videomancer FPGA RTL modules using GHDL simulator.
-
-
 
 ## Overview
 
-
-
 This directory contains VHDL unit tests for the core FPGA modules. Tests are written using the [VUnit](https://vunit.github.io/) framework and simulated with [GHDL](https://github.com/ghdl/ghdl).
 
-
-
 ## Test Modules
-
-
 
 ### tb_sync_slv.vhd
 
 Tests the `sync_slv` clock domain synchronizer module.
-
-
 
 **Test Cases:**
 
@@ -36,13 +24,9 @@ Tests the `sync_slv` clock domain synchronizer module.
 
 - `test_all_bits` - All bits can transition independently
 
-
-
 ### tb_yuv422_to_yuv444.vhd
 
 Tests the `yuv422_to_yuv444` video format converter.
-
-
 
 **Test Cases:**
 
@@ -60,13 +44,9 @@ Tests the `yuv422_to_yuv444` video format converter.
 
 - `test_continuous_stream` - Continuous pixel stream processing
 
-
-
 ### tb_yuv444_to_yuv422.vhd
 
 Tests the `yuv444_to_yuv422` video format converter.
-
-
 
 **Test Cases:**
 
@@ -80,13 +60,9 @@ Tests the `yuv444_to_yuv422` video format converter.
 
 - `test_field_propagation` - Field signal propagates correctly
 
-
-
 ### tb_blanking_yuv444.vhd
 
 Tests the `blanking_yuv444` video blanking module.
-
-
 
 **Test Cases:**
 
@@ -102,15 +78,9 @@ Tests the `blanking_yuv444` video blanking module.
 
 - `test_continuous_blanking` - Continuous blanking period handling
 
-
-
 ## Prerequisites
 
-
-
 Install VUnit and GHDL:
-
-
 
 ```bash
 
@@ -118,15 +88,11 @@ Install VUnit and GHDL:
 
 sudo apt-get install ghdl
 
-
-
 # Install VUnit via pip
 
 # On Ubuntu 24.04+, use --break-system-packages flag:
 
 pip3 install --break-system-packages vunit-hdl
-
-
 
 # Or use a virtual environment (recommended):
 
@@ -138,27 +104,15 @@ pip install vunit-hdl
 
 ```
 
-
-
 **Note:** If you've run `scripts/setup.sh`, GHDL is already available in `build/oss-cad-suite/bin/`.
-
-
 
 **Ubuntu 24.04+ Note:** Python environments are externally managed (PEP 668). The scripts will attempt to install VUnit automatically, or you can install manually with the commands above.
 
-
-
 ## Running Tests
-
-
 
 ### Run All VHDL Tests
 
-
-
 From the `tests/vhdl` directory:
-
-
 
 ```bash
 
@@ -166,11 +120,7 @@ python3 run.py
 
 ```
 
-
-
 ### Run Specific Test Suite
-
-
 
 ```bash
 
@@ -178,19 +128,13 @@ python3 run.py
 
 python3 run.py 'rtl_lib.tb_sync_slv.*'
 
-
-
 # Run only yuv422_to_yuv444 tests
 
 python3 run.py 'rtl_lib.tb_yuv422_to_yuv444.*'
 
-
-
 # Run only yuv444_to_yuv422 tests
 
 python3 run.py 'rtl_lib.tb_yuv444_to_yuv422.*'
-
-
 
 # Run only blanking_yuv444 tests
 
@@ -198,11 +142,7 @@ python3 run.py 'rtl_lib.tb_blanking_yuv444.*'
 
 ```
 
-
-
 ### Run Specific Test Case
-
-
 
 ```bash
 
@@ -218,11 +158,7 @@ python3 run.py 'rtl_lib.tb_blanking_yuv444.test_active_video_passthrough'
 
 ```
 
-
-
 ### Verbose Output
-
-
 
 ```bash
 
@@ -230,15 +166,9 @@ python3 run.py -v
 
 ```
 
-
-
 ### GUI Waveform Viewing
 
-
-
 Generate waveform files for debugging:
-
-
 
 ```bash
 
@@ -246,11 +176,7 @@ python3 run.py --gtkwave-fmt=vcd
 
 ```
 
-
-
 Then open with GTKWave:
-
-
 
 ```bash
 
@@ -258,11 +184,7 @@ gtkwave vunit_out/ghdl/rtl_lib.tb_sync_slv.test_two_ff_delay_xxx/wave.vcd
 
 ```
 
-
-
 ## VUnit Features Used
-
-
 
 - **Test runner context** - Provides `test_runner_setup`, `test_runner_cleanup`, etc.
 
@@ -272,11 +194,7 @@ gtkwave vunit_out/ghdl/rtl_lib.tb_sync_slv.test_two_ff_delay_xxx/wave.vcd
 
 - **Test watchdog** - Automatic timeout to prevent infinite simulations
 
-
-
 ## Adding New Tests
-
-
 
 1. Create a new testbench file: `tb_<module_name>.vhd`
 
@@ -287,8 +205,6 @@ gtkwave vunit_out/ghdl/rtl_lib.tb_sync_slv.test_two_ff_delay_xxx/wave.vcd
    library vunit_lib;
 
    context vunit_lib.vunit_context;
-
-
 
    entity tb_<module_name> is
 
@@ -302,11 +218,7 @@ gtkwave vunit_out/ghdl/rtl_lib.tb_sync_slv.test_two_ff_delay_xxx/wave.vcd
 
 4. The test will be automatically discovered by VUnit
 
-
-
 ## Integration
-
-
 
 VHDL tests are integrated into:
 
@@ -316,11 +228,7 @@ VHDL tests are integrated into:
 
 - **Build system**: Optional verification step during FPGA builds
 
-
-
 ## Coverage
-
-
 
 Current coverage:
 
@@ -338,11 +246,7 @@ Current coverage:
 
 - 🔲 Video field detector (`video_field_detector`)
 
-
-
 ## Resources
-
-
 
 - [VUnit Documentation](https://vunit.github.io/)
 

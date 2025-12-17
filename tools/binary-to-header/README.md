@@ -1,14 +1,8 @@
 # Binary to C++ Header/Source Generator
 
-
-
 This tool converts binary files into C++ header and source files, embedding the binary data as a `const uint8_t` array.
 
-
-
 ## Features
-
-
 
 - Converts any binary file to C++ code
 
@@ -22,15 +16,9 @@ This tool converts binary files into C++ header and source files, embedding the 
 
 - Configurable template files
 
-
-
 ## Usage
 
-
-
 ### Basic Usage
-
-
 
 ```bash
 
@@ -38,11 +26,7 @@ python3 binary-to-header.py -i input.bin -o output.h -s output.cpp
 
 ```
 
-
-
 ### With Custom Name
-
-
 
 ```bash
 
@@ -50,11 +34,7 @@ python3 binary-to-header.py -i firmware.bin -o firmware.h -s firmware.cpp --name
 
 ```
 
-
-
 ### With Namespace
-
-
 
 ```bash
 
@@ -62,11 +42,7 @@ python3 binary-to-header.py -i data.bin -o data.h -s data.cpp --namespace embedd
 
 ```
 
-
-
 ### With Custom Templates
-
-
 
 ```bash
 
@@ -78,11 +54,7 @@ python3 binary-to-header.py -i file.bin -o file.h -s file.cpp \
 
 ```
 
-
-
 ## Command Line Options
-
-
 
 - `-i, --input`: Input binary file path (required)
 
@@ -100,15 +72,9 @@ python3 binary-to-header.py -i file.bin -o file.h -s file.cpp \
 
 - `-v, --verbose`: Enable verbose output
 
-
-
 ## Template Variables
 
-
-
 The following variables are available in template files:
-
-
 
 - `{{HEADER_GUARD}}`: Include guard macro name
 
@@ -126,15 +92,9 @@ The following variables are available in template files:
 
 - `{{NAMESPACE_END}}`: Namespace closing (empty if no namespace)
 
-
-
 ## Generated Code Example
 
-
-
 For an input file `firmware.bin` (100 bytes), the tool generates:
-
-
 
 **firmware.h:**
 
@@ -144,33 +104,23 @@ For an input file `firmware.bin` (100 bytes), the tool generates:
 
 #define FIRMWARE_H
 
-
-
 #include <cstdint>
 
 #include <cstddef>
-
-
 
 extern const uint8_t firmware_data[];
 
 extern const size_t firmware_size;
 
-
-
 #endif // FIRMWARE_H
 
 ```
-
-
 
 **firmware.cpp:**
 
 ```cpp
 
 #include "firmware.h"
-
-
 
 const uint8_t firmware_data[] = {
 
@@ -182,21 +132,13 @@ const uint8_t firmware_data[] = {
 
 };
 
-
-
 const size_t firmware_size = 100;
 
 ```
 
-
-
 ## Customizing Templates
 
-
-
 You can create custom template files to change the output format. Templates use `{{VARIABLE}}` syntax for substitution.
-
-
 
 Example custom header template:
 
@@ -204,13 +146,9 @@ Example custom header template:
 
 #pragma once
 
-
-
 #include <stdint.h>
 
 #include <stddef.h>
-
-
 
 #ifdef __cplusplus
 
@@ -218,13 +156,9 @@ extern "C" {
 
 #endif
 
-
-
 extern const uint8_t {{VAR_NAME}}_data[];
 
 extern const size_t {{VAR_NAME}}_size;
-
-
 
 #ifdef __cplusplus
 
@@ -234,15 +168,9 @@ extern const size_t {{VAR_NAME}}_size;
 
 ```
 
-
-
 ## Integration Example
 
-
-
 Using the generated code in your C++ project:
-
-
 
 ```cpp
 
@@ -250,13 +178,9 @@ Using the generated code in your C++ project:
 
 #include <iostream>
 
-
-
 int main() {
 
     std::cout << "Firmware size: " << firmware_size << " bytes" << std::endl;
-
-
 
     // Access the data
 
@@ -266,19 +190,13 @@ int main() {
 
     }
 
-
-
     return 0;
 
 }
 
 ```
 
-
-
 ## License
-
-
 
 This tool is part of the Videomancer SDK project.
 

@@ -1,14 +1,8 @@
 # Videomancer SDK Test Suite
 
-
-
 Comprehensive test suite for the Videomancer SDK C++ headers and Python tools.
 
-
-
 ## Test Summary
-
-
 
 - **Total C++ Unit Tests**: 118 tests across 6 test suites
 
@@ -40,15 +34,9 @@ Comprehensive test suite for the Videomancer SDK C++ headers and Python tools.
 
 - **Test Coverage**: All SDK C++ headers and core FPGA RTL modules are tested
 
-
-
 ## Test Organization
 
-
-
 The test suite is organized by language and purpose:
-
-
 
 ```
 
@@ -100,19 +88,11 @@ tests/
 
 ```
 
-
-
 ## Running Tests
-
-
 
 ### Quick Start
 
-
-
 Run all tests with a single command:
-
-
 
 ```bash
 
@@ -122,23 +102,15 @@ cd tests
 
 ```
 
-
-
 ### C++ Unit Tests Only
 
-
-
 Build and run C++ tests:
-
-
 
 ```bash
 
 # From SDK root directory
 
 ./build_sdk.sh --test
-
-
 
 # Or manually from build directory
 
@@ -148,11 +120,7 @@ ctest --output-on-failure
 
 ```
 
-
-
 Run specific C++ test:
-
-
 
 ```bash
 
@@ -168,19 +136,13 @@ cd build/tests/cpp
 
 ```
 
-
-
 ### Python Tests Only
-
-
 
 ```bash
 
 cd tests
 
 ./run_tests.sh --python-only
-
-
 
 # Or run individual tests
 
@@ -190,11 +152,7 @@ python3 python/test_ed25519_signing.py
 
 ```
 
-
-
 ### Shell Tests Only
-
-
 
 ```bash
 
@@ -202,11 +160,7 @@ cd tests
 
 ./run_tests.sh --shell-only
 
-
-
 # OrVHDL Tests Only
-
-
 
 ```bash
 
@@ -214,23 +168,17 @@ cd tests
 
 ./run_tests.sh --vhdl-only
 
-
-
 # Or run from vhdl directory
 
 cd tests/vhdl
 
 python3 run.py
 
-
-
 # Run specific test
 
 python3 run.py 'rtl_lib.tb_sync_slv.test_two_ff_delay'
 
 ```
-
-
 
 ###  run individual tests
 
@@ -240,11 +188,7 @@ bash shell/test_vmprog_pack.sh
 
 ```
 
-
-
 ### Advanced Options
-
-
 
 ```bash
 
@@ -252,15 +196,11 @@ bash shell/test_vmprog_pack.sh
 
 ./run_tests.sh --verbose
 
-
-
 # Build in debug mode with tests
 
 cd ..
 
 ./build_sdk.sh --test --debug
-
-
 
 # Run CTest with specific options
 
@@ -272,15 +212,9 @@ ctest -R crypto  # Run only crypto tests
 
 ```
 
-
-
 ## Test Coverage
 
-
-
 ### C++ Header Tests
-
-
 
 #### `test_vmprog_crypto.cpp`
 
@@ -298,11 +232,7 @@ Tests cryptographic functions from `vmprog_crypto.hpp`:
 
 - Ed25519 corrupted signature rejection and API safety
 
-
-
 **Note**: Uses standard Ed25519 (SHA-512) as specified in RFC 8032.
-
-
 
 #### `test_videomancer_abi.cpp`
 
@@ -315,8 +245,6 @@ Tests ABI constants and enumerations from `videomancer_abi.hpp`:
 - Video timing ID enumeration completeness
 
 - Range validation for all constants
-
-
 
 #### `test_vmprog_format.cpp`
 
@@ -334,8 +262,6 @@ Tests VMProg format structures from `vmprog_format.hpp`:
 
 - Enum value uniqueness and type sizes
 
-
-
 #### `test_vmprog_stream_reader.cpp`
 
 Tests stream-based reading from `vmprog_stream_reader.hpp`:
@@ -349,8 +275,6 @@ Tests stream-based reading from `vmprog_stream_reader.hpp`:
 - Payload data reading and verification
 
 - Stream seeking and boundary conditions
-
-
 
 #### `test_vmprog_public_keys.cpp`
 
@@ -367,8 +291,6 @@ Tests public key definitions from `vmprog_public_keys.hpp`:
 - Constexpr compilation support
 
 - Key copying and memory safety
-
-
 
 #### `test_videomancer_fpga_controller.cpp`
 
@@ -396,11 +318,7 @@ Tests FPGA controller from `videomancer_fpga_controller.hpp`:
 
 - Value masking to 10-bit range
 
-
-
 ### Python Tool Tests
-
-
 
 #### `test_converter.py`
 
@@ -412,8 +330,6 @@ Tests TOML to binary configuration conversion:
 
 - Field encoding and struct packing
 
-
-
 #### `test_ed25519_signing.py`
 
 Tests Ed25519 signing tools:
@@ -424,11 +340,7 @@ Tests Ed25519 signing tools:
 
 - Signature validation
 
-
-
 ### Shell Integration Tests
-
-
 
 #### `test_conversion.sh`
 
@@ -440,8 +352,6 @@ End-to-end TOML conversion testing:
 
 - Error handling
 
-
-
 #### `test_vmprog_pack.sh`
 
 Package creation and signing:
@@ -452,11 +362,7 @@ Package creation and signing:
 
 - Package integrity verification
 
-
-
 ## Requirements
-
-
 
 ### C++ Tests
 
@@ -465,8 +371,6 @@ Package creation and signing:
 - C++20 compiler (C++17 on Windows)
 
 - Monocypher library (included in third_party/)
-
-
 
 ### Python Tests
 
@@ -480,23 +384,15 @@ Package creation and signing:
 
   - pynacl (for Ed25519)
 
-
-
 ### Shell Tests
 
 - Bash
 
 - Standard Unix tools (grep, sed, diff)
 
-
-
 ## Test Development
 
-
-
 ### Adding New C++ Tests
-
-
 
 1. Create test file in `tests/cpp/`:
 
@@ -506,8 +402,6 @@ Package creation and signing:
 
 #include <iostream>
 
-
-
 bool test_your_function() {
 
     // Your test code
@@ -516,27 +410,19 @@ bool test_your_function() {
 
 }
 
-
-
 int main() {
 
     int passed = 0;
 
     int total = 1;
 
-
-
     if (test_your_function()) passed++;
-
-
 
     return (passed == total) ? 0 : 1;
 
 }
 
 ```
-
-
 
 2. Add to `tests/cpp/CMakeLists.txt`:
 
@@ -552,8 +438,6 @@ set(TEST_SOURCES
 
 ```
 
-
-
 3. Rebuild and run:
 
 ```bash
@@ -562,11 +446,7 @@ set(TEST_SOURCES
 
 ```
 
-
-
 ### Adding Python Tests
-
-
 
 1. Create test file in `tests/python/`:
 
@@ -576,15 +456,11 @@ set(TEST_SOURCES
 
 import sys
 
-
-
 def test_feature():
 
     # Your test code
 
     return True
-
-
 
 if __name__ == "__main__":
 
@@ -602,8 +478,6 @@ if __name__ == "__main__":
 
 ```
 
-
-
 2. Make executable:
 
 ```bash
@@ -612,11 +486,7 @@ chmod +x tests/python/test_your_feature.py
 
 ```
 
-
-
 ### Adding Shell Tests
-
-
 
 1. Create test script in `tests/shell/`:
 
@@ -626,8 +496,6 @@ chmod +x tests/python/test_your_feature.py
 
 set -e
 
-
-
 # Your test code
 
 echo "Test passed"
@@ -635,8 +503,6 @@ echo "Test passed"
 exit 0
 
 ```
-
-
 
 2. Make executable:
 
@@ -646,15 +512,9 @@ chmod +x tests/shell/test_your_feature.sh
 
 ```
 
-
-
 ## Continuous Integration
 
-
-
 Tests can be integrated into CI/CD pipelines:
-
-
 
 ```yaml
 
@@ -666,8 +526,6 @@ Tests can be integrated into CI/CD pipelines:
 
     ./build_sdk.sh --test
 
-
-
 - name: Run All Tests
 
   run: |
@@ -678,15 +536,9 @@ Tests can be integrated into CI/CD pipelines:
 
 ```
 
-
-
 ## Debugging Failed Tests
 
-
-
 ### C++ Test Failures
-
-
 
 1. Build in debug mode:
 
@@ -695,8 +547,6 @@ Tests can be integrated into CI/CD pipelines:
 ./build_sdk.sh --test --debug
 
 ```
-
-
 
 2. Run test with debugger:
 
@@ -708,8 +558,6 @@ gdb ./test_vmprog_crypto
 
 ```
 
-
-
 3. Run with verbose CTest output:
 
 ```bash
@@ -720,11 +568,7 @@ ctest --output-on-failure --verbose
 
 ```
 
-
-
 ### Python Test Failures
-
-
 
 Run with Python debugger:
 
@@ -734,11 +578,7 @@ python3 -m pdb tests/python/test_converter.py
 
 ```
 
-
-
 ### Shell Test Failures
-
-
 
 Run with bash debugging:
 
@@ -748,11 +588,7 @@ bash -x tests/shell/test_conversion.sh
 
 ```
 
-
-
 ## Test Maintenance
-
-
 
 - Update tests when modifying SDK headers
 
@@ -764,11 +600,7 @@ bash -x tests/shell/test_conversion.sh
 
 - Document test assumptions and requirements
 
-
-
 ## Support
-
-
 
 For issues or questions about tests:
 
@@ -788,11 +620,7 @@ For issues or questions about tests:
 
   - Steps to reproduce
 
-
-
 ---
-
-
 
 **Copyright (C) 2025 LZX Industries LLC**
 

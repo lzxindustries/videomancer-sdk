@@ -1,18 +1,10 @@
 # vmprog_pack - Videomancer Program Package Creator
 
-
-
 ## Overview
-
-
 
 `vmprog_pack.py` is a Python tool that creates fully packaged and verified `.vmprog` files from program configuration binaries and FPGA bitstream binaries. The output is validated against the Videomancer program package format specification.
 
-
-
 ## Features
-
-
 
 - ✅ Creates complete `.vmprog` package files from input directory
 
@@ -32,11 +24,7 @@
 
 - ✅ Human-readable validation output
 
-
-
 ## Requirements
-
-
 
 - Python 3.7 or higher
 
@@ -52,13 +40,9 @@
 
   sudo apt install python3-cryptography
 
-
-
   # macOS or if system allows pip
 
   pip3 install cryptography
-
-
 
   # If you get "externally-managed-environment" error
 
@@ -66,15 +50,9 @@
 
   ```
 
-
-
 ## Usage
 
-
-
 ### Basic Usage
-
-
 
 ```bash
 
@@ -82,25 +60,17 @@ python vmprog_pack.py <input_dir> <output_file.vmprog>
 
 ```
 
-
-
 ### Command-Line Options
-
-
 
 ```bash
 
 python vmprog_pack.py [-h] [--no-sign] [--keys-dir KEYS_DIR] input_dir output_file
-
-
 
 positional arguments:
 
   input_dir             Input directory containing program_config.bin and bitstreams/
 
   output_file           Output .vmprog file path
-
-
 
 optional arguments:
 
@@ -112,11 +82,7 @@ optional arguments:
 
 ```
 
-
-
 ### Examples
-
-
 
 ```bash
 
@@ -124,19 +90,13 @@ optional arguments:
 
 python vmprog_pack.py ./build/programs/passthru ./output/passthru.vmprog
 
-
-
 # Create unsigned package
 
 python vmprog_pack.py --no-sign ./build/programs/passthru ./output/passthru.vmprog
 
-
-
 # Use keys from custom directory
 
 python vmprog_pack.py --keys-dir ./my_keys ./build/programs/passthru ./output/passthru.vmprog
-
-
 
 # Create yuv_amplifier.vmprog
 
@@ -146,15 +106,9 @@ python vmprog_pack.py ./build/programs/yuv_amplifier ./output/yuv_amplifier.vmpr
 
 Ed25519 Cryptographic Signing
 
-
-
 The tool supports Ed25519 digital signatures for package authentication and integrity verification.
 
-
-
 ### Key Management
-
-
 
 Ed25519 keys are stored as raw binary files (32 bytes each):
 
@@ -162,27 +116,17 @@ Ed25519 keys are stored as raw binary files (32 bytes each):
 
 - `lzx_official_signed_descriptor_pub.bin` - Public key (safe to share)
 
-
-
 Default key location: `./keys/` (relative to SDK root)
-
-
 
 ### Generating Keys
 
-
-
 Use the provided key generation script:
-
-
 
 ```bash
 
 # Generate keys in default location (../../keys from vmprog_pack)
 
 python generate_ed25519_keys.py --output-dir ../../keys
-
-
 
 # Or use the setup script
 
@@ -192,15 +136,9 @@ cd ../
 
 ```
 
-
-
 ⚠️ **Security Notice:** Keep private keys secure. Do NOT commit them to version control!
 
-
-
 ### Signing Process
-
-
 
 When signing is enabled (default), the tool:
 
@@ -214,15 +152,9 @@ When signing is enabled (default), the tool:
 
 5. Sets the `signed_pkg` flag in the package header
 
-
-
 The signature is verified by Videomancer firmware using the embedded public key.
 
-
-
 ### Signed vs. Unsigned Packages
-
-
 
 **Signed packages** (default):
 
@@ -234,8 +166,6 @@ The signature is verified by Videomancer firmware using the embedded public key.
 
 - Recommended for production use
 
-
-
 **Unsigned packages** (`--no-sign`):
 
 - Do not include a signature
@@ -246,15 +176,9 @@ The signature is verified by Videomancer firmware using the embedded public key.
 
 - Will work on firmware that accepts unsigned packages
 
-
-
 ## Output Format
 
-
-
 The tool creates a `.vmprog` file with the following structure:
-
-
 
 1. **Header** (64 bytes)
 
@@ -268,15 +192,11 @@ The tool creates a `.vmprog` file with the following structure:
 
    - Flags (including `signed_pkg` if signed)
 
-
-
 2. **Table of Contents (TOC)**
 
    - One entry per payload (64 bytes each)
 
    - Contains type, offset, size, and hash for each payload
-
-
 
 3. **Payloads**
 
@@ -285,8 +205,6 @@ The tool creates a `.vmprog` file with the following structure:
    - Signed descriptor (332 bytes)
 
    - Ed25519 signature (64 bytes, if signed
-
-
 
 **Notes:**
 
@@ -298,15 +216,9 @@ The tool creates a `.vmprog` file with the following structure:
 
 - Bitstream files can be any size (within the 1MB package limit)
 
-
-
 ## Output Format
 
-
-
 The tool creates a `.vmprog` file with the following structure:
-
-
 
 1. **Header** (64 bytes)
 
@@ -318,15 +230,11 @@ The tool creates a `.vmprog` file with the following structure:
 
    - Package SHA-256 hash
 
-
-
 2. **Table of Contents (TOC)**
 
    - One entry per payload (64 bytes each)
 
    - Contains type, offset, size, and hash for each payload
-
-
 
 3. **Payloads**
 
@@ -334,15 +242,9 @@ The tool creates a `.vmprog` file with the following structure:
 
    - FPGA bitstreams (variable size)
 
-
-
 ## Validation
 
-
-
 The tool performs comprehensive validation after package creation:
-
-
 
 ### Header Validation
 
@@ -356,8 +258,6 @@ The tool performs comprehensive validation after package creation:
 
 - ✓ TOC metadata validation
 
-
-
 ### TOC Validation
 
 - ✓ Entry count matches TOC size
@@ -365,8 +265,6 @@ The tool performs comprehensive validation after package creation:
 - ✓ All payload offsets within file bounds
 
 - ✓ All payload hashes verified
-
-
 
 ### Program Config Validation
 
@@ -380,27 +278,17 @@ The tool performs comprehensive validation after package creation:
 
 - ✓ Reserved fields zeroed
 
-
-
 ### Package Hash Validation
 
 - ✓ Package-wide SHA-256 hash verified
 
-
-
 ## Exit Codes
-
-
 
 - `0` - Success: Package created and validated
 
 - `1` - Error: Package creation or validation failed
 
-
-
 ## Example Output
-
-
 
 ```
 
@@ -413,8 +301,6 @@ Building vmprog package
 Input directory: ./build/programs/passthru
 
 Output file: ./output/passthru.vmprog
-
-
 
 Loaded program config: 7368 bytes
 
@@ -430,8 +316,6 @@ Found bitstream: hd_hdmi.bin (104090 bytes)
 
 Found bitstream: hd_dual.bin (104090 bytes)
 
-
-
 TOC Entry 0: CONFIG
 
   Offset: 512
@@ -439,8 +323,6 @@ TOC Entry 0: CONFIG
   Size: 7368
 
   Hash: a3f2d8e9b1c4...
-
-
 
 TOC Entry 1: BITSTREAM_SD_ANALOG
 
@@ -452,27 +334,17 @@ TOC Entry 1: BITSTREAM_SD_ANALOG
 
   Hash: e7b9c2f1a8d3...
 
-
-
 [... additional entries ...]
-
-
 
 Total package size: 631932 bytes (617.1 KB)
 
-
-
 Package hash: d4c8e3f9a2b7...
-
-
 
 ======================================================================
 
 Package created successfully: ./output/passthru.vmprog
 
 ======================================================================
-
-
 
 ======================================================================
 
@@ -484,11 +356,7 @@ File: ./output/passthru.vmprog
 
 Verify hashes: True
 
-
-
 File size: 631932 bytes (617.1 KB)
-
-
 
 --- Header Validation ---
 
@@ -508,17 +376,11 @@ File size: 631932 bytes (617.1 KB)
 
 ✓ Package hash: d4c8e3f9a2b7...
 
-
-
 --- Package Hash Verification ---
 
 ✓ Package hash verified
 
-
-
 --- TOC Entries Validation ---
-
-
 
 Entry 0: CONFIG
 
@@ -540,11 +402,7 @@ Entry 0: CONFIG
 
   ✓ Config structure validated
 
-
-
 [... additional entries ...]
-
-
 
 ======================================================================
 
@@ -552,21 +410,13 @@ Entry 0: CONFIG
 
 ======================================================================
 
-
-
 ✓ Successfully created and validated: ./output/passthru.vmprog
 
 ```
 
-
-
 ## Error Handling
 
-
-
 The tool provides detailed error messages for common issues:
-
-
 
 - Missing or incorrectly sized `program_config.bin`
 
@@ -580,15 +430,9 @@ The tool provides detailed error messages for common issues:
 
 - Invalid program configuration fields
 
-
-
 ## Integration with Build System
 
-
-
 This tool can be easily integrated into build scripts:
-
-
 
 ```bash
 
@@ -596,13 +440,9 @@ This tool can be easily integrated into build scripts:
 
 # Example build script
 
-
-
 # Build FPGA bitstreams
 
 make -C fpga/programs/myprogram
-
-
 
 # Convert TOML to binary config
 
@@ -612,8 +452,6 @@ python tools/toml-converter/toml_to_config_binary.py \
 
     build/programs/myprogram/program_config.bin
 
-
-
 # Package everything into .vmprog
 
 python tools/vmprog-packer/vmprog_pack.py \
@@ -622,17 +460,11 @@ python tools/vmprog-packer/vmprog_pack.py \
 
     output/myprogram.vmprog
 
-
-
 echo "✓ Build complete: output/myprogram.vmprog"
 
 ```
 
-
-
 ## Format Specification
-
-
 
 For complete details on the `.vmprog` format, see:
 
@@ -640,11 +472,7 @@ For complete details on the `.vmprog` format, see:
 
 - [src/lzx/videomancer/vmprog_format.hpp](../../src/lzx/videomancer/vmprog_format.hpp)
 
-
-
 ## License
-
-
 
 Copyright (C) 2025 LZX Industries LLC
 

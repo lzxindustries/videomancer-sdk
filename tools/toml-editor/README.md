@@ -1,14 +1,8 @@
 # TOML Configuration Editor
 
-
-
 Visual editor for Videomancer program configuration TOML files with live validation and an intuitive form-based interface.
 
-
-
 ## Features
-
-
 
 - **Visual Form Interface** - Edit all configuration fields through an easy-to-use UI
 
@@ -22,15 +16,9 @@ Visual editor for Videomancer program configuration TOML files with live validat
 
 - **Schema Enforcement** - Automatically validates all rules and constraints
 
-
-
 ## Usage
 
-
-
 Open the editor directly in your web browser:
-
-
 
 ```bash
 
@@ -38,13 +26,9 @@ Open the editor directly in your web browser:
 
 open tools/toml-editor/toml-editor.html
 
-
-
 # Or on Linux:
 
 xdg-open tools/toml-editor/toml-editor.html
-
-
 
 # Or on Windows:
 
@@ -52,19 +36,11 @@ start tools/toml-editor/toml-editor.html
 
 ```
 
-
-
 The editor works entirely offline - no internet connection required after initial loading.
-
-
 
 ## Interface
 
-
-
 ### Navigation Sections
-
-
 
 - **Program** - Edit main program metadata (name, version, author, etc.)
 
@@ -74,15 +50,9 @@ The editor works entirely offline - no internet connection required after initia
 
 - **Help** - View usage guide and embedded example
 
-
-
 ### Real-Time Feedback
 
-
-
 The editor provides instant validation feedback:
-
-
 
 - **Required fields** - Marked with asterisks (*)
 
@@ -94,15 +64,9 @@ The editor provides instant validation feedback:
 
 - **Status indicator** - Green dot = Valid, Red = Errors, Yellow = Warnings
 
-
-
 ### Parameter Modes
 
-
-
 Each parameter must use exactly one mode:
-
-
 
 **Label Mode** - For discrete options:
 
@@ -112,8 +76,6 @@ Each parameter must use exactly one mode:
 
 - Best for mode selectors, waveform types, etc.
 
-
-
 **Numeric Mode** - For continuous ranges:
 
 - Specify min/max values and control curve
@@ -122,11 +84,7 @@ Each parameter must use exactly one mode:
 
 - Best for frequency, amplitude, brightness, etc.
 
-
-
 ## Workflow
-
-
 
 1. **Start with example** - Click "Reset to Example" to load a template
 
@@ -138,11 +96,7 @@ Each parameter must use exactly one mode:
 
 5. **Export** - Click "Export TOML" to save your configuration
 
-
-
 ## Tips
-
-
 
 - **No focus loss** - Type freely in text fields without losing cursor position
 
@@ -154,11 +108,7 @@ Each parameter must use exactly one mode:
 
 - **Import existing** - Use "Import TOML" to load and modify existing files
 
-
-
 ## Technical Details
-
-
 
 - **No installation required** - Single HTML file with embedded dependencies
 
@@ -176,11 +126,7 @@ Each parameter must use exactly one mode:
 
 - **Schema version** - vmprog_program_config_v1_0
 
-
-
 ## Related Documentation
-
-
 
 - [TOML Configuration Guide](../../docs/toml-config-guide.md) - Complete field reference
 
@@ -188,23 +134,15 @@ Each parameter must use exactly one mode:
 
 - [TOML Converter](../toml-converter/) - Binary conversion utility
 
-
-
 ## Development
 
-
-
 The editor is designed as a standalone, self-contained tool. To modify:
-
-
 
 1. Edit `toml-editor.html` directly
 
 2. Test by opening in a browser
 
 3. All JavaScript, CSS, and dependencies are inline
-
-
 
 No build process or compilation required.
 

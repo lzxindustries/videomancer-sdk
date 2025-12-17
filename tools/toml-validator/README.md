@@ -1,14 +1,8 @@
 # TOML Schema Validator
 
-
-
 Validates Videomancer program configuration TOML files against the JSON schema specification.
 
-
-
 ## Usage
-
-
 
 ```bash
 
@@ -16,19 +10,13 @@ Validates Videomancer program configuration TOML files against the JSON schema s
 
 python toml_schema_validator.py <input.toml>
 
-
-
 # Validate using custom schema
 
 python toml_schema_validator.py <input.toml> <schema.json>
 
 ```
 
-
-
 ## Examples
-
-
 
 ```bash
 
@@ -36,19 +24,13 @@ python toml_schema_validator.py <input.toml> <schema.json>
 
 python toml_schema_validator.py ../../examples/templates/template.toml
 
-
-
 # Validate with explicit schema path
 
 python toml_schema_validator.py my_program.toml ../../docs/schemas/vmprog_program_config_schema_v1_0.json
 
 ```
 
-
-
 ## Default Schema
-
-
 
 If no schema is provided, the validator uses:
 
@@ -58,11 +40,7 @@ If no schema is provided, the validator uses:
 
 ```
 
-
-
 ## Requirements
-
-
 
 - Python 3.7 or later
 
@@ -70,21 +48,13 @@ If no schema is provided, the validator uses:
 
 - TOML library (built-in for Python 3.11+, or install `tomli` for earlier versions)
 
-
-
 ## Output
-
-
 
 - **Success**: Prints `✓ VALIDATION PASSED` and exits with code 0
 
 - **Failure**: Prints all validation errors and exits with code 1
 
-
-
 ## Error Reporting
-
-
 
 The validator provides detailed error messages including:
 
@@ -96,11 +66,7 @@ The validator provides detailed error messages including:
 
 - Missing required fields
 
-
-
 ## Notes
-
-
 
 The validator simplifies complex schema validations (such as cross-field comparisons using `$data` references) that aren't supported by the standard `jsonschema` library. These advanced validations should be checked by the `toml_to_config_binary.py` converter during actual binary generation.
 

@@ -1,28 +1,16 @@
 # Changelog
 
-
-
 All notable changes to the Videomancer SDK will be documented in this file.
-
-
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-
 ## [Unreleased]
-
-
 
 ## [0.3.0] - 2025-12-15
 
-
-
 ### Added
-
-
 
 - **Comprehensive Test Suite Expansion** - Significantly increased test coverage across all SDK headers
 
@@ -36,8 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - All tests achieve 100% pass rate
 
-
-
 - **Ed25519 Signature Algorithm Update** - Switched from EdDSA (Blake2b) to standard Ed25519 (SHA-512)
 
   - Updated vmprog_crypto.hpp to use `crypto_ed25519_check` instead of `crypto_eddsa_check`
@@ -47,8 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added RFC 8032 test vectors to validate implementation correctness
 
   - Maintains backward compatibility with Monocypher library
-
-
 
 - **Integration Test Framework** - Complete mock package testing infrastructure
 
@@ -60,8 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Tests all 7 bitstream type variants (SD/HD analog/HDMI/dual, generic)
 
-
-
 - **Test Documentation** - Comprehensive test suite documentation
 
   - tests/README.md: Complete test suite overview, organization, and running instructions
@@ -70,11 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Test suite reorganization into cpp/, python/, and shell/ directories
 
-
-
 ### Changed
-
-
 
 - **Test Organization** - Improved test structure and coverage
 
@@ -88,8 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Comprehensive testing of string manipulation, cryptographic, and I/O operations
 
-
-
 - **Cryptographic API** - Updated to use RFC 8032-compliant Ed25519
 
   - Changed from `crypto_eddsa_check` to `crypto_ed25519_check` in vmprog_crypto.hpp
@@ -98,11 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - All existing code using the API remains compatible
 
-
-
 ### Fixed
-
-
 
 - **Test Coverage Gaps** - Addressed untested methods across SDK headers
 
@@ -114,15 +86,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Complete coverage of edge cases, overflow conditions, and error paths
 
-
-
 ## [0.2.0] - 2025-12-15
 
-
-
 ### Added
-
-
 
 - **TOML Editor** - Browser-based visual editor for program configuration files
 
@@ -138,8 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Comprehensive documentation in tools/toml-editor/README.md
 
-
-
 - **Tool Documentation** - README files for all development tools
 
   - tools/toml-editor/README.md - Visual editor usage and features
@@ -149,8 +113,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - tools/toml-validator/README.md - Validation tool documentation
 
   - tools/vmprog-packer/README.md - Package creation and signing
-
-
 
 - **toml-config-guide.md** - Comprehensive "how-to" guide for creating TOML configuration files
 
@@ -164,8 +126,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Tips and best practices for program development
 
-
-
 - **toml_schema_validator.py** - Standalone TOML schema validation tool
 
   - Validates TOML files against JSON Schema
@@ -176,15 +136,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Deduplicates validation errors for readability
 
-
-
 ### Changed
 
-
-
 #### Documentation Organization
-
-
 
 - **Renamed documentation files** for consistency (lowercase-with-hyphens naming)
 
@@ -196,8 +150,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - All cross-references updated across 13 files
 
-
-
 - **Updated documentation content**
 
   - toml-config-guide.md: Added "Visual Editor (Recommended)" section
@@ -206,11 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - keys/README.md: Corrected script paths (scripts/vmprog_pack → tools/vmprog-packer)
 
-
-
 #### Repository Maintenance
-
-
 
 - **.gitignore improvements** - Added Python cache patterns
 
@@ -222,15 +170,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - `.Python` metadata
 
-
-
 - **Copyright headers** - Added GPL-3.0 license header to tools/toml-editor/toml-editor.html
 
-
-
 #### TOML Configuration Format Improvements
-
-
 
 - **String enums** - `parameter_id` and `control_mode` now use descriptive strings instead of numeric values
 
@@ -239,8 +181,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Example: `"linear"` instead of `0`
 
   - More readable and self-documenting configurations
-
-
 
 - **Version string formats** - Simplified version specification
 
@@ -252,8 +192,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Legacy numeric format still supported for backward compatibility
 
-
-
 - **Auto-calculated fields** - Reduced manual bookkeeping
 
   - `parameter_count` automatically calculated from number of `[[parameter]]` sections
@@ -262,8 +200,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - These fields should no longer be manually specified in TOML files
 
-
-
 - **Signed integer display values** - Support for negative display ranges
 
   - `display_min_value` and `display_max_value` changed from `uint16_t` to `int16_t`
@@ -271,8 +207,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Range: -32768 to 32767 (previously 0 to 65535)
 
   - Enables display of negative values (e.g., -100 to +100 for brightness)
-
-
 
 - **Optional fields with defaults** - Reduced TOML verbosity
 
@@ -284,11 +218,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Minimal valid configuration requires only `program_id`, `program_name`, version fields
 
-
-
 #### Binary Format Changes
-
-
 
 - **vmprog_program_config_v1_0** structure increased from 7240 to 7368 bytes
 
@@ -298,19 +228,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Updated `struct_size` constant to 7368
 
-
-
 - **Display value storage** - Changed to signed integers
 
   - `display_min_value` and `display_max_value` use `int16_t` (signed)
 
   - Struct packing format changed from `'<H'` (unsigned) to `'<h'` (signed)
 
-
-
 #### Validation and Constraints
-
-
 
 - **Enhanced validation** in `toml_to_config_binary.py`
 
@@ -326,8 +250,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Automatic default application for optional fields
 
-
-
 - **JSON Schema updates** in `vmprog_program_config_schema_v1_0.json`
 
   - Enum validation for string-based `parameter_id` and `control_mode`
@@ -340,11 +262,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Added mutual exclusivity constraints using `if`/`then`/`not` patterns
 
-
-
 #### Removed Fields
-
-
 
 - **hw_mask** removed from TOML format
 
@@ -352,11 +270,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - No longer user-configurable
 
-
-
 ### Fixed
-
-
 
 - **TOML Editor bugs**
 
@@ -366,17 +280,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Improved ACE editor initialization and state management
 
-
-
 - **control_mode defaults** - Automatically set to `0` (linear) when omitted or when using `value_labels` mode
 
 - **Schema validation compatibility** - Simplified `$data` references for broader JSON Schema library support
 
-
-
 ### Documentation
-
-
 
 - Updated **vmprog-format.md** with new structure size, offsets, and signed integer types
 
@@ -384,23 +292,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated **passthru.toml** to use new string formats
 
-
-
 ## [0.1.0] - 2025-12-14
-
-
 
 Initial public release of the Videomancer SDK. Complete FPGA development toolchain including format specification, C++ SDK, FPGA build chain, RTL libraries, Ed25519 package signing, and automated packaging workflow for cryptographically signed `.vmprog` packages.
 
-
-
 ### Added
 
-
-
 #### Core SDK Components
-
-
 
 - **vmprog_format.hpp** - Complete `.vmprog` v1.0 format specification with binary structures and validation functions
 
@@ -410,11 +308,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Header-only C++ library (C++17/20) with zero runtime dependencies
 
-
-
 #### Binary Format Structures
-
-
 
 - `vmprog_header_v1_0` - 64-byte file header (magic: 'VMPG', version, TOC metadata)
 
@@ -428,11 +322,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - `vmprog_artifact_hash_v1_0` - 36-byte artifact hash entries
 
-
-
 #### Features
-
-
 
 - Maximum file size: 1 MB (1,048,576 bytes)
 
@@ -448,11 +338,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Little-endian packed structures with UTF-8 strings
 
-
-
 #### Cryptography
-
-
 
 - Ed25519 digital signatures (64-byte signatures, 32-byte public keys)
 
@@ -464,11 +350,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Monocypher 4.0.2 cryptographic library (BSD-2-Clause OR CC0-1.0)
 
-
-
 #### FPGA Build Chain
-
-
 
 - **OSS CAD Suite Integration** - Yosys (with GHDL plugin), nextpnr-ice40, icepack
 
@@ -480,11 +362,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - ICE40HX4K target with TQ144 package
 
-
-
 #### RTL VHDL Libraries
-
-
 
 - **top.vhd** - Top-level entity (RP2040 SPI interface, video pipeline integration)
 
@@ -508,11 +386,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - **core_pkg.vhd** - Core package with type definitions
 
-
-
 #### Hardware Constraints
-
-
 
 - Pin mapping for Videomancer Core rev A and rev B
 
@@ -520,11 +394,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - ICE40HX4K-TQ144 specific PCF files
 
-
-
 #### Build Scripts
-
-
 
 - **setup.sh** - One-time setup: downloads and installs OSS CAD Suite (20250523 release)
 
@@ -534,11 +404,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - **build_programs.sh** - Complete workflow: synthesizes all 6 bitstream variants, generates config binary, packages `.vmprog` files
 
-
-
 #### Python Tools
-
-
 
 - **toml_to_config_binary.py** - TOML to binary converter with comprehensive validation (enum bounds, value ranges, ABI checks)
 
@@ -560,11 +426,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Python `cryptography` library integration for Ed25519 operations
 
-
-
 #### Example Programs
-
-
 
 - **passthru** - Simple passthrough program with no parameters
 
@@ -574,11 +436,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
   - Demonstrates complete development workflow from VHDL to `.vmprog`
 
-
-
 #### Build System
-
-
 
 - CMake 3.13+ with interface library pattern
 
@@ -588,11 +446,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Automatic dependency management for Monocypher
 
-
-
 #### Documentation
-
-
 
 - **vmprog-format.md** - Complete binary format specification with diagrams and validation procedures
 
@@ -610,11 +464,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - THIRD_PARTY_LICENSES documentation (Monocypher, SiliconBlue ICE40 components)
 
-
-
 ### Security
-
-
 
 - Private keys protected by `.gitignore` in `keys/` directory
 
@@ -630,11 +480,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Graceful fallback when `cryptography` library unavailable
 
-
-
 ### Project Information
-
-
 
 - **License:** GPL-3.0-only
 
@@ -644,11 +490,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - **Repository:** <https://github.com/lzxindustries/videomancer-sdk>
 
-
-
 ### Notes
-
-
 
 **Scope of v0.1.0:**
 
@@ -664,8 +506,6 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Example program demonstrating complete development cycle (passthru)
 
-
-
 **Stability:**
 
 - Pre-release (0.x series) - API may evolve before 1.0
@@ -675,8 +515,6 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 - Breaking changes will increment minor version
 
 - FPGA build chain tested with OSS CAD Suite 20250523
-
-
 
 **Known Limitations:**
 
@@ -688,11 +526,7 @@ Initial public release of the Videomancer SDK. Complete FPGA development toolcha
 
 - Signature generation requires optional `cryptography` Python library
 
-
-
 [0.2.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.2.0
 
 [0.1.0]: https://github.com/lzxindustries/videomancer-sdk/releases/tag/0.1.0
-
-
 

@@ -1,10 +1,6 @@
 # Contributing to Videomancer SDK
 
-
-
 ## Table of Contents
-
-
 
 - [Contributing to Videomancer SDK](#contributing-to-videomancer-sdk)
 
@@ -36,27 +32,15 @@
 
   - [License](#license)
 
-
-
 ## Maintenance Policy
-
-
 
 Maintained by LZX Industries. Bug reports welcome. External contributions reviewed case-by-case; discuss significant changes before investing effort.
 
-
-
 ## Reporting Bugs
-
-
 
 We appreciate bug reports from the community as they help improve the SDK for all Videomancer users.
 
-
-
 ### Before Reporting
-
-
 
 - Check existing issues to avoid duplicates
 
@@ -66,27 +50,17 @@ We appreciate bug reports from the community as they help improve the SDK for al
 
 - Collect relevant information (OS, compiler, SDK version)
 
-
-
 ### Bug Report Template
 
-
-
 When reporting a bug, please include:
-
-
 
 **Describe the Bug**
 
 Clear description of the issue
 
-
-
 **To Reproduce**
 
 Steps to reproduce:
-
-
 
 1. Step one
 
@@ -94,23 +68,15 @@ Steps to reproduce:
 
 3. See error
 
-
-
 **Expected Behavior**
 
 What should happen
-
-
 
 **Actual Behavior**
 
 What actually happens
 
-
-
 **Environment**
-
-
 
 - OS: [e.g., Windows 11, Ubuntu 22.04]
 
@@ -120,45 +86,25 @@ What actually happens
 
 - SDK Version: [e.g., 0.1.7]
 
-
-
 **Additional Context**
 
 Any other relevant information, logs, or files
 
-
-
 ## Feature Requests
-
-
 
 Submit via GitHub Issues. Describe use case and impact. Implementation subject to LZX Industries priorities.
 
-
-
 ## Community Discussion
-
-
 
 Use GitHub Discussions for questions. Issues for bugs only.
 
-
-
 ## Development Information
-
-
 
 This section provides technical information for those interested in understanding the SDK architecture.
 
-
-
 For developers creating new VHDL programs, see the **[Program Development Guide](docs/program-development-guide.md)**.
 
-
-
 ### Build Requirements
-
-
 
 - CMake 3.13+
 
@@ -166,11 +112,7 @@ For developers creating new VHDL programs, see the **[Program Development Guide]
 
 - Git
 
-
-
 ### Building from Source
-
-
 
 ```bash
 
@@ -180,19 +122,13 @@ git clone https://github.com/lzxindustries/videomancer-sdk.git
 
 cd videomancer-sdk
 
-
-
 # Run initial setup (one-time)
 
 ./setup.sh
 
-
-
 # Build SDK headers
 
 ./build_sdk.sh
-
-
 
 # Or manually:
 
@@ -204,11 +140,7 @@ cmake --build .
 
 ```
 
-
-
 ### Project Structure
-
-
 
 - `src/lzx/videomancer/` - Header-only SDK files
 
@@ -218,15 +150,9 @@ cmake --build .
 
 - `scripts/` - Build and utility scripts
 
-
-
 ### Coding Standards
 
-
-
 The SDK follows these conventions:
-
-
 
 - **C++ Standard:** C++17 minimum (C++20 on non-Windows)
 
@@ -238,11 +164,7 @@ The SDK follows these conventions:
 
 - **Indentation:** 4 spaces (no tabs)
 
-
-
 ### Architecture
-
-
 
 - **Header-only library** for easy integration
 
@@ -252,11 +174,7 @@ The SDK follows these conventions:
 
 - **Cryptographic security** via Ed25519 and SHA-256
 
-
-
 ## License
-
-
 
 GPL-3.0. Contributions subject to project license.
 

@@ -1,10 +1,6 @@
 # Videomancer SDK Test Coverage Report
 
-
-
 ## Summary
-
-
 
 **Test Suite Status**: ✅ All tests passing
 
@@ -18,11 +14,7 @@
 
 **Last Updated**: 2025-12-15
 
-
-
 ## C++ Header Coverage
-
-
 
 | Header File | Test Suite | Tests | Status |
 
@@ -46,11 +38,7 @@
 
 | `vmprog_stream_reader.hpp` | test_vmprog_stream_reader | 37 | ✅ Passed |
 
-
-
 ## Test Suite Details
-
-
 
 ### test_vmprog_crypto (15 tests)
 
@@ -86,11 +74,7 @@ Validates cryptographic operations:
 
 - ✅ Helper: is_pubkey_valid validation
 
-
-
 **Note**: The SDK now uses standard Ed25519 (SHA-512) via `crypto_ed25519_check` from monocypher, which is RFC 8032 compliant. All test vectors are from RFC 8032.
-
-
 
 ### test_videomancer_abi (6 tests)
 
@@ -105,8 +89,6 @@ Validates ABI constants and register addresses:
 - ✅ Video timing registe41 tests)
 
 Validates VMProg format structures and utilities:
-
-
 
 **Core Structure Tests (11 tests)**
 
@@ -132,8 +114,6 @@ Validates VMProg format structures and utilities:
 
 - ✅ Config validation (valid/invalid)
 
-
-
 **Additional Validation Tests (21 tests)**
 
 - ✅ String helpers: safe_strncpy, safe_strnlen
@@ -141,8 +121,6 @@ Validates VMProg format structures and utilities:
 - ✅ Enum operators: BitstreamTy37 tests)
 
 Validates stream-based reading and integration workflows:
-
-
 
 **Core Stream Tests (9 tests)**
 
@@ -163,8 +141,6 @@ Validates stream-based reading and integration workflows:
 - ✅ Invalid data handling
 
 - ✅ Large payload support
-
-
 
 **Integration Tests with Mock Packages (19 tests)**
 
@@ -190,8 +166,6 @@ Validates stream-based reading and integration workflows:
 
 - ✅ Config validation (valid/invalid)
 
-
-
 ### test_vmprog_stream_reader (9 tests)
 
 Validates stream-based reading:
@@ -214,8 +188,6 @@ Validates stream-based reading:
 
 - ✅ Large payload support
 
-
-
 ### test_vmprog_public_keys (8 tests)
 
 Validates public key definitions:
@@ -236,13 +208,9 @@ Validates public key definitions:
 
 - ✅ Constexpr support
 
-
-
 ### test_videomancer_fpga_controller (11 tests)
 
 ValPython Test Coverage
-
-
 
 ### test_converter.py
 
@@ -255,8 +223,6 @@ Tests TOML-to-binary conversion tool:
 - ✅ Binary output format
 
 - ✅ Error handling for invalid input
-
-
 
 ### test_ed25519_signing.py
 
@@ -278,8 +244,6 @@ cd tests
 
 ```
 
-
-
 ### Run Specific Test Categories
 
 ```bash
@@ -294,8 +258,6 @@ cd tests
 
 ```
 
-
-
 ### Quick C++ Test
 
 ```bash
@@ -303,8 +265,6 @@ cd tests
 ./build_sdk.sh --test
 
 ```
-
-
 
 ### Individual C++st for TOML conversion workflow:
 
@@ -315,8 +275,6 @@ cd tests
 - ✅ Error propagation
 
 - ✅ Output validation
-
-
 
 ### test_vmprog_pack.sh
 
@@ -330,23 +288,15 @@ Integration test for package creation:
 
 - ✅ Final package validation
 
-
-
 ## Abstract Interface Coverage
 
-
-
 The following headers define abstract interfaces and are tested indirectly through mock implementations:
-
-
 
 ### videomancer_fpga.hpp
 
 - Tested via `mock_videomancer_fpga` in test_videomancer_fpga_controller
 
 - Validates SPI transfer and chip select operations
-
-
 
 ### vmprog_stream.hpp
 
@@ -368,11 +318,7 @@ The following headers define abstract interfaces and are tested indirectly throu
 
 | Integration | ✅ CMake + CTest + Test Runner
 
-
-
 The following headers define abstract interfaces and are tested indirectly through mock implementations:
-
-
 
 ### videomancer_fpga.hpp
 
@@ -380,19 +326,13 @@ The following headers define abstract interfaces and are tested indirectly throu
 
 - Validates SPI transfer and chip select operations
 
-
-
 ### vmprog_stream.hpp
 
 - Tested via `mock_vmprog_stream` in test_vmprog_stream_reader
 
 - Validates read and seek operations
 
-
-
 ## Test Execution
-
-
 
 ### Quick Test
 
@@ -401,8 +341,6 @@ The following headers define abstract interfaces and are tested indirectly throu
 ./build_sdk.sh --test
 
 ```
-
-
 
 ### Individual Test Suites
 
@@ -424,13 +362,9 @@ cd build/tests/cpp
 
 ```
 
-
-
 ### CTest Integration
 
 ```Test Suite Improvements (Version 0.3.0)
-
-
 
 Recent enhancements to the test suite:
 
@@ -448,11 +382,7 @@ Recent enhancements to the test suite:
 
 - ✅ Achieved 100% method-level coverage for all public APIs
 
-
-
 ## Future Test Enhancements
-
-
 
 Potential areas for expansion:
 
@@ -470,11 +400,7 @@ Potential areas for expansion:
 
 - [ ] Integration tests with actual FPGA hardware
 
-
-
 ## Notes
-
-
 
 - Ed25519 signature verification uses RFC 8032-compliant implementation via Monocypher's `crypto_ed25519_check`
 
@@ -484,11 +410,7 @@ Potential areas for expansion:
 
 - Mock package framework enables comprehensive integration testing without actual .vmprog files
 
-
-
 ## Future Test Enhancements
-
-
 
 Potential areas for expansion:
 
@@ -506,11 +428,7 @@ Potential areas for expansion:
 
 - [ ] Integration tests with actual FPGA hardware (mock-based)
 
-
-
 ## Notes
-
-
 
 - Ed25519 signature verification test in test_vmprog_crypto is optional and commented out by default. It can be enabled if monocypher is built with Ed25519 support.
 

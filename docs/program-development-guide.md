@@ -1,14 +1,8 @@
 # Program Development Guide
 
-
-
 Create VHDL-based video processing programs for Videomancer FPGA hardware.
 
-
-
 ## Prerequisites
-
-
 
 **VHDL knowledge** (entities, architectures, processes, signals)
 
@@ -18,33 +12,21 @@ Create VHDL-based video processing programs for Videomancer FPGA hardware.
 
 - [VHDL Programming by Example](https://www.doulos.com/knowhow/vhdl/) - Doulos VHDL resources
 
-
-
 **Fixed-point arithmetic** (10-bit unsigned, 0-1023)
 
 - [Fixed-Point Arithmetic: An Introduction](https://inst.eecs.berkeley.edu/~cs61c/sp06/handout/fixedpt.html) - Berkeley CS course notes
 
 - [FPGA Numerical Formats](https://zipcpu.com/dsp/2017/07/22/rounding.html) - ZipCPU fixed-point tutorial
 
-
-
 **The SDK and build tools**
 
 - Included in this repository
 
-
-
 ## Program Architecture
-
-
 
 ### The Standard Interface
 
-
-
 All Videomancer programs implement the same `program_yuv444` entity interface:
-
-
 
 ```vhdl
 
@@ -66,8 +48,6 @@ end entity program_yuv444;
 
 ```
 
-
-
 **Key Points:**
 
 - **Clock**: 74.25 MHz pixel clock (for HD) or 13.5MHz pixel clock (for SD)
@@ -78,15 +58,9 @@ end entity program_yuv444;
 
 - **Sync Signals**: hsync_n, vsync_n, field_n, avid (active video flag)
 
-
-
 ## Project Structure
 
-
-
 Each program lives in its own directory under `programs/`:
-
-
 
 ```
 
@@ -104,25 +78,15 @@ programs/
 
 ```
 
-
-
 ### Required Files
-
-
 
 1. **Main VHDL file**: Implements the `program_yuv444` architecture
 
 2. **TOML config**: Defines program metadata and register mappings
 
-
-
 ## Development Workflow
 
-
-
 ### Step 1: Concept and Planning
-
-
 
 Define your program's functionality:
 
@@ -134,8 +98,6 @@ Define your program's functionality:
 
 - What's the acceptable latency?
 
-
-
 **Example**: A color inverter needs:
 
 - One control register (enable/disable)
@@ -144,11 +106,7 @@ Define your program's functionality:
 
 - Minimal latency (1 clock cycle)
 
-
-
 ### Step 2: Design the Pipeline
-
-
 
 Break your processing into stages:
 
@@ -158,8 +116,6 @@ Break your processing into stages:
 
 3. **Output stage**: Format results, multiplex outputs
 
-
-
 **Key Considerations:**
 
 - Each stage adds 1+ clock cycles of latency
@@ -168,23 +124,13 @@ Break your processing into stages:
 
 - Balance latency vs. resource usage
 
-
-
 ### Step 3: Create the TOML Configuration
-
-
 
 The TOML file defines your program's metadata and control interface. See the [TOML Configuration Guide](toml-config-guide.md) for complete details on program metadata, parameter definitions, and formatting requirements.
 
-
-
 ### Step 4: Implement the VHDL
 
-
-
 Create your main architecture file following this structure:
-
-
 
 **Header Section:**
 
@@ -206,8 +152,6 @@ Create your main architecture file following this structure:
 
 ```
 
-
-
 **Libraries and Architecture:**
 
 ```vhdl
@@ -218,23 +162,17 @@ use ieee.std_logic_1164.all;
 
 use ieee.numeric_std.all;
 
-
-
 library work;
 
 use work.core_pkg.all;
 
 use work.video_timing_pkg.all;
 
-
-
 architecture your_program of program_yuv444 is
 
     -- Constants
 
     constant C_LATENCY_CLKS : integer := ...;
-
-
 
     -- Signals for pipeline stages
 
@@ -252,8 +190,6 @@ end architecture;
 
 ```
 
-
-
 **Register Mapping:**
 
 ```vhdl
@@ -265,8 +201,6 @@ s_param1 <= unsigned(registers_in(0));  -- Register 0
 s_enable <= registers_in(1)(0);         -- Register 1, bit 0
 
 ```
-
-
 
 **Pipeline Implementation:**
 
@@ -288,8 +222,6 @@ begin
 
 end process p_stage1;
 
-
-
 -- Add detailed comments for complex operations
 
 p_stage2 : process(clk)
@@ -307,8 +239,6 @@ begin
 end process p_stage2;
 
 ```
-
-
 
 **Delay Line for Sync Signals:**
 
@@ -332,8 +262,6 @@ begin
 
         -- Shift other signals
 
-
-
         data_out.hsync_n <= v_hsync(C_LATENCY_CLKS - 1);
 
         -- Output other delayed signals
@@ -344,11 +272,7 @@ end process p_sync_delay;
 
 ```
 
-
-
 ### Step 5: Build and Test
-
-
 
 ```bash
 
@@ -356,25 +280,15 @@ end process p_sync_delay;
 
 ```
 
-
-
 Creates bitstreams, config binary, and `.vmprog` package. Test on hardware.
 
-
-
 ## Examples
-
-
 
 - `programs/passthru` - Minimal reference (1 clock latency)
 
 - `programs/yuv_amplifier` - Multi-stage pipeline with submodules
 
-
-
 ## Reference
-
-
 
 - [TOML Configuration Guide](toml-config-guide.md)
 
@@ -383,6 +297,4 @@ Creates bitstreams, config binary, and `.vmprog` package. Test on hardware.
 - [ABI Format](abi-format.md)
 
 - [Package Signing](package-signing-guide.md)
-
-
 
