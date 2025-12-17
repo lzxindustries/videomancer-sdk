@@ -52,23 +52,23 @@ package video_timing_pkg is
   constant C_1080P24   : t_video_timing_id := "0011"; -- 3
   constant C_1080P2398 : t_video_timing_id := "1001"; -- 9
 
-  -- type t_video_timing_port is record
-  --   avid          : std_logic;
-  --   hsync_n       : std_logic;
-  --   vsync_n       : std_logic;
-  --   field_n       : std_logic;
-  --   vavid         : std_logic;
-  --   hsync_start   : std_logic;
-  --   vsync_start   : std_logic;
-  --   avid_start    : std_logic;
-  --   avid_end      : std_logic;
-  --   is_interlaced : std_logic;
-  -- end record;
+  type t_video_timing_port is record
+    avid          : std_logic;
+    hsync_n       : std_logic;
+    vsync_n       : std_logic;
+    field_n       : std_logic;
+    vavid         : std_logic;
+    hsync_start   : std_logic;
+    vsync_start   : std_logic;
+    avid_start    : std_logic;
+    avid_end      : std_logic;
+    is_interlaced : std_logic;
+  end record;
 
-  -- subtype t_video_timing_range is std_logic_vector(1 downto 0);
+  subtype t_video_timing_range is std_logic_vector(1 downto 0);
 
-  -- constant C_ANIMATION  : t_video_timing_range := "00";
-  -- constant C_VERTICAL   : t_video_timing_range := "01";
-  -- constant C_HORIZONTAL : t_video_timing_range := "10";
+  constant C_ANIMATION  : t_video_timing_range := "00";
+  constant C_VERTICAL   : t_video_timing_range := "01";
+  constant C_HORIZONTAL : t_video_timing_range := "10";
 
 end package;
