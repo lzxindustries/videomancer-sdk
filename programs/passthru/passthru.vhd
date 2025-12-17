@@ -64,20 +64,7 @@ use work.video_stream_pkg.all;
 use work.core_pkg.all;
 use work.all;
 
---------------------------------------------------------------------------------
--- program_yuv444 Entity Interface (defined in fpga/rtl/program_yuv444.vhd)
---------------------------------------------------------------------------------
--- entity program_yuv444 is
---     port (
---         clk             : in std_logic;                    -- System clock
---         registers_in    : in t_spi_ram;                    -- Control registers from SPI
---         data_in         : in t_video_stream_yuv444;        -- Input video stream
---         data_out        : out t_video_stream_yuv444        -- Output video stream
---     );
--- end entity program_yuv444;
---------------------------------------------------------------------------------
-
-architecture passthru of yuv444_30b_top is
+architecture passthru of program_top is
 begin
     --------------------------------------------------------------------------------
     -- Single-Stage Pipeline: Direct Video Forwarding

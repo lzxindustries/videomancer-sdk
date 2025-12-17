@@ -85,11 +85,11 @@ architecture rtl of core_top is
   signal s_hsync_n_d : std_logic := '0';
   signal s_hsync_n_event : std_logic := '0';
   signal s_video_timing_id : t_video_timing_id := (others => '0');
-  signal s_video_in : t_video_stream_yuv422;
-  signal s_program_in : t_video_stream_yuv444;
-  signal s_program_out : t_video_stream_yuv444;
-  signal s_blanking_out : t_video_stream_yuv444;
-  signal s_video_out : t_video_stream_yuv422;
+  signal s_video_in : t_video_stream_yuv422_20b;
+  signal s_program_in : t_video_stream_yuv422_20b;
+  signal s_program_out : t_video_stream_yuv422_20b;
+--  signal s_blanking_out : t_video_stream_yuv444;
+  signal s_video_out : t_video_stream_yuv422_20b;
   signal s_o_trisync_out_p : std_logic := '0';
   signal s_o_trisync_out_n : std_logic := '0';
   signal s_o_hsync : std_logic := '0';
@@ -210,12 +210,15 @@ begin
 
   end generate;
 
-  yuv422_to_yuv444_inst : entity work.yuv422_to_yuv444
-    port map(
-      clk => vid_clk,
-      i_data => s_video_in,
-      o_data => s_program_in
-    );
+  -- yuv422_to_yuv444_inst : entity work.yuv422_to_yuv444
+  --   port map(
+  --     clk => vid_clk,
+  --     i_data => s_video_in,
+  --     o_data => s_program_in
+  --   );
+
+  s_program_in <= s_video_in;
+
   -- SPI RAM process with proper block RAM inference
   process (vid_clk)
   begin
@@ -273,7 +276,7 @@ begin
 
   s_video_timing_id <= s_spi_ram_d(8)(3 downto 0);
 
-  yuv422_20b_top_inst : entity work.yuv422_20b_top
+  yuv422_20b_top_inst : entity work.program_top
     port map(
       clk => vid_clk,
       registers_in => s_spi_ram_d,
@@ -305,19 +308,20 @@ begin
       vsync => s_o_vsync
     );
 
-  yuv444_blanking_inst : entity work.yuv444_blanking
-    port map(
-      clk => vid_clk,
-      data_in => s_program_out,
-      data_out => s_blanking_out
-    );
+  -- yuv444_blanking_inst : entity work.yuv444_blanking
+  --   port map(
+  --     clk => vid_clk,
+  --     data_in => s_program_out,
+  --     data_out => s_blanking_out
+  --   );
 
-  yuv444_to_yuv422_inst : entity work.yuv444_to_yuv422
-    port map(
-      clk => vid_clk,
-      i_data => s_blanking_out,
-      o_data => s_video_out
-    );
+  -- yuv444_to_yuv422_inst : entity work.yuv444_to_yuv422
+  --   port map(
+  --     clk => vid_clk,
+  --     i_data => s_blanking_out,
+  --     o_data => s_video_out
+  --   );
+  s_video_out <= s_program_out;
 
   o_vid_sync_out_p <= s_o_trisync_out_p;
   o_vid_sync_out_n <= s_o_trisync_out_n;

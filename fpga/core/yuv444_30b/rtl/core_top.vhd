@@ -273,7 +273,7 @@ begin
 
   s_video_timing_id <= s_spi_ram_d(8)(3 downto 0);
 
-  yuv444_30b_top_inst : entity work.yuv444_30b_top
+  yuv444_30b_top_inst : entity work.program_top
     port map(
       clk => vid_clk,
       registers_in => s_spi_ram_d,

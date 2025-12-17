@@ -32,11 +32,11 @@ use work.video_timing_pkg.all;
 use work.video_stream_pkg.all;
 use work.core_pkg.all;
 
-entity yuv444_30b_top is
+entity program_top is
     port (
         clk             : in std_logic;
         registers_in    : in t_spi_ram;
         data_in         : in t_video_stream_yuv444_30b;
         data_out        : out t_video_stream_yuv444_30b
     );
-end entity yuv444_30b_top;
+end entity program_top;
