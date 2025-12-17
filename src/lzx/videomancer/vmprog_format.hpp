@@ -531,6 +531,7 @@ namespace lzx {
         vmprog_program_config_v1_0::program_id_max_length +  // 64
         sizeof(uint16_t) * 8 +                               // 16 (8 uint16_t fields)
         sizeof(vmprog_hardware_flags_v1_0) +                 // 4
+        sizeof(vmprog_core_id_v1_0) +                        // 4
         vmprog_program_config_v1_0::program_name_max_length + // 32
         vmprog_program_config_v1_0::author_max_length +       // 64
         vmprog_program_config_v1_0::license_max_length +      // 32
