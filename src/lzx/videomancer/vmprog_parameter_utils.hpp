@@ -545,7 +545,9 @@ namespace lzx {
         // Copy suffix label if present
         if (config.suffix_label[0] != '\0' && pos < out_str_size - 1) {
             size_t suffix_idx = 0;
-            while (config.suffix_label[suffix_idx] != '\0' && pos < out_str_size - 1) {
+            while (config.suffix_label[suffix_idx] != '\0' &&
+                   suffix_idx < 4 &&  // Add this
+                   pos < out_str_size - 1) {
                 out_str[pos++] = config.suffix_label[suffix_idx++];
             }
         }

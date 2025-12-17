@@ -8,6 +8,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Parameter Control Curve API** - Enhanced to support full int32_t input range
+  - Changed `apply_parameter_control_curve()` to accept `int32_t` instead of `uint16_t`
+  - Changed `apply_parameter_control_curve_and_scaling()` to accept `int32_t` instead of `uint16_t`
+  - Polar modes (polar_degs_90 through polar_degs_2880) now wrap around 0-1023 for out-of-range inputs
+  - All non-polar modes clamp out-of-range inputs to [0, 1023] before processing
+  - Wrapping is applied BEFORE clamping for polar modes to enable continuous rotation
+  - Negative input handling: polar modes wrap (e.g., -100 → 924), others clamp to 0
+  - Large positive handling: polar modes wrap (e.g., 1500 → 476), others clamp to 1023
+  - Maintains backward compatibility - all existing uint16_t inputs work identically
+  - Added comprehensive test coverage for negative inputs, wrapping behavior, and edge cases
+
+### Fixed
+
+- **Test Suite Buffer Overflow** - Corrected buffer overflow in parameter utility tests
+  - Fixed `test_string_suffix_variations()` attempting to write 6 bytes into 4-byte suffix_label buffer
+  - Changed test suffix from "units" (6 bytes with null) to "Hz" (3 bytes with null)
+  - Respects suffix_label_max_length = 4 bytes as defined in vmprog_parameter_config_v1_0
+
+
+
+## [0.4.0] - 2025-12-16
+
+### Added
+
+- **Parameter Control Curve Utilities** - Complete parameter transformation system
+  - Added `vmprog_parameter_utils.hpp` with 36 control curve modes
+  - Linear scaling modes (1x, 0.5x, 0.25x, 2x)
+  - Boolean on/off threshold
+  - Discrete step quantization (4, 8, 16, 32, 64, 128, 256 steps)
+  - Polar/angular wrapping modes (90°, 180°, 360°, 720°, 1440°, 2880°)
+  - Easing curves: quadratic, sinusoidal, circular, quintic, quartic, exponential
+  - Fixed-point arithmetic for embedded systems compatibility
+  - Comprehensive unit test suite with 67 tests covering all modes
+
+- **VHDL Test Infrastructure** - VUnit-based hardware description language testing
+  - Added VHDL testbenches for core RTL modules
+  - Testbenches for YUV422↔YUV444 conversion, blanking, and sync modules
+  - Automated VHDL testing integrated into test suite
+  - Python-based VUnit test runner for hardware verification
+
+### Changed
+
+- **Documentation** - Improved project documentation structure
+  - Cleaned up broken links and dead references
+  - Minimized and reorganized documentation
+  - Updated README with clearer structure
+
+### Fixed
+
+- **SPI Peripheral** - Corrected SPI peripheral implementation
+  - Fixed errors in SPI peripheral RTL
+  - Corrected SPI peripheral testbench
+  - Resolved VHDL testbench issues for SPI module
+
+- **CI/CD** - Resolved continuous integration workflow issues
+  - Fixed stalling CI workflows
+  - Removed slow tests causing timeouts
+  - Fixed VHDL testbench execution in CI environment
+
+## [0.3.3] - 2025-12-15
+
+### Changed
+
+- **Documentation** - Cleanup of GitHub CI documentation
+  - Removed redundant GitHub CI readme file
+  - Streamlined project documentation structure
+
+## [0.3.2] - 2025-12-15
+
+### Changed
+
+- **Test Suite** - Platform compatibility improvements
+  - Removed version header tests for better cross-platform compatibility
+  - Removed MacOS CI tests to focus on Linux/WSL testing
+  - Improved CI stability and reliability
+
+### Added
+
+- **Continuous Integration** - Initial CI/CD pipeline setup
+  - Added GitHub Actions workflow for automated testing
+  - Python test integration in CI
+  - Documentation link validation
+
+### Fixed
+
+- **Documentation** - Fixed documentation link errors
+  - Corrected broken documentation links
+  - Fixed trailing whitespace issues
+
+## [0.3.1] - 2025-12-15
+
+### Changed
+
+- **Documentation** - Updated test coverage documentation
+  - Updated COVERAGE.md with latest test metrics
+  - Minor documentation improvements
+
+
 ## [0.3.0] - 2025-12-15
 
 ### Added

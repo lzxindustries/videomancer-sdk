@@ -40,15 +40,15 @@ architecture tb of tb_sync_slv is
 
   -- Clock period
   constant C_CLK_PERIOD : time := 10 ns;
-  
+
   -- Test vector width
   constant C_WIDTH : integer := 8;
-  
+
   -- DUT signals
   signal clk : std_logic := '0';
   signal a   : std_logic_vector(C_WIDTH-1 downto 0) := (others => '0');
   signal b   : std_logic_vector(C_WIDTH-1 downto 0);
-  
+
   -- Test control
   signal test_done : boolean := false;
 
@@ -70,114 +70,114 @@ begin
     variable expected : std_logic_vector(C_WIDTH-1 downto 0);
   begin
     test_runner_setup(runner, runner_cfg);
-    
+
     while test_suite loop
-      
+
       -- Test 1: Basic synchronization with zero value
       if run("test_sync_zeros") then
         info("Testing synchronization of zero value");
-        
+
         -- Set input to zeros
         a <= (others => '0');
         wait for C_CLK_PERIOD;
-        
+
         -- After 2 clock cycles, output should be stable at zero
         wait for C_CLK_PERIOD;
         wait for C_CLK_PERIOD;
-        
-        check_equal(b, std_logic_vector(to_unsigned(0, C_WIDTH)), 
+
+        check_equal(b, std_logic_vector(to_unsigned(0, C_WIDTH)),
                    "Output should be zero after 2 clock cycles");
-      
+
       -- Test 2: Basic synchronization with non-zero value
       elsif run("test_sync_value") then
         info("Testing synchronization of non-zero value");
-        
+
         -- Set input to a known value
         expected := x"A5";
         a <= expected;
-        
+
         -- Wait one clock cycle - output should still be old value
         wait for C_CLK_PERIOD;
         wait for 1 ns;
-        check(b /= expected, 
+        check(b /= expected,
              "Output should not match input after 1 clock cycle");
-        
+
         -- Wait another clock cycle - output should now match
         wait for C_CLK_PERIOD;
         wait for 1 ns;
-        check_equal(b, expected, 
+        check_equal(b, expected,
                    "Output should match input after 2 clock cycles");
-      
+
       -- Test 3: Value change propagation
       elsif run("test_value_changes") then
         info("Testing multiple value changes");
-        
+
         -- Test multiple transitions
         for i in 0 to 15 loop
           expected := std_logic_vector(to_unsigned(i, C_WIDTH));
           a <= expected;
-          
+
           -- Wait 2 clock cycles for synchronization
           wait for 2 * C_CLK_PERIOD;
           wait for 1 ns;
-          
-          check_equal(b, expected, 
+
+          check_equal(b, expected,
                      "Output should match input value " & integer'image(i));
         end loop;
-      
+
       -- Test 4: Verify 2-FF delay (metastability protection)
       elsif run("test_two_ff_delay") then
         info("Testing 2-FF synchronization delay");
-        
+
         -- Set initial value
         a <= x"00";
         wait for 3 * C_CLK_PERIOD;
-        
+
         -- Change input and verify delay
         a <= x"FF";
         wait for 1 ns;  -- Small delta to avoid clock edge
-        
+
         -- After 0 clocks, output should still be old value
         check_equal(b, std_logic_vector(to_unsigned(0, C_WIDTH)),
                    "Output should not change immediately");
-        
+
         -- After 1 clock, output should still be old value (first FF)
         wait for C_CLK_PERIOD;
         wait for 1 ns;
         check_equal(b, std_logic_vector(to_unsigned(0, C_WIDTH)),
                    "Output should not change after 1 clock (first FF)");
-        
+
         -- After 2 clocks, output should have new value (second FF)
         wait for C_CLK_PERIOD;
         wait for 1 ns;
         check_equal(b, std_logic_vector'(x"FF"),
                    "Output should change after 2 clocks (second FF)");
-      
+
       -- Test 5: All bits transition
       elsif run("test_all_bits") then
         info("Testing all bits can be synchronized");
-        
+
         -- Test that all bits can transition independently
         a <= x"AA";  -- 10101010
         wait for 2 * C_CLK_PERIOD + 1 ns;
         check_equal(b, std_logic_vector'(x"AA"), "Pattern 0xAA should synchronize");
-        
+
         a <= x"55";  -- 01010101
         wait for 2 * C_CLK_PERIOD + 1 ns;
         check_equal(b, std_logic_vector'(x"55"), "Pattern 0x55 should synchronize");
-        
+
         a <= x"F0";  -- 11110000
         wait for 2 * C_CLK_PERIOD + 1 ns;
         check_equal(b, std_logic_vector'(x"F0"), "Pattern 0xF0 should synchronize");
-        
+
         a <= x"0F";  -- 00001111
         wait for 2 * C_CLK_PERIOD + 1 ns;
         check_equal(b, std_logic_vector'(x"0F"), "Pattern 0x0F should synchronize");
-        
+
       end if;
-      
+
     end loop;
-    
+
     test_done <= true;
     test_runner_cleanup(runner);
   end process;

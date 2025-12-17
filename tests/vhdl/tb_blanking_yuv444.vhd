@@ -41,12 +41,12 @@ architecture tb of tb_blanking_yuv444 is
 
   constant C_CLK_PERIOD : time := 13.5 ns;
   constant C_BIT_DEPTH  : integer := 10;
-  
+
   -- Black level values in 10-bit
   constant C_BLACK_Y : unsigned(C_BIT_DEPTH-1 downto 0) := to_unsigned(0, C_BIT_DEPTH);
   constant C_BLACK_U : unsigned(C_BIT_DEPTH-1 downto 0) := to_unsigned(512, C_BIT_DEPTH);
   constant C_BLACK_V : unsigned(C_BIT_DEPTH-1 downto 0) := to_unsigned(512, C_BIT_DEPTH);
-  
+
   signal clk       : std_logic := '0';
   signal data_in   : t_video_stream_yuv444;
   signal data_out  : t_video_stream_yuv444;
@@ -86,7 +86,7 @@ begin
 
   begin
     test_runner_setup(runner, runner_cfg);
-    
+
     -- Initialize signals
     data_in.y       <= (others => '0');
     data_in.u       <= (others => '0');
@@ -95,102 +95,102 @@ begin
     data_in.vsync_n <= '1';
     data_in.avid    <= '0';
     data_in.field_n <= '1';
-    
+
     wait for 5 * C_CLK_PERIOD;
-    
+
     while test_suite loop
-      
+
       if run("test_active_video_passthrough") then
         info("Testing active video passes through unchanged");
-        
+
         -- Send active video pixels
         send_pixel(200, 300, 400, '1');
-        
+
         -- Check immediately after pipeline establishes (2 cycles from first pixel)
         wait for 1 * C_CLK_PERIOD + 1 ns;
-        
+
         check_equal(unsigned(data_out.y), 200, "Active Y should pass through");
         check_equal(unsigned(data_out.u), 300, "Active U should pass through");
         check_equal(unsigned(data_out.v), 400, "Active V should pass through");
         check_equal(data_out.avid, '1', "AVID should pass through");
-      
+
       elsif run("test_blanking_replacement") then
         info("Testing blanking pixels replaced with black");
-        
+
         -- Send blanking pixels (AVID=0) with non-black values
         send_pixel(500, 600, 700, '0');
-        
+
         -- Wait for pipeline delay
         wait for 2 * C_CLK_PERIOD + 1 ns;
-        
+
         check_equal(unsigned(data_out.y), C_BLACK_Y, "Blanking Y should be 0");
         check_equal(unsigned(data_out.u), C_BLACK_U, "Blanking U should be 512");
         check_equal(unsigned(data_out.v), C_BLACK_V, "Blanking V should be 512");
         check_equal(data_out.avid, '0', "AVID should remain 0");
-      
+
       elsif run("test_sync_passthrough") then
         info("Testing sync signals pass through unchanged");
-        
+
         -- Send pixel with sync signals active
         send_pixel(100, 200, 300, '1', '0', '0', '0');
-        
+
         wait for 2 * C_CLK_PERIOD + 1 ns;
-        
+
         check_equal(data_out.hsync_n, '0', "HSYNC should pass through");
         check_equal(data_out.vsync_n, '0', "VSYNC should pass through");
         check_equal(data_out.field_n, '0', "Field should pass through");
-      
+
       elsif run("test_transition_to_blanking") then
         info("Testing transition from active to blanking");
-        
+
         -- Active video
         send_pixel(200, 300, 400, '1');
-        
+
         -- Transition to blanking
         send_pixel(500, 600, 700, '0');
-        
+
         wait for 3 * C_CLK_PERIOD + 1 ns;
-        
+
         -- Output should be black
         check_equal(unsigned(data_out.y), C_BLACK_Y, "Should output black Y");
         check_equal(unsigned(data_out.u), C_BLACK_U, "Should output black U");
         check_equal(unsigned(data_out.v), C_BLACK_V, "Should output black V");
-      
+
       elsif run("test_transition_to_active") then
         info("Testing transition from blanking to active");
-        
+
         -- Blanking
         send_pixel(500, 600, 700, '0');
-        
+
         -- Transition to active video
         send_pixel(200, 300, 400, '1');
-        
+
         wait for 3 * C_CLK_PERIOD + 1 ns;
-        
+
         -- Output should be active video data
         check_equal(unsigned(data_out.y), 200, "Should output active Y");
         check_equal(unsigned(data_out.u), 300, "Should output active U");
         check_equal(unsigned(data_out.v), 400, "Should output active V");
         check_equal(data_out.avid, '1', "AVID should be 1");
-      
+
       elsif run("test_continuous_blanking") then
         info("Testing continuous blanking interval");
-        
+
         -- Send multiple blanking pixels
         for i in 1 to 10 loop
           send_pixel(100*i, 200*i, 300*i, '0');
         end loop;
-        
+
         -- All should be replaced with black
         wait for 1 ns;
         check_equal(unsigned(data_out.y), C_BLACK_Y, "Continuous blanking Y");
         check_equal(unsigned(data_out.u), C_BLACK_U, "Continuous blanking U");
         check_equal(unsigned(data_out.v), C_BLACK_V, "Continuous blanking V");
-      
+
       end if;
-      
+
     end loop;
-    
+
     test_done <= true;
     test_runner_cleanup(runner);
   end process;
