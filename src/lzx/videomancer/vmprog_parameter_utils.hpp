@@ -203,16 +203,16 @@ namespace lzx {
     constexpr uint16_t apply_parameter_control_curve(int32_t value, vmprog_parameter_control_mode_v1_0 mode)
     {
         constexpr uint16_t max_val = 1023;  // 10-bit maximum
-        
+
         // Handle polar modes with wrapping BEFORE clamping
-        if (mode >= vmprog_parameter_control_mode_v1_0::polar_degs_90 && 
+        if (mode >= vmprog_parameter_control_mode_v1_0::polar_degs_90 &&
             mode <= vmprog_parameter_control_mode_v1_0::polar_degs_2880)
         {
             // Wrap around 0-1023 for out-of-range inputs
             int32_t wrapped = value % 1024;
             if (wrapped < 0) wrapped += 1024;  // Handle negative modulo
             const uint32_t t = static_cast<uint32_t>(wrapped);
-            
+
             // Apply polar transformations on wrapped value
             switch (mode)
             {
@@ -232,7 +232,7 @@ namespace lzx {
                 break;  // Should never reach
             }
         }
-        
+
         // For all non-polar modes: clamp to 0-1023
         const uint32_t t = (value < 0) ? 0 : ((value > max_val) ? max_val : static_cast<uint32_t>(value));
 

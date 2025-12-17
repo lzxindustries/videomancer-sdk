@@ -112,7 +112,7 @@ begin
                 when others =>
                     null;
             end case;
-            
+
             -- Second delay stage to align with sync delay (2 cycles total)
             s_yuv422_y_out <= s_yuv422_y;
             s_yuv422_c_out <= s_yuv422_c;

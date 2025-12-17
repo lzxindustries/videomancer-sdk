@@ -43,7 +43,7 @@ begin
         if rising_edge(clk) then
             -- Input register (cycle 1)
             s_data_reg <= data_in;
-            
+
             -- Processing with 2-cycle total delay
             if s_data_reg.avid = '1' then
                 data_out.y <= s_data_reg.y;

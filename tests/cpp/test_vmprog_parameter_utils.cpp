@@ -1649,11 +1649,11 @@ bool test_string_suffix_variations() {
         return false;
     }
 
-    // Test with long suffix
-    strcpy(config.suffix_label, "units");
+    // Test with max length suffix (3 chars + null terminator = 4 bytes max)
+    strcpy(config.suffix_label, "Hz");
     generate_parameter_value_display_string(512, config, buffer, sizeof(buffer));
-    if (strstr(buffer, "units") == nullptr) {
-        std::cerr << "FAILED: suffix variations test - units missing (got: " << buffer << ")" << std::endl;
+    if (strstr(buffer, "Hz") == nullptr) {
+        std::cerr << "FAILED: suffix variations test - Hz missing (got: " << buffer << ")" << std::endl;
         return false;
     }
 
