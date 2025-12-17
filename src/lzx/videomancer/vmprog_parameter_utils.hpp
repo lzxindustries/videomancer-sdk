@@ -478,7 +478,7 @@ namespace lzx {
      * @param out_str Output string buffer
      * @param out_str_size Size of output string buffer
      */
-    constexpr void generate_parameter_value_display_string(uint16_t value, const vmprog_parameter_config_v1_0& config, char* out_str, size_t out_str_size)
+    constexpr void generate_parameter_value_display_string(int32_t value, const vmprog_parameter_config_v1_0& config, char* out_str, size_t out_str_size)
     {
         if (out_str_size == 0) return;
 
