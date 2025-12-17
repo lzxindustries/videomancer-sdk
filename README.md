@@ -26,7 +26,7 @@ bash build_programs.sh
 
 ```
 
-**Requirements:** Linux, WSL2, or macOS | Python 3.7+ | ~2 GB disk space
+**Requirements:** Linux, Windows (WSL2), or macOS (Homebrew) | Python 3.7+ | ~2 GB disk space
 
 ## Documentation
 

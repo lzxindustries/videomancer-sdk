@@ -196,88 +196,74 @@ namespace lzx {
      * Transforms input value according to specified control mode. All modes operate
      * on 10-bit unsigned values (0-1023) using fixed-point arithmetic.
      *
-     * @param value Input value (any int32_t, will be wrapped for polar modes or clamped for others)
+     * @param value Input value (0-1023)
      * @param mode Control mode to apply
      * @return Transformed output value (0-1023)
      */
-    constexpr uint16_t apply_parameter_control_curve(int32_t value, vmprog_parameter_control_mode_v1_0 mode)
+    constexpr uint16_t apply_parameter_control_curve(uint16_t value, vmprog_parameter_control_mode_v1_0 mode)
     {
         constexpr uint16_t max_val = 1023;  // 10-bit maximum
-        
-        // Handle polar modes with wrapping BEFORE clamping
-        if (mode >= vmprog_parameter_control_mode_v1_0::polar_degs_90 && 
-            mode <= vmprog_parameter_control_mode_v1_0::polar_degs_2880)
-        {
-            // Wrap around 0-1023 for out-of-range inputs
-            int32_t wrapped = value % 1024;
-            if (wrapped < 0) wrapped += 1024;  // Handle negative modulo
-            const uint32_t t = static_cast<uint32_t>(wrapped);
-            
-            // Apply polar transformations on wrapped value
-            switch (mode)
-            {
-            case vmprog_parameter_control_mode_v1_0::polar_degs_90:
-                return static_cast<uint16_t>(t >> 2);
-            case vmprog_parameter_control_mode_v1_0::polar_degs_180:
-                return static_cast<uint16_t>(t >> 1);
-            case vmprog_parameter_control_mode_v1_0::polar_degs_360:
-                return static_cast<uint16_t>(t);
-            case vmprog_parameter_control_mode_v1_0::polar_degs_720:
-                return static_cast<uint16_t>((t << 1) & 1023);
-            case vmprog_parameter_control_mode_v1_0::polar_degs_1440:
-                return static_cast<uint16_t>((t << 2) & 1023);
-            case vmprog_parameter_control_mode_v1_0::polar_degs_2880:
-                return static_cast<uint16_t>((t << 3) & 1023);
-            default:
-                break;  // Should never reach
-            }
-        }
-        
-        // For all non-polar modes: clamp to 0-1023
-        const uint32_t t = (value < 0) ? 0 : ((value > max_val) ? max_val : static_cast<uint32_t>(value));
+        const uint32_t t = value > max_val ? max_val : value;  // Clamp input to valid range
 
         switch (mode)
         {
             // ===== Linear Scaling Modes =====
         case vmprog_parameter_control_mode_v1_0::linear:
-            return static_cast<uint16_t>(t);  // 1:1 passthrough (clamped)
+            return value;  // 1:1 passthrough
 
         case vmprog_parameter_control_mode_v1_0::linear_half:
-            return static_cast<uint16_t>(t >> 1);  // 0.5x scaling (optimized: shift instead of div)
+            return static_cast<uint16_t>(value >> 1);  // 0.5x scaling (optimized: shift instead of div)
 
         case vmprog_parameter_control_mode_v1_0::linear_quarter:
-            return static_cast<uint16_t>(t >> 2);  // 0.25x scaling (optimized: shift instead of div)
+            return static_cast<uint16_t>(value >> 2);  // 0.25x scaling (optimized: shift instead of div)
 
         case vmprog_parameter_control_mode_v1_0::linear_double:
-            return clamp_u16(t << 1, 0, max_val);  // 2x scaling (optimized: shift instead of mul)
+            return clamp_u16(value << 1, 0, max_val);  // 2x scaling (optimized: shift instead of mul)
 
             // ===== Boolean Mode =====
         case vmprog_parameter_control_mode_v1_0::boolean:
-            return (t >= 512) ? max_val : 0;  // On/off threshold at midpoint
+            return (value >= 512) ? max_val : 0;  // On/off threshold at midpoint
 
             // ===== Discrete Step Modes =====
         case vmprog_parameter_control_mode_v1_0::steps_4:
-            return static_cast<uint16_t>((t >> 8) * 341);  // 4 steps: 0, 341, 682, 1023 (optimized)
+            return static_cast<uint16_t>((value >> 8) * 341);  // 4 steps: 0, 341, 682, 1023 (optimized)
 
         case vmprog_parameter_control_mode_v1_0::steps_8:
-            return static_cast<uint16_t>((t >> 7) * 146);  // 8 steps: ~146 per step (optimized)
+            return static_cast<uint16_t>((value >> 7) * 146);  // 8 steps: ~146 per step (optimized)
 
         case vmprog_parameter_control_mode_v1_0::steps_16:
-            return static_cast<uint16_t>((t >> 6) * 68);  // 16 steps: ~68 per step (optimized)
+            return static_cast<uint16_t>((value >> 6) * 68);  // 16 steps: ~68 per step (optimized)
 
         case vmprog_parameter_control_mode_v1_0::steps_32:
-            return static_cast<uint16_t>((t >> 5) * 33);  // 32 steps: ~33 per step (optimized)
+            return static_cast<uint16_t>((value >> 5) * 33);  // 32 steps: ~33 per step (optimized)
 
         case vmprog_parameter_control_mode_v1_0::steps_64:
-            return static_cast<uint16_t>((t >> 4) << 4);  // 64 steps: 16 per step (optimized: mask bits)
+            return static_cast<uint16_t>((value >> 4) << 4);  // 64 steps: 16 per step (optimized: mask bits)
 
         case vmprog_parameter_control_mode_v1_0::steps_128:
-            return static_cast<uint16_t>((t >> 3) << 3);  // 128 steps: 8 per step (optimized: mask bits)
+            return static_cast<uint16_t>((value >> 3) << 3);  // 128 steps: 8 per step (optimized: mask bits)
 
         case vmprog_parameter_control_mode_v1_0::steps_256:
-            return static_cast<uint16_t>((t >> 2) << 2);  // 256 steps: 4 per step (optimized: mask bits)
+            return static_cast<uint16_t>((value >> 2) << 2);  // 256 steps: 4 per step (optimized: mask bits)
 
-            // ===== Polar modes handled above with wrapping =====
+            // ===== Polar/Angular Modes (with 360° wrapping) =====
+        case vmprog_parameter_control_mode_v1_0::polar_degs_90:
+            return static_cast<uint16_t>(t >> 2);  // 0.25 rotations (optimized: 90/360 = 1/4)
+
+        case vmprog_parameter_control_mode_v1_0::polar_degs_180:
+            return static_cast<uint16_t>(t >> 1);  // 0.5 rotations (optimized: 180/360 = 1/2)
+
+        case vmprog_parameter_control_mode_v1_0::polar_degs_360:
+            return static_cast<uint16_t>(t);  // 1 rotation (optimized: 360/360 = 1)
+
+        case vmprog_parameter_control_mode_v1_0::polar_degs_720:
+            return static_cast<uint16_t>((t << 1) & 1023);  // 2 rotations with wrap (optimized: 720/360 = 2)
+
+        case vmprog_parameter_control_mode_v1_0::polar_degs_1440:
+            return static_cast<uint16_t>((t << 2) & 1023);  // 4 rotations with wrap (optimized: 1440/360 = 4)
+
+        case vmprog_parameter_control_mode_v1_0::polar_degs_2880:
+            return static_cast<uint16_t>((t << 3) & 1023);  // 8 rotations with wrap (optimized: 2880/360 = 8)
 
             // ===== Quadratic Easing =====
         case vmprog_parameter_control_mode_v1_0::quad_in:
@@ -434,7 +420,7 @@ namespace lzx {
             }
 
         default:
-            return static_cast<uint16_t>(t);  // Unknown mode: return clamped input
+            return value;  // Unknown mode: return input unchanged
         }
     }
 
@@ -444,11 +430,11 @@ namespace lzx {
      * First applies the control curve transformation, then scales the result
      * from 0-1023 to the parameter's configured min/max range.
      *
-     * @param value Input value (any int32_t, will be wrapped for polar modes or clamped for others)
+     * @param value Input value (0-1023)
      * @param mode Parameter configuration including control mode and min/max
      * @return Scaled output value within parameter's min/max range
      */
-    constexpr uint16_t apply_parameter_control_curve_and_scaling(int32_t value, const vmprog_parameter_config_v1_0& mode)
+    constexpr uint16_t apply_parameter_control_curve_and_scaling(uint16_t value, const vmprog_parameter_config_v1_0& mode)
     {
         const uint16_t curved = apply_parameter_control_curve(value, mode.control_mode);
         const uint32_t scaled = mode.min_value + ((static_cast<uint32_t>(curved) * (mode.max_value - mode.min_value)) / 1023);

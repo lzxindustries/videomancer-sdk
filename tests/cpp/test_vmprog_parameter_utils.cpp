@@ -461,18 +461,40 @@ bool test_inverted_range() {
 // ===== Edge Case Tests =====
 
 bool test_out_of_range_inputs() {
-    // Test that values > 1023 are handled (linear mode passes through, but t is clamped in other modes)
+    // Test that values > 1023 are clamped for non-polar modes
     uint16_t result = apply_parameter_control_curve(2000, vmprog_parameter_control_mode_v1_0::linear);
-    // Linear mode returns value directly without clamping
-    if (result != 2000) {
-        std::cerr << "FAILED: out of range test - linear passthrough (got " << result << ")" << std::endl;
+    // Linear mode should now clamp to 1023
+    if (result != 1023) {
+        std::cerr << "FAILED: out of range test - linear should clamp (got " << result << ", expected 1023)" << std::endl;
         return false;
     }
 
-    // Test that other modes clamp via the 't' variable
+    // Test quad_in also clamps
     uint16_t result_quad = apply_parameter_control_curve(2000, vmprog_parameter_control_mode_v1_0::quad_in);
-    if (result_quad > 1023) {
-        std::cerr << "FAILED: out of range test - quad_in should clamp" << std::endl;
+    if (result_quad != 1023) {
+        std::cerr << "FAILED: out of range test - quad_in should clamp to 1023 (got " << result_quad << ")" << std::endl;
+        return false;
+    }
+
+    // Test negative values are clamped to 0
+    uint16_t result_neg = apply_parameter_control_curve(-500, vmprog_parameter_control_mode_v1_0::linear);
+    if (result_neg != 0) {
+        std::cerr << "FAILED: out of range test - negative should clamp to 0 (got " << result_neg << ")" << std::endl;
+        return false;
+    }
+
+    // Test polar modes wrap instead of clamp
+    uint16_t result_polar = apply_parameter_control_curve(1500, vmprog_parameter_control_mode_v1_0::polar_degs_360);
+    // 1500 % 1024 = 476, polar_360 returns value as-is
+    if (result_polar != 476) {
+        std::cerr << "FAILED: out of range test - polar should wrap (got " << result_polar << ", expected 476)" << std::endl;
+        return false;
+    }
+
+    // Test negative polar wrapping: -100 % 1024 = 924
+    uint16_t result_polar_neg = apply_parameter_control_curve(-100, vmprog_parameter_control_mode_v1_0::polar_degs_360);
+    if (result_polar_neg != 924) {
+        std::cerr << "FAILED: out of range test - polar negative wrap (got " << result_polar_neg << ", expected 924)" << std::endl;
         return false;
     }
 
@@ -1253,6 +1275,601 @@ bool test_divisor_lookup_table() {
     return true;
 }
 
+
+// ===== Individual Step Mode Tests =====
+
+bool test_steps_8_mode() {
+    // steps_8: Should divide 1024 into 8 steps
+    // Each step is 128 wide (1024/8 = 128)
+    // Formula: (value >> 7) << 7  (masks lower 7 bits)
+
+    uint16_t test_cases[][2] = {
+        {0, 0},        // 0 >> 7 = 0, 0 << 7 = 0
+        {127, 0},      // 127 >> 7 = 0, 0 << 7 = 0
+        {128, 146},    // 128 >> 7 = 1, 1 * 146 = 146
+        {255, 146},      // 255 >> 7 = 1, 1 * 146 = 146
+        {256, 292},    // 256 >> 7 = 2, 2 * 146 = 292
+        {512, 584},    // 512 >> 7 = 4, 4 * 146 = 584
+        {1023, 1022}    // 1023 >> 7 = 7, 7 * 146 = 1022
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::steps_8);
+
+        if (result != expected) {
+            std::cerr << "FAILED: steps_8 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: steps_8 mode test" << std::endl;
+    return true;
+}
+
+bool test_steps_16_mode() {
+    // steps_16: (value >> 6) << 6  (masks lower 6 bits)
+    // Step size: 64
+
+    uint16_t test_cases[][2] = {
+        {0, 0},
+        {63, 0},
+        {64, 68},
+        {127, 68},
+        {128, 136},
+        {512, 544},    // 512 >> 6 = 8, 8 * 68 = 544
+        {1023, 1020}    // 1023 >> 6 = 15, 15 * 68 = 1020
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::steps_16);
+
+        if (result != expected) {
+            std::cerr << "FAILED: steps_16 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: steps_16 mode test" << std::endl;
+    return true;
+}
+
+bool test_steps_32_mode() {
+    // steps_32: (value >> 5) << 5  (masks lower 5 bits)
+    // Step size: 32
+
+    uint16_t test_cases[][2] = {
+        {0, 0},
+        {31, 0},
+        {32, 33},      // 32 >> 5 = 1, 1 * 33 = 33
+        {63, 33},      // 63 >> 5 = 1, 1 * 33 = 33
+        {64, 66},      // 64 >> 5 = 2, 2 * 33 = 66
+        {512, 528},    // 512 >> 5 = 16, 16 * 33 = 528
+        {1023, 1023}    // 1023 >> 5 = 31, 31 * 33 = 1023
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::steps_32);
+
+        if (result != expected) {
+            std::cerr << "FAILED: steps_32 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: steps_32 mode test" << std::endl;
+    return true;
+}
+
+bool test_steps_64_mode() {
+    // steps_64: (value >> 4) << 4  (masks lower 4 bits)
+    // Step size: 16
+
+    uint16_t test_cases[][2] = {
+        {0, 0},
+        {15, 0},
+        {16, 16},
+        {31, 16},
+        {32, 32},      // 32 >> 4 = 2, 2 << 4 = 32
+        {123, 112},    // 123 >> 4 = 7, 7 << 4 = 112
+        {512, 512},
+        {1023, 1008}   // 1023 >> 4 = 63, 63 << 4 = 1008
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::steps_64);
+
+        if (result != expected) {
+            std::cerr << "FAILED: steps_64 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: steps_64 mode test" << std::endl;
+    return true;
+}
+
+bool test_steps_128_mode() {
+    // steps_128: (value >> 3) << 3  (masks lower 3 bits)
+    // Step size: 8
+
+    uint16_t test_cases[][2] = {
+        {0, 0},
+        {7, 0},
+        {8, 8},
+        {15, 8},
+        {16, 16},
+        {512, 512},
+        {1023, 1016}   // 1023 >> 3 = 127, 127 << 3 = 1016
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::steps_128);
+
+        if (result != expected) {
+            std::cerr << "FAILED: steps_128 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: steps_128 mode test" << std::endl;
+    return true;
+}
+
+// ===== Individual Polar Mode Tests =====
+
+bool test_polar_degs_90_mode() {
+    // polar_degs_90: Output wraps every 256 units (90 degrees = 1/4 rotation)
+    // Formula: (value & 0x3FF) << 2
+
+    uint16_t test_cases[][2] = {
+        {0, 0},
+        {255, 63},      // 255 >> 2 = 63
+        {256, 64},      // 256 >> 2 = 64
+        {257, 64},      // 257 >> 2 = 64
+        {512, 128},     // 512 >> 2 = 128
+        {768, 192},     // 768 >> 2 = 192
+        {1023, 255}   // 1023 >> 2 = 255
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::polar_degs_90);
+
+        if (result != expected) {
+            std::cerr << "FAILED: polar_degs_90 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: polar_degs_90 mode test" << std::endl;
+    return true;
+}
+
+bool test_polar_degs_180_mode() {
+    // polar_degs_180: Output wraps every 512 units (180 degrees = 1/2 rotation)
+    // Formula: (value & 0x1FF) << 1
+
+    uint16_t test_cases[][2] = {
+        {0, 0},
+        {511, 255},     // 511 >> 1 = 255
+        {512, 256},     // 512 >> 1 = 256
+        {513, 256},     // 513 >> 1 = 256
+        {1023, 511}   // 1023 >> 1 = 511
+    };
+
+    for (size_t i = 0; i < sizeof(test_cases) / sizeof(test_cases[0]); ++i) {
+        uint16_t input = test_cases[i][0];
+        uint16_t expected = test_cases[i][1];
+        uint16_t result = apply_parameter_control_curve(input, vmprog_parameter_control_mode_v1_0::polar_degs_180);
+
+        if (result != expected) {
+            std::cerr << "FAILED: polar_degs_180 mode at input " << input
+                      << " (got " << result << ", expected " << expected << ")" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "PASSED: polar_degs_180 mode test" << std::endl;
+    return true;
+}
+
+bool test_polar_degs_720_mode() {
+    // polar_degs_720: Output wraps every 143 units (720 degrees = 2 rotations)
+    // Formula: ((value & 0x7F) << 3) | (value & 0x07)
+
+    uint16_t result_0 = apply_parameter_control_curve(0, vmprog_parameter_control_mode_v1_0::polar_degs_720);
+    uint16_t result_1023 = apply_parameter_control_curve(1023, vmprog_parameter_control_mode_v1_0::polar_degs_720);
+
+    if (result_0 != 0 || result_1023 != 1022) {
+        std::cerr << "FAILED: polar_degs_720 mode edge values (0:" << result_0
+                  << ", 1023:" << result_1023 << ")" << std::endl;
+        return false;
+    }
+
+    // Verify wrapping behavior
+    uint16_t result_144 = apply_parameter_control_curve(144, vmprog_parameter_control_mode_v1_0::polar_degs_720);
+    uint16_t result_288 = apply_parameter_control_curve(288, vmprog_parameter_control_mode_v1_0::polar_degs_720);
+
+    if (result_144 != 288 || result_288 != 576) {
+        std::cerr << "FAILED: polar_degs_720 mode wrapping (144:" << result_144
+                  << ", 288:" << result_288 << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: polar_degs_720 mode test" << std::endl;
+    return true;
+}
+
+bool test_polar_degs_1440_mode() {
+    // polar_degs_1440: Output wraps every 71 units (1440 degrees = 4 rotations)
+    // Formula: ((value & 0x3F) << 4) | (value & 0x0F)
+
+    uint16_t result_0 = apply_parameter_control_curve(0, vmprog_parameter_control_mode_v1_0::polar_degs_1440);
+    uint16_t result_1023 = apply_parameter_control_curve(1023, vmprog_parameter_control_mode_v1_0::polar_degs_1440);
+
+    if (result_0 != 0 || result_1023 != 1020) {
+        std::cerr << "FAILED: polar_degs_1440 mode edge values (0:" << result_0
+                  << ", 1023:" << result_1023 << ")" << std::endl;
+        return false;
+    }
+
+    // Verify wrapping: 71, 142, 213, 284 should be near wrap points
+    uint16_t result_71 = apply_parameter_control_curve(71, vmprog_parameter_control_mode_v1_0::polar_degs_1440);
+    uint16_t result_72 = apply_parameter_control_curve(72, vmprog_parameter_control_mode_v1_0::polar_degs_1440);
+
+    if (result_71 > 1023 || result_72 > 1023) {
+        std::cerr << "FAILED: polar_degs_1440 mode wrapping (71:" << result_71
+                  << ", 72:" << result_72 << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: polar_degs_1440 mode test" << std::endl;
+    return true;
+}
+
+bool test_polar_degs_2880_mode() {
+    // polar_degs_2880: Output wraps every 36 units (2880 degrees = 8 rotations)
+    // Formula: ((value & 0x1F) << 5) | (value & 0x1F)
+
+    uint16_t result_0 = apply_parameter_control_curve(0, vmprog_parameter_control_mode_v1_0::polar_degs_2880);
+    uint16_t result_1023 = apply_parameter_control_curve(1023, vmprog_parameter_control_mode_v1_0::polar_degs_2880);
+
+    if (result_0 != 0 || result_1023 != 1016) {
+        std::cerr << "FAILED: polar_degs_2880 mode edge values (0:" << result_0
+                  << ", 1023:" << result_1023 << ")" << std::endl;
+        return false;
+    }
+
+    // Verify wrapping: 36, 72, 108, 144, etc. should be near wrap points
+    uint16_t result_35 = apply_parameter_control_curve(35, vmprog_parameter_control_mode_v1_0::polar_degs_2880);
+    uint16_t result_36 = apply_parameter_control_curve(36, vmprog_parameter_control_mode_v1_0::polar_degs_2880);
+
+    if (result_35 > 1023 || result_36 > 1023) {
+        std::cerr << "FAILED: polar_degs_2880 mode wrapping (35:" << result_35
+                  << ", 36:" << result_36 << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: polar_degs_2880 mode test" << std::endl;
+    return true;
+}
+
+// ===== Extended String Generation Tests =====
+
+bool test_string_zero_decimals() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 100;
+    config.display_float_digits = 0;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(1023, config, buffer, sizeof(buffer));
+
+    if (strchr(buffer, '.') != nullptr) {
+        std::cerr << "FAILED: zero decimals test - decimal point found (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    if (strcmp(buffer, "100") != 0) {
+        std::cerr << "FAILED: zero decimals test - wrong value (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string zero decimals test" << std::endl;
+    return true;
+}
+
+bool test_string_one_decimal() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 1000;
+    config.display_float_digits = 1;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(512, config, buffer, sizeof(buffer));
+
+    const char* dot = strchr(buffer, '.');
+    if (dot == nullptr) {
+        std::cerr << "FAILED: one decimal test - no decimal point (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    size_t decimal_count = 0;
+    for (const char* p = dot + 1; *p != '\0' && *p != ' '; ++p) {
+        if (*p >= '0' && *p <= '9') {
+            decimal_count++;
+        }
+    }
+
+    if (decimal_count != 1) {
+        std::cerr << "FAILED: one decimal test - wrong decimal count: " << decimal_count
+                  << " (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string one decimal test" << std::endl;
+    return true;
+}
+
+bool test_string_suffix_variations() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 100;
+    config.display_float_digits = 0;
+
+    char buffer[20];
+
+    // Test with % suffix
+    strcpy(config.suffix_label, "%");
+    generate_parameter_value_display_string(512, config, buffer, sizeof(buffer));
+    if (strstr(buffer, "%") == nullptr) {
+        std::cerr << "FAILED: suffix variations test - % missing (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    // Test with long suffix
+    strcpy(config.suffix_label, "units");
+    generate_parameter_value_display_string(512, config, buffer, sizeof(buffer));
+    if (strstr(buffer, "units") == nullptr) {
+        std::cerr << "FAILED: suffix variations test - units missing (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string suffix variations test" << std::endl;
+    return true;
+}
+
+bool test_string_max_decimals() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 10000;
+    config.display_float_digits = 6;
+    config.suffix_label[0] = '\0';
+
+    char buffer[30];
+    generate_parameter_value_display_string(1023, config, buffer, sizeof(buffer));
+
+    const char* dot = strchr(buffer, '.');
+    if (dot == nullptr) {
+        std::cerr << "FAILED: max decimals test - no decimal point (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    size_t decimal_count = 0;
+    for (const char* p = dot + 1; *p != '\0' && *p != ' '; ++p) {
+        if (*p >= '0' && *p <= '9') {
+            decimal_count++;
+        }
+    }
+
+    if (decimal_count != 6) {
+        std::cerr << "FAILED: max decimals test - wrong count: " << decimal_count
+                  << " (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string max decimals test" << std::endl;
+    return true;
+}
+
+bool test_string_with_curves() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::quad_in;
+    config.display_min_value = 0;
+    config.display_max_value = 100;
+    config.display_float_digits = 1;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(512, config, buffer, sizeof(buffer));
+
+    if (buffer[0] == '\0') {
+        std::cerr << "FAILED: string with curves test - empty output" << std::endl;
+        return false;
+    }
+
+    const char* dot = strchr(buffer, '.');
+    if (dot == nullptr) {
+        std::cerr << "FAILED: string with curves test - no decimal point (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string with curves test" << std::endl;
+    return true;
+}
+
+bool test_string_buffer_safety() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 100;
+    config.display_float_digits = 0;
+    config.suffix_label[0] = '\0';
+
+    // Test with buffer size 1
+    char buffer1[1];
+    generate_parameter_value_display_string(512, config, buffer1, sizeof(buffer1));
+    if (buffer1[0] != '\0') {
+        std::cerr << "FAILED: buffer safety test - buffer size 1 not null terminated" << std::endl;
+        return false;
+    }
+
+    // Test with buffer size 2
+    char buffer2[2];
+    generate_parameter_value_display_string(512, config, buffer2, sizeof(buffer2));
+    if (buffer2[1] != '\0') {
+        std::cerr << "FAILED: buffer safety test - buffer size 2 not properly terminated" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string buffer safety test" << std::endl;
+    return true;
+}
+
+bool test_string_negative_ranges() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = -10000;
+    config.display_max_value = -5000;
+    config.display_float_digits = 0;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(0, config, buffer, sizeof(buffer));
+
+    if (buffer[0] != '-') {
+        std::cerr << "FAILED: negative ranges test - not negative (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string negative ranges test" << std::endl;
+    return true;
+}
+
+bool test_string_mixed_sign() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = -50;
+    config.display_max_value = 50;
+    config.display_float_digits = 0;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+
+    // At 0, should be -50
+    generate_parameter_value_display_string(0, config, buffer, sizeof(buffer));
+    if (strcmp(buffer, "-50") != 0) {
+        std::cerr << "FAILED: mixed sign test at 0 (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    // At 1023, should be 50
+    generate_parameter_value_display_string(1023, config, buffer, sizeof(buffer));
+    if (strcmp(buffer, "50") != 0) {
+        std::cerr << "FAILED: mixed sign test at 1023 (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: string mixed sign test" << std::endl;
+    return true;
+}
+
+bool test_numeric_display_rounding() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 999;
+    config.display_float_digits = 2;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(256, config, buffer, sizeof(buffer));
+
+    const char* dot = strchr(buffer, '.');
+    if (dot == nullptr) {
+        std::cerr << "FAILED: numeric rounding test - no decimal point (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    size_t decimal_count = 0;
+    for (const char* p = dot + 1; *p != '\0' && *p != ' '; ++p) {
+        if (*p >= '0' && *p <= '9') {
+            decimal_count++;
+        }
+    }
+
+    if (decimal_count != 2) {
+        std::cerr << "FAILED: numeric rounding test - wrong decimal count (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: numeric display rounding test" << std::endl;
+    return true;
+}
+
+bool test_numeric_display_small_range() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 0;
+    config.display_max_value = 10;
+    config.display_float_digits = 3;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(512, config, buffer, sizeof(buffer));
+
+    if (buffer[0] == '\0') {
+        std::cerr << "FAILED: small range test - empty output" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: numeric display small range test" << std::endl;
+    return true;
+}
+
+bool test_numeric_display_large_values() {
+    vmprog_parameter_config_v1_0 config;
+    config.control_mode = vmprog_parameter_control_mode_v1_0::linear;
+    config.display_min_value = 10000;
+    config.display_max_value = 20000;
+    config.display_float_digits = 0;
+    config.suffix_label[0] = '\0';
+
+    char buffer[20];
+    generate_parameter_value_display_string(1023, config, buffer, sizeof(buffer));
+
+    if (strcmp(buffer, "20000") != 0) {
+        std::cerr << "FAILED: large values test (got: " << buffer << ")" << std::endl;
+        return false;
+    }
+
+    std::cout << "PASSED: numeric display large values test" << std::endl;
+    return true;
+}
+
 // ===== Main Test Runner =====
 
 int main() {
@@ -1341,6 +1958,35 @@ int main() {
     // Optimization verification tests
     total++; if (test_shift_optimizations()) passed++;
     total++; if (test_divisor_lookup_table()) passed++;
+
+    // Individual step mode tests
+    total++; if (test_steps_8_mode()) passed++;
+    total++; if (test_steps_16_mode()) passed++;
+    total++; if (test_steps_32_mode()) passed++;
+    total++; if (test_steps_64_mode()) passed++;
+    total++; if (test_steps_128_mode()) passed++;
+
+    // Individual polar mode tests
+    total++; if (test_polar_degs_90_mode()) passed++;
+    total++; if (test_polar_degs_180_mode()) passed++;
+    total++; if (test_polar_degs_720_mode()) passed++;
+    total++; if (test_polar_degs_1440_mode()) passed++;
+    total++; if (test_polar_degs_2880_mode()) passed++;
+
+    // Extended string generation tests
+    total++; if (test_string_zero_decimals()) passed++;
+    total++; if (test_string_one_decimal()) passed++;
+    total++; if (test_string_suffix_variations()) passed++;
+    total++; if (test_string_max_decimals()) passed++;
+    total++; if (test_string_with_curves()) passed++;
+    total++; if (test_string_buffer_safety()) passed++;
+    total++; if (test_string_negative_ranges()) passed++;
+    total++; if (test_string_mixed_sign()) passed++;
+
+    // Additional numeric display tests
+    total++; if (test_numeric_display_rounding()) passed++;
+    total++; if (test_numeric_display_small_range()) passed++;
+    total++; if (test_numeric_display_large_values()) passed++;
 
     std::cout << std::endl;
     std::cout << "======================================" << std::endl;
