@@ -13,5 +13,5 @@ license = "GPL-3.0"
 category = "Utility"
 description = "Simple passthrough program with null parameters for testing."
 url = "https://github.com/lzxindustries/videomancer-sdk"
-hardware_compatibility = ["rev_a", "rev_b"]
+hardware_compatibility = ["rev_b"]
 core = "yuv444_30b"

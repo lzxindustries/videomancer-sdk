@@ -348,6 +348,20 @@ for PROGRAM in $PROGRAMS; do
         # Temporary file for capturing make errors
         MAKE_LOG=$(mktemp)
 
+        # Check for and execute Python hook if it exists
+        PYTHON_HOOK="${PROJECT_ROOT}${PROGRAM}.py"
+        if [ -f "$PYTHON_HOOK" ]; then
+            echo -e "${CYAN}Executing Python hook: ${PROGRAM}.py${NC}"
+            if ! python3 "$PYTHON_HOOK"; then
+                echo -e "${RED}ERROR: Python hook failed${NC}"
+                rm -f "$MAKE_LOG"
+                cd ..
+                FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+                continue 2
+            fi
+            echo -e "${GREEN}  ✓ Python hook completed${NC}"
+        fi
+
         # Track total bitstream generation time
         BITSTREAM_START=$(date +%s.%N)
 
