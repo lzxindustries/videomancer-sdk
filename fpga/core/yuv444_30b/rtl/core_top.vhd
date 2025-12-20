@@ -110,7 +110,7 @@ begin
     s_video_in.vsync_n <= i_hdmi_rx_vsync;
     s_video_in.avid <= i_hdmi_rx_de;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_hdmi_rx_avid;
+    o_mcu_gpout_clk <= i_hdmi_rx_de;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -126,7 +126,7 @@ begin
     s_video_in.vsync_n <= i_hdmi_rx_vsync;
     s_video_in.avid <= i_hdmi_rx_de;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_hdmi_rx_avid;
+    o_mcu_gpout_clk <= i_hdmi_rx_de;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
