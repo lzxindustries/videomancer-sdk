@@ -198,12 +198,15 @@ parse_build_stats() {
 }
 
 # Determine which programs to build
-PROGRAMS="${1:-$(find "${VIDEOMANCER_PROGRAMS_DIR}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)}"
-PROGRAM_COUNT=$(echo "$PROGRAMS" | wc -w)
-
-if [ -n "$1" ]; then
-    echo -e "${CYAN}Building specific program: ${1}${NC}"
+if [ $# -gt 0 ]; then
+    # Arguments provided - use them as program list
+    PROGRAMS="$@"
+    PROGRAM_COUNT=$#
+    echo -e "${CYAN}Building ${PROGRAM_COUNT} specific program(s)${NC}"
 else
+    # No arguments - find all programs
+    PROGRAMS="$(find "${VIDEOMANCER_PROGRAMS_DIR}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)"
+    PROGRAM_COUNT=$(echo "$PROGRAMS" | wc -w)
     echo -e "${CYAN}Building all programs (${PROGRAM_COUNT} found in ${VIDEOMANCER_PROGRAMS_DIR})${NC}"
 fi
 echo ""
