@@ -110,7 +110,7 @@ begin
     s_video_in.vsync_n <= i_hdmi_rx_vsync;
     s_video_in.avid <= i_hdmi_rx_de;
     s_video_in.field_n <= '1';
-    -- o_mcu_gpout_clk <= i_hdmi_rx_hsync;
+    o_mcu_gpout_clk <= i_hdmi_rx_de;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -126,7 +126,7 @@ begin
     s_video_in.vsync_n <= i_hdmi_rx_vsync;
     s_video_in.avid <= i_hdmi_rx_de;
     s_video_in.field_n <= '1';
-    -- o_mcu_gpout_clk <= i_hdmi_rx_hsync;
+    o_mcu_gpout_clk <= i_hdmi_rx_de;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -140,7 +140,7 @@ begin
     s_video_in.vsync_n <= i_vid_dec_vsync;
     s_video_in.avid <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    -- o_mcu_gpout_clk <= i_vid_dec_hsync;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -154,7 +154,7 @@ begin
     s_video_in.vsync_n <= i_vid_dec_vsync;
     s_video_in.avid <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    -- o_mcu_gpout_clk <= i_vid_dec_hsync;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -181,7 +181,7 @@ begin
     s_video_in.vsync_n <= i_vid_dec_vsync;
     s_video_in.avid <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    -- o_mcu_gpout_clk <= i_vid_dec_hsync;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
     o_vid_dec_hsync_in <= i_hdmi_rx_hsync;
     o_vid_dec_vsync_in <= i_hdmi_rx_vsync;
@@ -203,7 +203,7 @@ begin
     s_video_in.vsync_n <= i_vid_dec_vsync;
     s_video_in.avid <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    -- o_mcu_gpout_clk <= i_vid_dec_hsync;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
     o_vid_dec_hsync_in <= i_hdmi_rx_hsync;
     o_vid_dec_vsync_in <= i_hdmi_rx_vsync;
