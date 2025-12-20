@@ -272,7 +272,45 @@ end process p_sync_delay;
 
 ```
 
-### Step 5: Build and Test
+### Step 5: Add Python Hook (Optional)
+
+You can optionally create a Python script that runs automatically during the build process, before any FPGA synthesis begins. This is useful for:
+
+- Generating lookup tables or coefficient files
+- Preprocessing data or configuration files
+- Performing validation checks
+- Creating derived VHDL components
+
+**Creating the Hook:**
+
+Create a Python script named `your_program.py` in your program directory:
+
+```python
+#!/usr/bin/env python3
+# Copyright (C) 2025 LZX Industries LLC
+# SPDX-License-Identifier: GPL-3.0-only
+"""
+Your Program - Build Hook
+
+Description of what this hook does.
+"""
+
+if __name__ == "__main__":
+    # Your preprocessing code here
+    print("Generating lookup tables...")
+    # Generate files, validate configs, etc.
+    print("Done!")
+```
+
+**Key Points:**
+
+- The script must be named exactly `your_program.py` (matching your program name)
+- It will be executed once per program build, before any hardware-specific synthesis
+- If the script fails (returns non-zero exit code), the build will stop
+- The script runs in the context where OSS CAD Suite environment is loaded
+- Use standard Python 3 - the system Python interpreter is used
+
+### Step 6: Build and Test
 
 ```bash
 
