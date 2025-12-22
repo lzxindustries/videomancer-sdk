@@ -90,9 +90,9 @@ mkdir build
 cd build
 
 # OSS CAD Suite download
-OSS_VERSION="20251222"
+OSS_VERSION="20250523"
 OSS_FILE="oss-cad-suite-${OSS_ARCH}-${OSS_VERSION}.tgz"
-OSS_URL="https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2025-12-22/${OSS_FILE}"
+OSS_URL="https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2025-05-23/${OSS_FILE}"
 
 if [ -f "${OSS_FILE}" ]; then
     echo -e "${YELLOW}Using existing ${OSS_FILE}${NC}"
