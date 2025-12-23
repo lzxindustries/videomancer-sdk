@@ -517,7 +517,7 @@ for PROGRAM in $PROGRAMS; do
         PACK_LOG=$(mktemp)
         if [ "$SIGN_PACKAGES" = true ]; then
             echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-            if ! python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+            if ! /usr/bin/python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
                 echo -e "${RED}Packaging failed. Error output:${NC}"
                 cat "$PACK_LOG"
                 rm -f "$PACK_LOG"
@@ -526,7 +526,7 @@ for PROGRAM in $PROGRAMS; do
                 continue 2
             fi
         else
-            if ! python3 vmprog_pack.py --no-sign --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+            if ! /usr/bin/python3 vmprog_pack.py --no-sign --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
                 echo -e "${RED}Packaging failed. Error output:${NC}"
                 cat "$PACK_LOG"
                 rm -f "$PACK_LOG"
