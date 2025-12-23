@@ -1324,6 +1324,21 @@ namespace lzx {
         }
     }
 
+    /**
+     * @brief Convert core ID enum to string.
+     *
+     * @param core_id Core ID enum value
+     * @return String description
+     */
+    inline const char* core_id_to_string(vmprog_core_id_v1_0 core_id) {
+        switch (core_id) {
+            case vmprog_core_id_v1_0::none: return "none";
+            case vmprog_core_id_v1_0::yuv444_30b: return "yuv444_30b";
+            case vmprog_core_id_v1_0::yuv422_20b: return "yuv422_20b";
+            default: return "unknown";
+        }
+    }
+
     // =============================================================================
     // Structure Initialization Helpers
     // =============================================================================
