@@ -394,8 +394,9 @@ def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, 
 
         # Modify config_data to only enable the specified hardware flag
         config_data = bytearray(config_data)
-        # hw_mask is at offset 78 (after program_id[64] + 8 uint16_t fields)
-        hw_mask_offset = 64 + 16
+        # hw_mask is at offset 78 (after program_id[64] + 7 uint16_t fields = 14 bytes)
+        # program_id[64] + version_major/minor/patch + abi_min/max_major/minor = 64 + 14 = 78
+        hw_mask_offset = 64 + 14
         hw_mask = HARDWARE_FLAGS_MAP[hardware]
         struct.pack_into('<I', config_data, hw_mask_offset, hw_mask)
         config_data = bytes(config_data)
