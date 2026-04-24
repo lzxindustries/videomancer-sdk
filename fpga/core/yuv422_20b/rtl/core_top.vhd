@@ -189,8 +189,6 @@ begin
     s_video_in.field_n <= '1';
     o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
-    o_vid_dec_hsync_in <= i_hdmi_rx_hsync;
-    o_vid_dec_vsync_in <= i_hdmi_rx_vsync;
 
   end generate;
 
@@ -211,10 +209,20 @@ begin
     s_video_in.field_n <= '1';
     o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
-    o_vid_dec_hsync_in <= i_hdmi_rx_hsync;
-    o_vid_dec_vsync_in <= i_hdmi_rx_vsync;
 
   end generate;
+
+  -- ========================================================================
+  -- UNCONDITIONAL SYNC ROUTING: HDMI RX -> DECODER EXT SYNC INPUTS
+  -- ========================================================================
+  -- Forward HDMI receiver sync signals to the analog decoder's external
+  -- HSYNC_IN/VSYNC_IN pins in all bitstream variants. In analog and HDMI
+  -- modes, the decoder firmware configures sync extraction from the video
+  -- signal itself (ignoring these pins). In dual and standalone modes,
+  -- firmware configures the decoder for external sync, genlocking it to
+  -- the HDMI receiver's timing.
+  o_vid_dec_hsync_in <= i_hdmi_rx_hsync;
+  o_vid_dec_vsync_in <= i_hdmi_rx_vsync;
 
   -- yuv422_to_yuv444_inst : entity work.yuv422_to_yuv444
   --   port map(
