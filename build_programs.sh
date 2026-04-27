@@ -125,16 +125,21 @@ esac
 # Function to check for timing violations in nextpnr build log
 # Returns 0 if no timing errors, 1 if timing errors found
 # Args: $1 = log file path
-# Note: only checks for ERROR-level timing failures (post-route verification),
-# not Info-level warnings (initial timing estimate which may be pessimistic).
+#
+# nextpnr-ice40 emits TWO "Max frequency for clock ..." lines per run:
+#   1. Info:    <Fmax> MHz   - pre-route estimate (optimistic, ignores routing)
+#   2. Info: or Warning:     - post-route verification (definitive achieved Fmax)
+# By default, post-route FAIL is logged as "Warning:" (not "ERROR:") because
+# nextpnr exits successfully when --timing-allow-fail is in effect. We match
+# the explicit FAIL marker on the post-route line, which appears as either
+# "Warning: Max frequency ... (FAIL at ...)" or
+# "ERROR: Max frequency ... (FAIL at ...)".
 check_timing_errors() {
     local log_file="$1"
     if [ ! -f "$log_file" ]; then
         return 0
     fi
-    # nextpnr reports definitive post-route timing violations as:
-    #   "ERROR: Max frequency for clock ... (FAIL at ...)"
-    if $SEARCH -q 'ERROR.*FAIL at' "$log_file"; then
+    if $SEARCH -qE '(Warning|ERROR):\s+Max frequency.*FAIL at' "$log_file"; then
         return 1
     fi
     return 0
@@ -159,11 +164,14 @@ parse_build_stats() {
         return 1
     fi
 
-    # Extract max frequency from timing analysis (look for critical path max frequency)
-    max_freq=$($SEARCH -oP 'Max frequency for clock.*?:\s+\K[0-9.]+' "$log_file" | head -n1)
+    # Extract max frequency from timing analysis.
+    # nextpnr emits TWO "Max frequency" lines: pre-route estimate (Info, optimistic)
+    # and post-route verification (Info or Warning, definitive). Use tail -n1 to
+    # grab the post-route value, which is the achieved Fmax after routing.
+    max_freq=$($SEARCH -oP 'Max frequency for clock.*?:\s+\K[0-9.]+' "$log_file" | tail -n1)
     if [ -z "$max_freq" ]; then
         # Alternative pattern for max frequency
-        max_freq=$($SEARCH -oP 'Max delay.*?=.*?\K[0-9.]+(?=\s+MHz)' "$log_file" | head -n1)
+        max_freq=$($SEARCH -oP 'Max delay.*?=.*?\K[0-9.]+(?=\s+MHz)' "$log_file" | tail -n1)
     fi
 
     # Extract resource utilization with both used and max values
