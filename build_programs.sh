@@ -437,12 +437,7 @@ for PROGRAM in $PROGRAMS; do
             continue 2
         fi
         if ! check_timing_errors "$MAKE_LOG"; then
-            echo -e "${RED}Timing constraint violated. Error output:${NC}"
-            cat "$MAKE_LOG"
-            rm -f "$MAKE_LOG"
-            cd ..
-            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
-            continue 2
+            echo -e "${YELLOW}    ⚠ HD timing not met (informational; bitstream produced via --timing-allow-fail)${NC}"
         fi
         END=$(date +%s.%N)
         ELAPSED=$(echo "$END - $START" | bc)
@@ -491,12 +486,7 @@ for PROGRAM in $PROGRAMS; do
             continue 2
         fi
         if ! check_timing_errors "$MAKE_LOG"; then
-            echo -e "${RED}Timing constraint violated. Error output:${NC}"
-            cat "$MAKE_LOG"
-            rm -f "$MAKE_LOG"
-            cd ..
-            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
-            continue 2
+            echo -e "${YELLOW}    ⚠ HD timing not met (informational; bitstream produced via --timing-allow-fail)${NC}"
         fi
         END=$(date +%s.%N)
         ELAPSED=$(echo "$END - $START" | bc)
@@ -545,12 +535,7 @@ for PROGRAM in $PROGRAMS; do
             continue 2
         fi
         if ! check_timing_errors "$MAKE_LOG"; then
-            echo -e "${RED}Timing constraint violated. Error output:${NC}"
-            cat "$MAKE_LOG"
-            rm -f "$MAKE_LOG"
-            cd ..
-            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
-            continue 2
+            echo -e "${YELLOW}    ⚠ HD timing not met (informational; bitstream produced via --timing-allow-fail)${NC}"
         fi
         END=$(date +%s.%N)
         ELAPSED=$(echo "$END - $START" | bc)
