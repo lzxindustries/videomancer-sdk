@@ -106,6 +106,8 @@ namespace lzx {
         bitstream_hd_analog = 8,
         bitstream_hd_hdmi = 9,
         bitstream_hd_dual = 10,
+        bitstream_sd_standalone = 11,
+        bitstream_hd_standalone = 12,
     };
 
     // Package header flags
@@ -326,15 +328,15 @@ namespace lzx {
 
 #pragma pack(push, 1)
     struct vmprog_signed_descriptor_v1_0 {
-        static constexpr uint32_t max_artifacts = 8;
-        static constexpr uint32_t struct_size = 332;
+        static constexpr uint32_t max_artifacts = 10;
+        static constexpr uint32_t struct_size = 404;
 
         uint8_t config_sha256[32];   // SHA-256 hash of program config
-        uint8_t  artifact_count;      // Number of valid artifact entries (must be 0-8, entries [0..count-1] are valid)
+        uint8_t  artifact_count;      // Number of valid artifact entries (must be 0-10, entries [0..count-1] are valid)
         uint8_t  reserved_pad[3];     // Reserved padding to maintain alignment
         vmprog_artifact_hash_v1_0 artifacts[max_artifacts];  // Artifact hash array
         // Note: Entries [0..artifact_count-1] contain valid artifact hashes
-        //       Entries [artifact_count..7] must be zeroed (type=none, hash=zeros)
+        //       Entries [artifact_count..9] must be zeroed (type=none, hash=zeros)
         vmprog_signed_descriptor_flags_v1_0 flags;
         uint32_t build_id;            // Build identifier
     };
@@ -467,8 +469,8 @@ namespace lzx {
         "vmprog_program_config_v1_0 size mismatch - check struct packing and alignment");
 
     // Additional static assertions for array bounds
-    static_assert(vmprog_signed_descriptor_v1_0::max_artifacts == 8,
-        "max_artifacts must be 8 - this is part of the format specification");
+    static_assert(vmprog_signed_descriptor_v1_0::max_artifacts == 10,
+        "max_artifacts must be 10 - this is part of the format specification");
 
     static_assert(vmprog_parameter_config_v1_0::max_value_labels == 16,
         "max_value_labels must be 16 - this is part of the format specification");
@@ -598,7 +600,7 @@ namespace lzx {
     static_assert(vmprog_signed_descriptor_v1_0::struct_size ==
         32 +  // config_sha256
         4 +   // artifact_count (1 byte) + reserved_pad (3 bytes)
-        (vmprog_signed_descriptor_v1_0::max_artifacts * vmprog_artifact_hash_v1_0::struct_size) + // 288
+        (vmprog_signed_descriptor_v1_0::max_artifacts * vmprog_artifact_hash_v1_0::struct_size) + // 360
         sizeof(vmprog_signed_descriptor_flags_v1_0) + // 4
         sizeof(uint32_t),  // build_id
         "vmprog_signed_descriptor_v1_0::struct_size calculation mismatch");
@@ -923,7 +925,7 @@ namespace lzx {
     ) {
         // Check artifact type is valid (none is only allowed for unused slots)
         uint32_t type_value = static_cast<uint32_t>(artifact.type);
-        if (type_value > static_cast<uint32_t>(vmprog_toc_entry_type_v1_0::bitstream_hd_dual)) {
+        if (type_value > static_cast<uint32_t>(vmprog_toc_entry_type_v1_0::bitstream_hd_standalone)) {
             return vmprog_validation_result::invalid_enum_value;
         }
 

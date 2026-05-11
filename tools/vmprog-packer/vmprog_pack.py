@@ -21,9 +21,11 @@ Input directory structure:
             sd_analog.bin           # Optional: SD analog bitstream
             sd_hdmi.bin             # Optional: SD HDMI bitstream
             sd_dual.bin             # Optional: SD dual bitstream
+            sd_standalone.bin       # Optional: SD standalone bitstream
             hd_analog.bin           # Optional: HD analog bitstream
             hd_hdmi.bin             # Optional: HD HDMI bitstream
             hd_dual.bin             # Optional: HD dual bitstream
+            hd_standalone.bin       # Optional: HD standalone bitstream
 """
 
 import struct
@@ -66,13 +68,13 @@ VERSION_MINOR = 0
 HEADER_SIZE = 64
 TOC_ENTRY_SIZE = 64
 PROGRAM_CONFIG_SIZE = 7936
-SIGNED_DESCRIPTOR_SIZE = 332
+SIGNED_DESCRIPTOR_SIZE = 404
 SIGNATURE_SIZE = 64
 ARTIFACT_HASH_SIZE = 36
 
 # Limits
 MAX_FILE_SIZE = 1048576  # 1 MB
-MAX_ARTIFACTS = 8
+MAX_ARTIFACTS = 10
 MAX_TOC_ENTRIES = 256
 
 # TOC Entry Types
@@ -88,6 +90,8 @@ class TOCEntryType:
     BITSTREAM_HD_ANALOG = 8
     BITSTREAM_HD_HDMI = 9
     BITSTREAM_HD_DUAL = 10
+    BITSTREAM_SD_STANDALONE = 11
+    BITSTREAM_HD_STANDALONE = 12
 
 # Header flags
 class HeaderFlags:
@@ -301,9 +305,11 @@ BITSTREAM_MAP = {
     'sd_analog.bin': TOCEntryType.BITSTREAM_SD_ANALOG,
     'sd_hdmi.bin': TOCEntryType.BITSTREAM_SD_HDMI,
     'sd_dual.bin': TOCEntryType.BITSTREAM_SD_DUAL,
+    'sd_standalone.bin': TOCEntryType.BITSTREAM_SD_STANDALONE,
     'hd_analog.bin': TOCEntryType.BITSTREAM_HD_ANALOG,
     'hd_hdmi.bin': TOCEntryType.BITSTREAM_HD_HDMI,
     'hd_dual.bin': TOCEntryType.BITSTREAM_HD_DUAL,
+    'hd_standalone.bin': TOCEntryType.BITSTREAM_HD_STANDALONE,
 }
 
 
@@ -441,11 +447,13 @@ def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, 
             TOCEntryType.BITSTREAM_SD_ANALOG,
             TOCEntryType.BITSTREAM_SD_HDMI,
             TOCEntryType.BITSTREAM_SD_DUAL,
+            TOCEntryType.BITSTREAM_SD_STANDALONE,
         }
         hd_bitstream_types = {
             TOCEntryType.BITSTREAM_HD_ANALOG,
             TOCEntryType.BITSTREAM_HD_HDMI,
             TOCEntryType.BITSTREAM_HD_DUAL,
+            TOCEntryType.BITSTREAM_HD_STANDALONE,
         }
 
         available_types = {bs.entry_type for bs in bitstreams}
@@ -924,7 +932,7 @@ def validate_signed_descriptor(data: bytes, offset: int) -> int:
         artifact_type = struct.unpack_from('<I', data, artifact_offset)[0]
 
         # Check artifact type is valid
-        if artifact_type < TOCEntryType.FPGA_BITSTREAM or artifact_type > TOCEntryType.BITSTREAM_HD_DUAL:
+        if artifact_type < TOCEntryType.FPGA_BITSTREAM or artifact_type > TOCEntryType.BITSTREAM_HD_STANDALONE:
             return ValidationResult.INVALID_ENUM_VALUE
 
     return ValidationResult.OK

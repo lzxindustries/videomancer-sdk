@@ -1170,15 +1170,17 @@ bool test_read_payload_wrong_position() {
 bool test_package_all_bitstream_types() {
     mock_vmprog_stream stream;
 
-    const uint32_t bitstream_count = 7;
+    const uint32_t bitstream_count = 9;
     vmprog_toc_entry_type_v1_0 bitstream_types[] = {
         vmprog_toc_entry_type_v1_0::fpga_bitstream,
         vmprog_toc_entry_type_v1_0::bitstream_sd_analog,
         vmprog_toc_entry_type_v1_0::bitstream_sd_hdmi,
         vmprog_toc_entry_type_v1_0::bitstream_sd_dual,
+        vmprog_toc_entry_type_v1_0::bitstream_sd_standalone,
         vmprog_toc_entry_type_v1_0::bitstream_hd_analog,
         vmprog_toc_entry_type_v1_0::bitstream_hd_hdmi,
-        vmprog_toc_entry_type_v1_0::bitstream_hd_dual
+        vmprog_toc_entry_type_v1_0::bitstream_hd_dual,
+        vmprog_toc_entry_type_v1_0::bitstream_hd_standalone
     };
 
     vmprog_toc_entry_v1_0 toc[bitstream_count];

@@ -9,12 +9,12 @@ Binary container for FPGA programs with Ed25519 signing.
 ```
 File Header (64 bytes) - Magic 'VMPG', version, size, flags
 Table of Contents - N × 64-byte entries with type, offset, size, hash
-Payloads - Config (7936 bytes), descriptor (332 bytes), signature (64 bytes), bitstreams
+Payloads - Config (7936 bytes), descriptor (404 bytes), signature (64 bytes), bitstreams
 ```
 
 ## TOC Entry Types
 
-`config` (1), `signed_descriptor` (2), `signature` (3), `fpga_bitstream` (4), `bitstream_sd_analog/hdmi/dual` (5-7), `bitstream_hd_analog/hdmi/dual` (8-10)
+`config` (1), `signed_descriptor` (2), `signature` (3), `fpga_bitstream` (4), `bitstream_sd_analog/hdmi/dual` (5-7), `bitstream_hd_analog/hdmi/dual` (8-10), `bitstream_sd_standalone` (11), `bitstream_hd_standalone` (12)
 
 ## Bitstream Compression (v1.1)
 
@@ -223,23 +223,23 @@ Used in signed descriptors to link artifacts:
 
 ### 4.4 Signed Descriptor
 
-**Structure:** `vmprog_signed_descriptor_v1_0` (332 bytes)
+**Structure:** `vmprog_signed_descriptor_v1_0` (404 bytes)
 
 This structure is signed by Ed25519:
 
 | Offset | Type | Field | Size | Description |
 |-------:|------|-------|-----:|-------------|
 | 0 | uint8_t[32] | config_sha256 | 32 | Hash of program config |
-| 32 | uint8_t | artifact_count | 1 | Number of artifacts (0-8) |
+| 32 | uint8_t | artifact_count | 1 | Number of artifacts (0-10) |
 | 33 | uint8_t[3] | reserved_pad | 3 | Reserved padding (zeros) |
-| 36 | artifact[8] | artifacts | 288 | Artifact hashes (8×36 bytes) |
-| 324 | uint32_t | flags | 4 | Descriptor flags |
-| 328 | uint32_t | build_id | 4 | Build identifier |
+| 36 | artifact[10] | artifacts | 360 | Artifact hashes (10×36 bytes) |
+| 396 | uint32_t | flags | 4 | Descriptor flags |
+| 400 | uint32_t | build_id | 4 | Build identifier |
 
 **Constants:**
 
-- `max_artifacts` = 8
-- `struct_size` = 332
+- `max_artifacts` = 10
+- `struct_size` = 404
 
 **Notes:** Signed by Ed25519. Signature stored as separate TOC entry.
 

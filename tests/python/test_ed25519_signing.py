@@ -116,8 +116,8 @@ def test_signing_and_verification():
         pub_key_data = pub_key_path.read_bytes()
         public_key = Ed25519PublicKey.from_public_bytes(pub_key_data)
 
-        # Create a test descriptor (332 bytes)
-        test_descriptor = b'\x00' * 332
+        # Create a test descriptor (404 bytes)
+        test_descriptor = b'\x00' * 404
         test_descriptor = bytearray(test_descriptor)
 
         # Put some test data in it

@@ -166,7 +166,7 @@ The tool creates a `.vmprog` file with the following structure:
 
 3. **Payloads**
    - Program configuration (7936 bytes)
-   - Signed descriptor (332 bytes)
+   - Signed descriptor (404 bytes)
    - Ed25519 signature (64 bytes, if signed)
 
 **Notes:**

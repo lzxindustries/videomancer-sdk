@@ -1,6 +1,6 @@
 -- Videomancer SDK - Open source FPGA-based video effects development kit
 -- Copyright (C) 2025 LZX Industries LLC
--- File: hd_analog_pkg.vhd - HD Analog Core Configuration
+-- File: sd_standalone_pkg.vhd - SD Standalone Core Configuration
 -- License: GNU General Public License v3.0
 -- https://github.com/lzxindustries/videomancer-sdk
 --
@@ -18,8 +18,12 @@
 -- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- Description:
---   Core configuration package for HD analog video mode.
---   Enables analog output at HD resolution with no clock division.
+--   Core configuration package for SD standalone video mode.
+--   Standalone mode is structurally similar to analog mode but is intended
+--   to evolve into a configuration that ignores all external video input
+--   and runs purely from the internal sync generator. Initially this
+--   package mirrors sd_analog so the bitstream is functionally identical;
+--   downstream RTL may gate additional logic on C_ENABLE_STANDALONE.
 --
 -- Authors:
 --   Lars Larsen
@@ -32,8 +36,8 @@ package core_config_pkg is
   constant C_ENABLE_ANALOG     : boolean := true;
   constant C_ENABLE_HDMI       : boolean := false;
   constant C_ENABLE_DUAL       : boolean := false;
-  constant C_ENABLE_STANDALONE : boolean := false;
-  constant C_ENABLE_SD         : boolean := false;
-  constant C_ENABLE_HD         : boolean := true;
+  constant C_ENABLE_STANDALONE : boolean := true;
+  constant C_ENABLE_SD         : boolean := true;
+  constant C_ENABLE_HD         : boolean := false;
   constant C_HD_CLOCK_DIVISOR  : integer := 1;
 end package core_config_pkg;

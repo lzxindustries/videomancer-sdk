@@ -402,7 +402,7 @@ for PROGRAM in $PROGRAMS; do
         # Remove stale .vmprog so a failed build can't be masked by a previous success
         rm -f "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog"
 
-        # Synthesize FPGA bitstreams (6 variants)
+        # Synthesize FPGA bitstreams (8 variants)
         echo -e "${GREEN}Synthesizing FPGA bitstreams for ${HARDWARE}...${NC}"
         cd fpga
 
@@ -426,7 +426,7 @@ for PROGRAM in $PROGRAMS; do
         # Track total bitstream generation time
         BITSTREAM_START=$(date +%s.%N)
 
-        echo -e "${CYAN}  [1/6] HD Analog - Fmin: 74.25 MHz...${NC}"
+        echo -e "${CYAN}  [1/8] HD Analog - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
         if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
@@ -448,7 +448,7 @@ for PROGRAM in $PROGRAMS; do
             echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
         fi
 
-        echo -e "${CYAN}  [2/6] SD Analog - Fmin: 27 MHz...${NC}"
+        echo -e "${CYAN}  [2/8] SD Analog - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
         if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
@@ -475,7 +475,7 @@ for PROGRAM in $PROGRAMS; do
             echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
         fi
 
-        echo -e "${CYAN}  [3/6] HD HDMI - Fmin: 74.25 MHz...${NC}"
+        echo -e "${CYAN}  [3/8] HD HDMI - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
         if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
@@ -497,7 +497,7 @@ for PROGRAM in $PROGRAMS; do
             echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
         fi
 
-        echo -e "${CYAN}  [4/6] SD HDMI - Fmin: 27 MHz...${NC}"
+        echo -e "${CYAN}  [4/8] SD HDMI - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
         if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
@@ -524,7 +524,7 @@ for PROGRAM in $PROGRAMS; do
             echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
         fi
 
-        echo -e "${CYAN}  [5/6] HD Dual - Fmin: 74.25 MHz...${NC}"
+        echo -e "${CYAN}  [5/8] HD Dual - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
         if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
@@ -546,9 +546,58 @@ for PROGRAM in $PROGRAMS; do
             echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
         fi
 
-        echo -e "${CYAN}  [6/6] SD Dual - Fmin: 27 MHz...${NC}"
+        echo -e "${CYAN}  [6/8] SD Dual - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
         if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM > "$MAKE_LOG" 2>&1; then
+            echo -e "${RED}Build failed. Error output:${NC}"
+            cat "$MAKE_LOG"
+            rm -f "$MAKE_LOG"
+            cd ..
+            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+            continue 2
+        fi
+        if ! check_timing_errors "$MAKE_LOG"; then
+            echo -e "${RED}Timing constraint violated. Error output:${NC}"
+            cat "$MAKE_LOG"
+            rm -f "$MAKE_LOG"
+            cd ..
+            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+            continue 2
+        fi
+        END=$(date +%s.%N)
+        ELAPSED=$(echo "$END - $START" | bc)
+        BUILD_STATS=$(parse_build_stats "$MAKE_LOG")
+        if [ -n "$BUILD_STATS" ]; then
+            echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s - ${BUILD_STATS}${NC}"
+        else
+            echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
+        fi
+
+        echo -e "${CYAN}  [7/8] HD Standalone - Fmin: 74.25 MHz...${NC}"
+        START=$(date +%s.%N)
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV > "$MAKE_LOG" 2>&1; then
+            echo -e "${RED}Build failed. Error output:${NC}"
+            cat "$MAKE_LOG"
+            rm -f "$MAKE_LOG"
+            cd ..
+            FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+            continue 2
+        fi
+        if ! check_timing_errors "$MAKE_LOG"; then
+            echo -e "${YELLOW}    ⚠ HD timing not met (informational; bitstream produced via --timing-allow-fail)${NC}"
+        fi
+        END=$(date +%s.%N)
+        ELAPSED=$(echo "$END - $START" | bc)
+        BUILD_STATS=$(parse_build_stats "$MAKE_LOG")
+        if [ -n "$BUILD_STATS" ]; then
+            echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s - ${BUILD_STATS}${NC}"
+        else
+            echo -e "${GREEN}    ✓ Completed in ${ELAPSED}s${NC}"
+        fi
+
+        echo -e "${CYAN}  [8/8] SD Standalone - Fmin: 27 MHz...${NC}"
+        START=$(date +%s.%N)
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -578,7 +627,7 @@ for PROGRAM in $PROGRAMS; do
 
         rm -f "$MAKE_LOG"
         cd ..
-        echo -e "${GREEN}✓ All 6 bitstream variants generated in ${TOTAL_BITSTREAM_TIME}s${NC}"
+        echo -e "${GREEN}✓ All 8 bitstream variants generated in ${TOTAL_BITSTREAM_TIME}s${NC}"
 
         # Convert TOML configuration to binary (always regenerate to avoid stale config)
         echo -e "${GREEN}Converting TOML configuration to binary...${NC}"

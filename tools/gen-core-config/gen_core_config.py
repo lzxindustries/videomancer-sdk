@@ -15,12 +15,14 @@ from pathlib import Path
 
 # Map config name to boolean flag values
 CONFIG_MAP = {
-    "sd_analog": {"sd": True,  "hd": False, "analog": True,  "hdmi": False, "dual": False},
-    "sd_hdmi":   {"sd": True,  "hd": False, "analog": False, "hdmi": True,  "dual": False},
-    "sd_dual":   {"sd": True,  "hd": False, "analog": True,  "hdmi": True,  "dual": True},
-    "hd_analog": {"sd": False, "hd": True,  "analog": True,  "hdmi": False, "dual": False},
-    "hd_hdmi":   {"sd": False, "hd": True,  "analog": False, "hdmi": True,  "dual": False},
-    "hd_dual":   {"sd": False, "hd": True,  "analog": True,  "hdmi": True,  "dual": True},
+    "sd_analog":     {"sd": True,  "hd": False, "analog": True,  "hdmi": False, "dual": False, "standalone": False},
+    "sd_hdmi":       {"sd": True,  "hd": False, "analog": False, "hdmi": True,  "dual": False, "standalone": False},
+    "sd_dual":       {"sd": True,  "hd": False, "analog": True,  "hdmi": True,  "dual": True,  "standalone": False},
+    "sd_standalone": {"sd": True,  "hd": False, "analog": True,  "hdmi": False, "dual": False, "standalone": True},
+    "hd_analog":     {"sd": False, "hd": True,  "analog": True,  "hdmi": False, "dual": False, "standalone": False},
+    "hd_hdmi":       {"sd": False, "hd": True,  "analog": False, "hdmi": True,  "dual": False, "standalone": False},
+    "hd_dual":       {"sd": False, "hd": True,  "analog": True,  "hdmi": True,  "dual": True,  "standalone": False},
+    "hd_standalone": {"sd": False, "hd": True,  "analog": True,  "hdmi": False, "dual": False, "standalone": True},
 }
 
 TEMPLATE = """\
@@ -35,12 +37,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 package core_config_pkg is
-  constant C_ENABLE_ANALOG : boolean := {analog};
-  constant C_ENABLE_HDMI   : boolean := {hdmi};
-  constant C_ENABLE_DUAL   : boolean := {dual};
-  constant C_ENABLE_SD     : boolean := {sd};
-  constant C_ENABLE_HD     : boolean := {hd};
-  constant C_HD_CLOCK_DIVISOR : integer := {divisor};
+  constant C_ENABLE_ANALOG     : boolean := {analog};
+  constant C_ENABLE_HDMI       : boolean := {hdmi};
+  constant C_ENABLE_DUAL       : boolean := {dual};
+  constant C_ENABLE_STANDALONE : boolean := {standalone};
+  constant C_ENABLE_SD         : boolean := {sd};
+  constant C_ENABLE_HD         : boolean := {hd};
+  constant C_HD_CLOCK_DIVISOR  : integer := {divisor};
 end package core_config_pkg;
 """
 
@@ -82,6 +85,7 @@ def main() -> int:
         analog=bool_vhdl(flags["analog"]),
         hdmi=bool_vhdl(flags["hdmi"]),
         dual=bool_vhdl(flags["dual"]),
+        standalone=bool_vhdl(flags["standalone"]),
         sd=bool_vhdl(flags["sd"]),
         hd=bool_vhdl(flags["hd"]),
     )

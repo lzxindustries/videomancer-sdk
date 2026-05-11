@@ -49,7 +49,8 @@ entity video_sync_generator is
     trisync_p     : out std_logic;
     trisync_n     : out std_logic;
     hsync         : out std_logic;
-    vsync         : out std_logic
+    vsync         : out std_logic;
+    avid          : out std_logic
   );
 end entity;
 
@@ -100,6 +101,10 @@ architecture rtl of video_sync_generator is
   signal s_vsync_b_lines_0          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_clocks_per_line          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_lines_per_frame          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+  signal s_frame_width              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+  signal s_frame_height             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+  signal s_h_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+  signal s_v_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_counter_clks             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_counter_lines            : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_trisync_p                : std_logic := '0';
@@ -111,6 +116,9 @@ architecture rtl of video_sync_generator is
   signal s_eq_pulses                : std_logic := '0';
   signal s_csync_serration          : std_logic := '0';
   signal s_vsync                    : std_logic := '0';
+  signal s_avid_h                   : std_logic := '0';
+  signal s_avid_v                   : std_logic := '0';
+  signal s_avid                     : std_logic := '0';
 
 begin
 
@@ -138,6 +146,29 @@ begin
       s_is_interlaced            <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).is_interlaced;
       s_clocks_per_line          <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).clocks_per_line;
       s_lines_per_frame          <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).lines_per_frame;
+      s_frame_width              <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_width;
+      s_frame_height             <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_height;
+      -- Right-align the active window inside each line: blanking (hsync
+      -- pulse + back porch) at the start, no front porch. Approximation is
+      -- adequate for free-run mode.
+      s_h_active_start           <=
+        C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).clocks_per_line
+        - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_width;
+      -- Vertical back-porch threshold: active video starts after this many
+      -- lines from the per-field (interlaced) or per-frame (progressive)
+      -- counter reset. Approximation collapses all V blanking to the start
+      -- of the field/frame, which blanks a few extra lines of the front
+      -- porch (already at blanking level in the source) but never crops
+      -- real active video from the top of the picture.
+      if C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).is_interlaced = '1' then
+        s_v_active_start <= shift_right(
+          C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).lines_per_frame
+          - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_height, 1);
+      else
+        s_v_active_start <=
+          C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).lines_per_frame
+          - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_height;
+      end if;
       s_fsync_clks               <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).fsync_clks;
       s_fsync_lines              <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).fsync_lines;
       s_hsync_clks_0             <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).hsync_clks_0;
@@ -178,6 +209,15 @@ begin
     end if;
   end process;
 
+  -- Counter behavior:
+  --   * Free-runs from clk alone, wrapping at s_clocks_per_line and
+  --     s_lines_per_frame -- valid programmed video timing is produced
+  --     even with no external sync inputs at all.
+  --   * External HSYNC/VSYNC are *optional* resets: when present, the
+  --     vsync (or field) edge snaps the per-frame counters to the
+  --     per-standard fsync seed values, locking output phase to the
+  --     external source. Absent external edges, the counters simply
+  --     keep wrapping; output remains a valid free-run signal.
   counters : process (clk)
   begin
     if rising_edge(clk) then
@@ -252,6 +292,25 @@ begin
         s_vsync <= '1';
       end if;
 
+      -- AVID (active video) gate.
+      -- Horizontal: high when pixel counter is past the H back porch
+      -- (active window right-aligned in the line).
+      -- Vertical: high after V back porch (per-standard, accounts for
+      -- interlaced fields).
+      if s_counter_clks > s_h_active_start then
+        s_avid_h <= '1';
+      else
+        s_avid_h <= '0';
+      end if;
+
+      if s_counter_lines > s_v_active_start then
+        s_avid_v <= '1';
+      else
+        s_avid_v <= '0';
+      end if;
+
+      s_avid <= s_avid_h and s_avid_v;
+
     end if;
   end process;
 
@@ -267,5 +326,6 @@ begin
 
   hsync <= s_hsync;
   vsync <= s_vsync;
+  avid  <= s_avid;
 
 end architecture;

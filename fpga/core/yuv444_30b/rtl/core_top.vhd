@@ -121,11 +121,16 @@ begin
     s_video_in.c(9 downto 2) <= i_hdmi_rx_d(7 downto 0);
     s_video_in.y(1 downto 0) <= i_hdmi_rx_d(23 downto 22);
     s_video_in.c(1 downto 0) <= i_hdmi_rx_d(19 downto 18);
-    s_video_in.hsync_n <= i_hdmi_rx_hsync;
-    s_video_in.vsync_n <= i_hdmi_rx_vsync;
-    s_video_in.avid <= i_hdmi_rx_de;
+    -- Sync and active-video gating come from the internal free-running
+    -- video sync generator (slaved to the external HDMI vsync below).
+    -- The HDMI receiver's DE pin is intentionally not used.
+    s_video_in.hsync_n <= s_o_hsync;
+    s_video_in.vsync_n <= s_o_vsync;
+    s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_hdmi_rx_de;
+    s_sync_ref_hsync_n <= i_hdmi_rx_hsync;
+    s_sync_ref_vsync_n <= i_hdmi_rx_vsync;
+    o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -137,11 +142,13 @@ begin
     s_video_in.c(9 downto 2) <= i_hdmi_rx_d(7 downto 0);
     s_video_in.y(1 downto 0) <= i_hdmi_rx_d(23 downto 22);
     s_video_in.c(1 downto 0) <= i_hdmi_rx_d(19 downto 18);
-    s_video_in.hsync_n <= i_hdmi_rx_hsync;
-    s_video_in.vsync_n <= i_hdmi_rx_vsync;
-    s_video_in.avid <= i_hdmi_rx_de;
+    s_video_in.hsync_n <= s_o_hsync;
+    s_video_in.vsync_n <= s_o_vsync;
+    s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_hdmi_rx_de;
+    s_sync_ref_hsync_n <= i_hdmi_rx_hsync;
+    s_sync_ref_vsync_n <= i_hdmi_rx_vsync;
+    o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -151,11 +158,16 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    s_video_in.hsync_n <= i_vid_dec_hsync;
-    s_video_in.vsync_n <= i_vid_dec_vsync;
-    s_video_in.avid <= i_vid_dec_field_de;
+    -- Sync and active-video gating come from the internal free-running
+    -- video sync generator (slaved to the external analog decoder vsync
+    -- below). The decoder's FIELD/DE pin is intentionally not used.
+    s_video_in.hsync_n <= s_o_hsync;
+    s_video_in.vsync_n <= s_o_vsync;
+    s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_vid_dec_field_de;
+    s_sync_ref_hsync_n <= i_vid_dec_hsync;
+    s_sync_ref_vsync_n <= i_vid_dec_vsync;
+    o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -165,11 +177,13 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    s_video_in.hsync_n <= i_vid_dec_hsync;
-    s_video_in.vsync_n <= i_vid_dec_vsync;
-    s_video_in.avid <= i_vid_dec_field_de;
+    s_video_in.hsync_n <= s_o_hsync;
+    s_video_in.vsync_n <= s_o_vsync;
+    s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_vid_dec_field_de;
+    s_sync_ref_hsync_n <= i_vid_dec_hsync;
+    s_sync_ref_vsync_n <= i_vid_dec_vsync;
+    o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -184,6 +198,9 @@ begin
       i_bypass => '0'
     );
 
+    -- Dual mode passthrough: HDMI RX -> Analog Encoder.
+    -- This is the only path in the bitstream that may reference the HDMI
+    -- receiver's blanking signals (HSYNC/VSYNC); DE remains unused.
     o_vid_enc_d(15 downto 8) <= i_hdmi_rx_d(15 downto 8);
     o_vid_enc_d(7 downto 0) <= i_hdmi_rx_d(7 downto 0);
     o_vid_enc_hsync <= not i_hdmi_rx_hsync;
@@ -192,11 +209,14 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    s_video_in.hsync_n <= i_vid_dec_hsync;
-    s_video_in.vsync_n <= i_vid_dec_vsync;
-    s_video_in.avid <= i_vid_dec_field_de;
+    -- Sync and active-video gating come from the internal free-running
+    -- video sync generator. Reference selection (sync_ref_*) is handled
+    -- by the dedicated CDC block below.
+    s_video_in.hsync_n <= s_o_hsync;
+    s_video_in.vsync_n <= s_o_vsync;
+    s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_vid_dec_field_de;
+    o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -212,11 +232,11 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    s_video_in.hsync_n <= i_vid_dec_hsync;
-    s_video_in.vsync_n <= i_vid_dec_vsync;
-    s_video_in.avid <= i_vid_dec_field_de;
+    s_video_in.hsync_n <= s_o_hsync;
+    s_video_in.vsync_n <= s_o_vsync;
+    s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= i_vid_dec_field_de;
+    o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -374,17 +394,12 @@ begin
   -- ========================================================================
   -- SYNC OUTPUT REFERENCE SELECTION
   -- ========================================================================
-  -- In dual mode, the Analog Enc receives HDMI RX passthrough data, so the
-  -- sync output must match the HDMI RX input timing. The HDMI RX sync
-  -- signals are in the i_hdmi_rx_clk domain; vid_clk is the genlock'd analog
-  -- decoder clock, so a 2FF synchronizer provides clean capture.
-  -- In all other modes, both outputs receive the program output, so the sync
-  -- output matches s_video_out timing directly.
-
-  GEN_SYNC_REF_PROGRAM_OUT : if not C_ENABLE_DUAL generate
-    s_sync_ref_hsync_n <= s_video_out.hsync_n;
-    s_sync_ref_vsync_n <= s_video_out.vsync_n;
-  end generate;
+  -- The video sync generator's HSYNC/VSYNC reference is driven by the
+  -- external source's sync pins (set in each GEN_*_IN block above) for
+  -- HDMI and analog modes. In dual mode, vid_clk is the analog decoder's
+  -- clock domain but the desired reference is the HDMI receiver, so a
+  -- 2FF synchronizer provides clean capture across the (genlock'd but
+  -- nominally separate) clock domains.
 
   GEN_SYNC_REF_HDMI_RX : if C_ENABLE_DUAL generate
     p_sync_ref_cdc : process(vid_clk)
@@ -419,7 +434,8 @@ begin
       trisync_p => s_o_trisync_out_p,
       trisync_n => s_o_trisync_out_n,
       hsync => s_o_hsync,
-      vsync => s_o_vsync
+      vsync => s_o_vsync,
+      avid => s_o_avid
     );
 
   yuv444_30b_blanking_inst : entity work.yuv444_30b_blanking

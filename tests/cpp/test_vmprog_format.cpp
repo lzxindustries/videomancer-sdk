@@ -610,7 +610,7 @@ bool test_validate_artifact_hash_invalid_type() {
 bool test_validate_descriptor_max_artifacts() {
     vmprog_signed_descriptor_v1_0 descriptor;
     init_signed_descriptor(descriptor);
-    descriptor.artifact_count = vmprog_signed_descriptor_v1_0::max_artifacts; // 8
+    descriptor.artifact_count = vmprog_signed_descriptor_v1_0::max_artifacts; // 10
 
     // Fill all artifact slots
     for (uint8_t i = 0; i < descriptor.artifact_count; i++) {
