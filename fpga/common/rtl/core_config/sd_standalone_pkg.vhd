@@ -19,11 +19,13 @@
 --
 -- Description:
 --   Core configuration package for SD standalone video mode.
---   Standalone mode is structurally similar to analog mode but is intended
---   to evolve into a configuration that ignores all external video input
---   and runs purely from the internal sync generator. Initially this
---   package mirrors sd_analog so the bitstream is functionally identical;
---   downstream RTL may gate additional logic on C_ENABLE_STANDALONE.
+--   Standalone mode disconnects the HDMI receiver and analog decoder
+--   inputs entirely and generates all pixel clocks internally from a
+--   27 MHz reference clock supplied by the MCU on RP2040_GPOUT_CLK
+--   (pin 128, repurposed as an input in standalone bitstreams). The
+--   bitstream supports two pixel clock rates selected at runtime by
+--   the SPI timing register: 13.5 MHz (NTSC, PAL) and 27 MHz
+--   (480p, 576p), with glitch-free runtime switching.
 --
 -- Authors:
 --   Lars Larsen
@@ -33,7 +35,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 package core_config_pkg is
-  constant C_ENABLE_ANALOG     : boolean := true;
+  constant C_ENABLE_ANALOG     : boolean := false;
   constant C_ENABLE_HDMI       : boolean := false;
   constant C_ENABLE_DUAL       : boolean := false;
   constant C_ENABLE_STANDALONE : boolean := true;
