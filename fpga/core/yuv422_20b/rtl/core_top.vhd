@@ -261,17 +261,38 @@ begin
   -- STANDALONE INPUT GENERATES
   -- ========================================================================
   -- In standalone bitstreams the analog decoder and HDMI receiver video
-  -- datapaths are disconnected from the video pipeline. The FPGA uses
-  -- the ADV7181C LLC clock (i_vid_dec_clk) directly as the pixel clock:
-  -- firmware configures the decoder's CP-PLL in clock-generator-only
-  -- mode so the LLC frequency exactly matches the selected video timing
-  -- (13.5 MHz for NTSC/PAL, 27 MHz for 480p/576p, 74.25 MHz for HD).
-  -- Pin 128 (RP2040_GPOUT_CLK) is driven as a debug AVID heartbeat to
-  -- the MCU, identical to all other bitstream variants.
+  -- datapaths are disconnected from the video pipeline. The FPGA derives
+  -- the pixel clock from the ADV7181C LLC pin (i_vid_dec_clk). Firmware
+  -- programs the decoder's CP-PLL in clock-generator-only mode so LLC is:
+  --   * 27.000 MHz for SD/ED bitstreams (NTSC, PAL, 480p, 576p)
+  --   * 74.250 MHz for HD bitstreams (or 74.25/1.001 for dropframe rates)
+  -- For SD bitstreams the FPGA divides LLC by 2 in fabric to produce the
+  -- 13.5 MHz NTSC/PAL pixel clock, and selects between 13.5 and 27 MHz at
+  -- runtime via a glitch-free clock mux based on the timing-id interlace
+  -- bit. For HD bitstreams the LLC is used directly. Pin 128
+  -- (RP2040_GPOUT_CLK) is driven as a debug AVID heartbeat to the MCU,
+  -- identical to all other bitstream variants.
 
   GEN_SD_STANDALONE_IN : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
+    signal s_ref_27   : std_logic;
+    signal s_ref_13_5 : std_logic := '0';
   begin
-    vid_clk <= i_vid_dec_clk;
+    s_ref_27 <= i_vid_dec_clk;
+
+    p_div2 : process(s_ref_27)
+    begin
+      if rising_edge(s_ref_27) then
+        s_ref_13_5 <= not s_ref_13_5;
+      end if;
+    end process;
+
+    clk_mux_inst : entity work.glitch_free_clock_mux
+    port map(
+      i_clk_a => s_ref_13_5,
+      i_clk_b => s_ref_27,
+      i_sel   => s_video_timing_id(2),
+      o_clk   => vid_clk
+    );
 
     s_video_in.y(9 downto 0) <= (others => '0');
     s_video_in.c(9 downto 0) <= (others => '0');

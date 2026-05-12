@@ -20,11 +20,12 @@
 -- Description:
 --   Core configuration package for SD standalone video mode.
 --   Standalone mode disconnects the HDMI receiver and analog decoder
---   video datapaths and uses the ADV7181C LLC clock (i_vid_dec_clk)
---   directly as the pixel clock. Firmware configures the decoder's
---   CP-PLL in clock-generator-only mode so the LLC frequency exactly
---   matches the selected SD/ED video timing: 13.5 MHz for NTSC and
---   PAL, 27 MHz for 480p and 576p.
+--   video datapaths and derives the pixel clock from the ADV7181C LLC
+--   pin (i_vid_dec_clk). Firmware programs the decoder's CP-PLL in
+--   clock-generator-only mode so LLC = 27 MHz for all four SD bitstream
+--   timings (NTSC, PAL, 480p, 576p). The FPGA divides LLC by 2 in
+--   fabric to derive the 13.5 MHz NTSC/PAL pixel clock and selects
+--   between 13.5 MHz and 27 MHz at runtime via a glitch-free clock mux.
 --
 -- Authors:
 --   Lars Larsen
