@@ -39,6 +39,11 @@ package video_sync_pkg is
     lines_per_frame          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     frame_width              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     frame_height             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+    -- SMPTE H front porch (clocks between end of active video and
+    -- start of HSYNC pulse). Used to right-align the active window
+    -- correctly inside each line so downstream encoders/HDMI TX see
+    -- active video at the SMPTE-correct sample position.
+    h_front_porch            : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     -- -- havid_clks_1             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     -- -- havid_clks_0             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     -- -- vavid_a_clks_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
@@ -111,6 +116,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(525, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(486, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(19, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -179,6 +185,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(625, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(576, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(12, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -247,6 +254,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(525, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(480, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(16, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -315,6 +323,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(625, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(576, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(12, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -383,6 +392,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(750, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1280, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(110, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -451,6 +461,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(750, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1280, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(110, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -519,6 +530,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(750, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1280, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(720, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(440, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -587,6 +599,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(88, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -655,6 +668,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(88, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -723,6 +737,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(528, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -791,6 +806,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(88, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -859,6 +875,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(88, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -927,6 +944,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(528, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -995,6 +1013,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(638, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -1063,6 +1082,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(1125, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(1920, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(1080, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(638, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
@@ -1131,6 +1151,7 @@ package video_sync_pkg is
     lines_per_frame          => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     frame_width              => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     frame_height             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
+    h_front_porch            => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_1             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- havid_clks_0             => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     -- vavid_a_clks_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),

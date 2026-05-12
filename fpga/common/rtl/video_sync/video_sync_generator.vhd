@@ -148,12 +148,17 @@ begin
       s_lines_per_frame          <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).lines_per_frame;
       s_frame_width              <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_width;
       s_frame_height             <= C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_height;
-      -- Right-align the active window inside each line: blanking (hsync
-      -- pulse + back porch) at the start, no front porch. Approximation is
-      -- adequate for free-run mode.
+      -- Right-align the active window inside each line at the SMPTE-
+      -- correct sample position: subtract the per-format H front porch
+      -- so the active region ends front_porch clocks before the next
+      -- HSYNC pulse, leaving (clocks_per_line - frame_width -
+      -- front_porch) = (sync_width + back_porch) of blanking before
+      -- active. Without this the active window slid right by
+      -- exactly front_porch clocks, varying per video standard.
       s_h_active_start           <=
         C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).clocks_per_line
-        - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_width;
+        - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_width
+        - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).h_front_porch;
       -- Vertical back-porch threshold: active video starts after this many
       -- lines from the per-field (interlaced) or per-frame (progressive)
       -- counter reset. Approximation collapses all V blanking to the start
