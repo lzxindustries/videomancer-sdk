@@ -118,6 +118,13 @@ architecture rtl of core_top is
   signal s_prog_data_out : t_video_stream_yuv422_20b;
   signal s_prog_registers : t_spi_ram := (others => (others => '0'));
 
+  -- SD standalone reference clocks. Driven inside GEN_SD_STANDALONE_IN
+  -- (where they are derived from the ADV7181C LLC pad), consumed by
+  -- GEN_SD_STANDALONE_OUT (where the 13.5 MHz reference feeds the
+  -- ADV7393 encoder PLL ×2 to produce a phase-locked 27 MHz CLK).
+  signal s_sd_standalone_ref_27   : std_logic := '0';
+  signal s_sd_standalone_ref_13_5 : std_logic := '0';
+
 begin
 
   GEN_SD_HDMI_IN : if C_ENABLE_SD and C_ENABLE_HDMI generate
@@ -274,22 +281,20 @@ begin
   -- identical to all other bitstream variants.
 
   GEN_SD_STANDALONE_IN : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
-    signal s_ref_27   : std_logic;
-    signal s_ref_13_5 : std_logic := '0';
   begin
-    s_ref_27 <= i_vid_dec_clk;
+    s_sd_standalone_ref_27 <= i_vid_dec_clk;
 
-    p_div2 : process(s_ref_27)
+    p_div2 : process(s_sd_standalone_ref_27)
     begin
-      if rising_edge(s_ref_27) then
-        s_ref_13_5 <= not s_ref_13_5;
+      if rising_edge(s_sd_standalone_ref_27) then
+        s_sd_standalone_ref_13_5 <= not s_sd_standalone_ref_13_5;
       end if;
     end process;
 
     clk_mux_inst : entity work.glitch_free_clock_mux
     port map(
-      i_clk_a => s_ref_13_5,
-      i_clk_b => s_ref_27,
+      i_clk_a => s_sd_standalone_ref_13_5,
+      i_clk_b => s_sd_standalone_ref_27,
       i_sel   => s_video_timing_id(2),
       o_clk   => vid_clk
     );
@@ -643,28 +648,36 @@ begin
   -- ========================================================================
   -- Drive both the analog encoder (ADV7393) and HDMI transmitter
   -- (ADV7513) outputs directly from vid_clk. ADV7393 analog encoder
-  -- requires CLK at 2x the SD pixel rate (27 MHz); LLC is already
-  -- 27 MHz in SD standalone, so drive the encoder clock from LLC
-  -- directly without an oversampling PLL. In HD standalone, vid_clk
-  -- is already 74.25 MHz and drives both encoder and HDMI tx.
+  -- requires CLK at 2x the SD pixel rate (27 MHz). For SD standalone
+  -- we instantiate sd_video_clk_pll_2x driven from the 13.5 MHz LLC÷2
+  -- reference to produce a 27 MHz encoder clock that is PLL-phase-
+  -- locked to vid_clk, mirroring the working SD HDMI/Analog OUT paths.
+  -- ADV7513 receives the same 27 MHz clock and handles SD content via
+  -- pixel_repetition. HD standalone uses vid_clk directly (74.25 MHz).
 
   GEN_SD_STANDALONE_OUT : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
+    signal s_enc_clk_27 : std_logic;
+  begin
+    pll_inst : entity work.sd_video_clk_pll_2x
+    port map(
+      i_clk    => s_sd_standalone_ref_13_5,
+      o_clk    => s_enc_clk_27,
+      i_resetb => '1',
+      i_bypass => '0'
+    );
 
     o_vid_enc_d(15 downto 8) <= s_video_out.y(9 downto 2);
     o_vid_enc_d(7 downto 0) <= s_video_out.c(9 downto 2);
     o_vid_enc_hsync <= not s_video_out.hsync_n;
     o_vid_enc_vsync <= not s_video_out.vsync_n;
-    -- ADV7393 needs 27 MHz CLK for SD: drive directly from LLC (always
-    -- 27 MHz in standalone), regardless of whether vid_clk is 13.5 MHz
-    -- (NTSC/PAL) or 27 MHz (480p/576p).
-    o_vid_enc_clk <= not i_vid_dec_clk;
+    o_vid_enc_clk <= not s_enc_clk_27;
 
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
     o_hdmi_tx_hsync <= s_video_out.hsync_n;
     o_hdmi_tx_vsync <= s_video_out.vsync_n;
-    o_hdmi_tx_clk <= not vid_clk;
+    o_hdmi_tx_clk <= not s_enc_clk_27;
 
   end generate;
 
