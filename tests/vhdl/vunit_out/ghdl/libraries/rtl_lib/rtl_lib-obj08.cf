@@ -1,75 +1,96 @@
 v 4
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/resolution_pkg.vhd" "773dcc5ad130c81ea31f712bf70c100204bc38b0" "20260308194318.052":
-  package resolution_pkg at 37( 1540) + 0 on 75 body;
-  package body resolution_pkg at 62( 2483) + 0 on 76;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/video_timing_generator.vhd" "1cfde08b2853c6581cf1facb2007a80a0ad047e1" "20260308192124.048":
-  entity video_timing_generator at 27( 1188) + 0 on 71;
-  architecture rtl of video_timing_generator at 44( 1574) + 0 on 72;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/edge_detector.vhd" "e24f6ff79256d39d06714fa0a4f7c5520382148a" "20260308191356.779":
-  entity edge_detector at 26( 1090) + 0 on 67;
-  architecture rtl of edge_detector at 40( 1373) + 0 on 68;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/lfsr.vhd" "883b5fb9e1f1ee947f279b0411202b39c5c9675b" "20260308191356.771":
-  entity lfsr at 26( 1129) + 0 on 63;
-  architecture rtl of lfsr at 44( 1600) + 0 on 64;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/sin_cos_full_lut_10x10.vhd" "89101c3e6a5e674a2cf62391940f7e458b73dd46" "20260308191356.760":
-  entity sin_cos_full_lut_10x10 at 27( 1195) + 0 on 59;
-  architecture rtl of sin_cos_full_lut_10x10 at 39( 1491) + 0 on 60;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/variable_filter_s.vhd" "5d3ef4d8081717975e09f47fe8fc42b0040467f5" "20260308191356.745":
-  entity variable_filter_s at 28( 1273) + 0 on 55;
-  architecture rtl of variable_filter_s at 47( 1746) + 0 on 56;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/video_timing_accumulator.vhd" "882f64cd67148debcddcc1225d53f80e2a91c1c5" "20260308191356.736":
-  entity video_timing_accumulator at 28( 1280) + 0 on 51;
-  architecture rtl of video_timing_accumulator at 52( 1997) + 0 on 52;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/interpolator.vhd" "933efd455ea12400bbda639783eb9d7a232a9386" "20260308185946.032":
-  entity interpolator_u at 73( 2981) + 0 on 49;
-  architecture rtl of interpolator_u at 95( 3539) + 0 on 50;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/frame_phase_accumulator.vhd" "4672671fd6fcdde29d99cc350bc94de06495b214" "20260512000144.025":
+  entity frame_phase_accumulator at 41( 1655) + 0 on 90;
+  architecture rtl of frame_phase_accumulator at 59( 2130) + 0 on 91;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/platform/ice40/rtl/standalone_hd_video_clk_pll.vhd" "4062c2b1620d8dfc6278529174cca9014c5dfc1b" "20260512000144.000":
+  entity standalone_hd_video_clk_pll at 38( 1595) + 0 on 79;
+  architecture rtl of standalone_hd_video_clk_pll at 50( 1957) + 0 on 80;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/resolution_pkg.vhd" "9e2d93b2a972fb8db3ba9e1e1f1d6c87c13d573a" "20260512000144.017":
+  package resolution_pkg at 37( 1540) + 0 on 86 body;
+  package body resolution_pkg at 62( 2483) + 0 on 87;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/video_timing_generator.vhd" "1e574d66842e699b4079409608b5652813e66eb7" "20260512000221.820":
+  entity video_timing_generator at 43( 2076) + 0 on 130;
+  architecture rtl of video_timing_generator at 60( 2462) + 0 on 131;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/edge_detector.vhd" "6aedaaaa9aa8d77617f833a5979e3aa323a2863e" "20260512000221.815":
+  entity edge_detector at 34( 1526) + 0 on 128;
+  architecture rtl of edge_detector at 48( 1809) + 0 on 129;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/lfsr.vhd" "6e548b094255c3416c01a85dcb1059eb3f8dbdf9" "20260512000221.802":
+  entity lfsr at 33( 1491) + 0 on 122;
+  architecture rtl of lfsr at 51( 1970) + 0 on 123;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/sin_cos_full_lut_10x10.vhd" "5b7ee8081abc0c4489bd73ea86b5b9a8d880b3b6" "20260512000221.792":
+  entity sin_cos_full_lut_10x10 at 27( 1195) + 0 on 118;
+  architecture rtl of sin_cos_full_lut_10x10 at 39( 1491) + 0 on 119;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/variable_filter_s.vhd" "b8b809cd27d97df1547f2b17bae5cb6759d7f9b1" "20260512000221.777":
+  entity variable_filter_s at 42( 2024) + 0 on 114;
+  architecture rtl of variable_filter_s at 61( 2497) + 0 on 115;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/video_timing_accumulator.vhd" "b6adc2716d7a5ecb0e568a53a0f1b3c06d1ccf2d" "20260512000144.012":
+  entity video_timing_accumulator at 41( 1991) + 0 on 84;
+  architecture rtl of video_timing_accumulator at 65( 2708) + 0 on 85;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/interpolator.vhd" "4feb6e167bbd2f3d755b3876c8ed2d4436a8e4aa" "20260512000221.807":
+  entity interpolator_u at 73( 2979) + 0 on 124;
+  architecture rtl of interpolator_u at 95( 3537) + 0 on 125;
 file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/multiplier.vhd" "a0a02c88e4ec8602dcd1c5a7b3db3e9421beb91f" "20260308185946.025":
   entity multiplier_s at 85( 3663) + 0 on 45;
   architecture rtl of multiplier_s at 107( 4209) + 0 on 46;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_sync/video_field_detector.vhd" "a9ca2530210cdf974e78cc5b75bfe10f82114879" "20260308182358.159":
-  entity video_field_detector at 22( 996) + 0 on 23;
-  architecture rtl of video_field_detector at 39( 1354) + 0 on 24;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/yuv422_20b_to_yuv444_30b.vhd" "e0452ce45220e583c96ff98d6812e4cac0f26a18" "20260308182358.205":
-  entity yuv422_20b_to_yuv444_30b at 26( 1161) + 0 on 33;
-  architecture rtl of yuv422_20b_to_yuv444_30b at 43( 1554) + 0 on 34;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/yuv444_30b_to_yuv422_20b.vhd" "ea9b8318fb4b63be1951bb9842a909bcf861796e" "20260308182358.193":
-  entity yuv444_30b_to_yuv422_20b at 26( 1161) + 0 on 29;
-  architecture rtl of yuv444_30b_to_yuv422_20b at 43( 1537) + 0 on 30;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_sync/video_sync_pkg.vhd" "c8988c8a6280c9fed0b0f23ffee07e82b048187a" "20260308182358.176":
-  package video_sync_pkg at 25( 1069) + 0 on 27;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_sync/video_field_detector.vhd" "ebc08a6517e3c674d7a1ad648c87bdad0ffb0db7" "20260512000144.054":
+  entity video_field_detector at 37( 1638) + 0 on 98;
+  architecture rtl of video_field_detector at 54( 1996) + 0 on 99;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/yuv422_20b_to_yuv444_30b.vhd" "ece3e85c30d27a2726a82f216c1e75b2585004e7" "20260512000221.755":
+  entity yuv422_20b_to_yuv444_30b at 36( 1610) + 0 on 104;
+  architecture rtl of yuv422_20b_to_yuv444_30b at 53( 2003) + 0 on 105;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/yuv444_30b_to_yuv422_20b.vhd" "698a3f52b2f33c1cd8eff0c0633ddc6c591e56ce" "20260512000221.741":
+  entity yuv444_30b_to_yuv422_20b at 36( 1670) + 0 on 100;
+  architecture rtl of yuv444_30b_to_yuv422_20b at 53( 2046) + 0 on 101;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_sync/video_sync_pkg.vhd" "c8988c8a6280c9fed0b0f23ffee07e82b048187a" "20260512000144.036":
+  package video_sync_pkg at 25( 1069) + 0 on 94;
 file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/video_stream_pkg.vhd" "f17ef502e52b58aedd318a27ef1933489fce0835" "20260308182358.164":
   package video_stream_pkg at 25( 1103) + 0 on 25;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/video_timing_pkg.vhd" "5b3b2f8a95f6390ecea9b043b424712f6dcf5d43" "20260308182358.168":
-  package video_timing_pkg at 25( 1073) + 0 on 26;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/core/yuv444_30b/rtl/core_pkg.vhd" "eaf35e173c2efc46b19f0a6da56d3c06a64c82ef" "20260308182358.184":
-  package core_pkg at 22( 988) + 0 on 28;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/yuv444_30b_blanking.vhd" "930861094b66fc019a2fa79e25acd073dcd1d45e" "20260308182358.198":
-  entity yuv444_30b_blanking at 22( 982) + 0 on 31;
-  architecture rtl of yuv444_30b_blanking at 38( 1342) + 0 on 32;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/utils/sync_slv.vhd" "c4ebcdad8d4549836c459c8d62017829f2cf08c6" "20260308182358.210":
-  entity sync_slv at 24( 1066) + 0 on 35;
-  architecture rtl of sync_slv at 36( 1278) + 0 on 36;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/serial/spi_peripheral.vhd" "d3033c11aa54b3d6f38ba4776954b42309867e13" "20260308182358.216":
-  entity spi_peripheral at 36( 1599) + 0 on 37;
-  architecture rtl of spi_peripheral at 65( 2521) + 0 on 38;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/video_timing_pkg.vhd" "abb6b972787fb385b5e1849e249d7eca3e549007" "20260512000144.007":
+  package video_timing_pkg at 25( 1073) + 0 on 83;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/core/yuv444_30b/rtl/core_pkg.vhd" "eaf35e173c2efc46b19f0a6da56d3c06a64c82ef" "20260512000144.043":
+  package core_pkg at 22( 988) + 0 on 95;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/yuv444_30b_blanking.vhd" "c0431a10781d09b73dcbaeee1458cdd8c40b443a" "20260512000221.747":
+  entity yuv444_30b_blanking at 39( 1671) + 0 on 102;
+  architecture rtl of yuv444_30b_blanking at 54( 2000) + 0 on 103;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/utils/sync_slv.vhd" "ab8d775bed98bad0fb8de9538a2120b1f1d29c8c" "20260512000221.764":
+  entity sync_slv at 24( 1066) + 0 on 108;
+  architecture rtl of sync_slv at 36( 1278) + 0 on 109;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/serial/spi_peripheral.vhd" "830ce937894c20c803536b15397f3d40262da283" "20260512000221.773":
+  entity spi_peripheral at 43( 1994) + 0 on 112;
+  architecture rtl of spi_peripheral at 72( 2936) + 0 on 113;
 file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/proc_amp.vhd" "0f96a809e159f63ee0cdd382d316a9899ae6a959" "20260308185946.029":
   entity proc_amp_u at 96( 3982) + 0 on 47;
   architecture rtl of proc_amp_u at 115( 4451) + 0 on 48;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/video_line_buffer.vhd" "a17624e14b75a623ca9a94e5f830ca67503be2f1" "20260308191356.741":
-  entity video_line_buffer at 27( 1203) + 0 on 53;
-  architecture rtl of video_line_buffer at 50( 1882) + 0 on 54;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/variable_delay_u.vhd" "983ffff710eb8a874562ecbef8ed83a2cb29a618" "20260308191356.750":
-  entity variable_delay_u at 26( 1124) + 0 on 57;
-  architecture rtl of variable_delay_u at 49( 1730) + 0 on 58;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/lfsr16.vhd" "bd4996c06016508769638f5441009e07aa536ef5" "20260308191356.766":
-  entity lfsr16 at 27( 1149) + 0 on 61;
-  architecture rtl of lfsr16 at 41( 1473) + 0 on 62;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/frequency_doubler.vhd" "ced47a9431a55c97a2245135bc7e56145cbc21d3" "20260308191356.775":
-  entity frequency_doubler at 28( 1289) + 0 on 65;
-  architecture rtl of frequency_doubler at 46( 1708) + 0 on 66;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/diff_multiplier_s.vhd" "d6a5adf57e23be3db74dbe008d36e3d5d9719561" "20260308191356.784":
-  entity diff_multiplier_s at 28( 1267) + 0 on 69;
-  architecture rtl of diff_multiplier_s at 56( 1990) + 0 on 70;
-file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_sync/video_sync_generator.vhd" "5bfa4340e7a5a509a89e00fe5f1377a65e9dc7c9" "20260308192400.131":
-  entity video_sync_generator at 26( 1129) + 0 on 73;
-  architecture rtl of video_sync_generator at 48( 1660) + 0 on 74;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_stream/video_line_buffer.vhd" "2132bfbaf9da6b6210e654dbfa9ef80213c6eb2d" "20260512000221.760":
+  entity video_line_buffer at 37( 1695) + 0 on 106;
+  architecture rtl of video_line_buffer at 56( 2314) + 0 on 107;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/variable_delay_u.vhd" "d48ccb98af2650d3f287669739ac4330a6bb8139" "20260512000221.781":
+  entity variable_delay_u at 42( 1899) + 0 on 116;
+  architecture rtl of variable_delay_u at 61( 2445) + 0 on 117;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/lfsr16.vhd" "a2e7462c52fbaaff11ff0bf54767b23f3c49303e" "20260512000221.797":
+  entity lfsr16 at 34( 1530) + 0 on 120;
+  architecture rtl of lfsr16 at 48( 1854) + 0 on 121;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/frequency_doubler.vhd" "9b9863cb946548ce5c129ed20f770935c886c2cd" "20260512000221.811":
+  entity frequency_doubler at 38( 1707) + 0 on 126;
+  architecture rtl of frequency_doubler at 56( 2126) + 0 on 127;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/dsp/diff_multiplier_s.vhd" "76f16a38efad33198be3dd0419c5c94262d017c1" "20260512000221.824":
+  entity diff_multiplier_s at 45( 1963) + 0 on 132;
+  architecture rtl of diff_multiplier_s at 73( 2686) + 0 on 133;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_sync/video_sync_generator.vhd" "6cdeb7a5bbf2dee86798560611d5e17a2c2274e7" "20260512000144.050":
+  entity video_sync_generator at 34( 1593) + 0 on 96;
+  architecture rtl of video_sync_generator at 57( 2159) + 0 on 97;
+file / "/home/lars/videomancer/videomancer-sdk/tests/vhdl/sb_pll40_core_sim.vhd" "e8a417f3157f7d9d69902755099cd2ad84f1f801" "20260512000143.996":
+  entity sb_pll40_core at 20( 879) + 0 on 77;
+  architecture sim of sb_pll40_core at 42( 1486) + 0 on 78;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/platform/ice40/rtl/glitch_free_clock_mux.vhd" "d8e393fd3a390105705d5ccdc9281ae4cb9b608b" "20260512000144.003":
+  entity glitch_free_clock_mux at 45( 2027) + 0 on 81;
+  architecture rtl of glitch_free_clock_mux at 57( 2374) + 0 on 82;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/pixel_counter.vhd" "2218884497c0e47d9d53af38e78b0073e6738b25" "20260512000144.021":
+  entity pixel_counter at 37( 1509) + 0 on 88;
+  architecture rtl of pixel_counter at 55( 1916) + 0 on 89;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/video_timing/frame_counter.vhd" "501ac9395341ebd637d40b5f0f22b99a77ce9c33" "20260512000144.029":
+  entity frame_counter at 36( 1435) + 0 on 92;
+  architecture rtl of frame_counter at 51( 1746) + 0 on 93;
+file / "/home/lars/videomancer/videomancer-sdk/fpga/common/rtl/utils/clamp_pkg.vhd" "48e0f7b2b65c8f45f5e9b0e45650cc97ee3e2b12" "20260512000221.768":
+  package clamp_pkg at 33( 1464) + 0 on 110 body;
+  package body clamp_pkg at 81( 3336) + 0 on 111;

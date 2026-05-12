@@ -20,12 +20,11 @@
 -- Description:
 --   Core configuration package for SD standalone video mode.
 --   Standalone mode disconnects the HDMI receiver and analog decoder
---   inputs entirely and generates all pixel clocks internally from a
---   27 MHz reference clock supplied by the MCU on RP2040_GPOUT_CLK
---   (pin 128, repurposed as an input in standalone bitstreams). The
---   bitstream supports two pixel clock rates selected at runtime by
---   the SPI timing register: 13.5 MHz (NTSC, PAL) and 27 MHz
---   (480p, 576p), with glitch-free runtime switching.
+--   video datapaths and uses the ADV7181C LLC clock (i_vid_dec_clk)
+--   directly as the pixel clock. Firmware configures the decoder's
+--   CP-PLL in clock-generator-only mode so the LLC frequency exactly
+--   matches the selected SD/ED video timing: 13.5 MHz for NTSC and
+--   PAL, 27 MHz for 480p and 576p.
 --
 -- Authors:
 --   Lars Larsen

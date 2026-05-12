@@ -20,14 +20,13 @@
 -- Description:
 --   Core configuration package for HD standalone video mode.
 --   Standalone mode disconnects the HDMI receiver and analog decoder
---   inputs entirely and generates the 74.25 MHz pixel clock internally
---   from a 27 MHz reference clock supplied by the MCU on
---   RP2040_GPOUT_CLK (pin 128, repurposed as an input in standalone
---   bitstreams). Supports the seven integer HD timing rates: 720p50,
---   720p60, 1080i50, 1080i60, 1080p24, 1080p25, 1080p30. Dropframe
---   rates (720p59.94, 1080i59.94, 1080p23.98, 1080p29.97) are NOT
---   supported in standalone mode (they require a 27/1.001 MHz
---   reference clock not currently routed to the FPGA).
+--   video datapaths and uses the ADV7181C LLC clock (i_vid_dec_clk)
+--   directly as the pixel clock. Firmware configures the decoder's
+--   CP-PLL in clock-generator-only mode so the LLC frequency exactly
+--   matches the selected HD video timing (74.25 MHz, or 74.25/1.001
+--   MHz for dropframe rates). All eleven HD timing rates are
+--   supported: 720p50, 720p59.94, 720p60, 1080i50, 1080i59.94,
+--   1080i60, 1080p23.98, 1080p24, 1080p25, 1080p29.97, 1080p30.
 --
 -- Authors:
 --   Lars Larsen
