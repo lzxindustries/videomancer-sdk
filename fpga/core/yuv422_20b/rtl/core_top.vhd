@@ -118,12 +118,14 @@ architecture rtl of core_top is
   signal s_prog_data_out : t_video_stream_yuv422_20b;
   signal s_prog_registers : t_spi_ram := (others => (others => '0'));
 
-  -- SD standalone reference clocks. Driven inside GEN_SD_STANDALONE_IN
-  -- (where they are derived from the ADV7181C LLC pad), consumed by
-  -- GEN_SD_STANDALONE_OUT (where the 13.5 MHz reference feeds the
-  -- ADV7393 encoder PLL ×2 to produce a phase-locked 27 MHz CLK).
-  signal s_sd_standalone_ref_27   : std_logic := '0';
-  signal s_sd_standalone_ref_13_5 : std_logic := '0';
+  -- SD standalone clean PLL clock. Derived inside GEN_SD_STANDALONE_IN by
+  -- feeding the ADV7181C LLC pad through a fabric ÷2 register and into
+  -- sd_video_clk_pll_2x (which puts a clean 27 MHz on a global clock net).
+  -- vid_clk is then the ÷2 of this PLL output, so vid_clk and
+  -- s_sd_standalone_clk_27_pll are deterministically phased and the
+  -- ADV7393 / ADV7513 receive a clean 27 MHz CLK with a fixed phase
+  -- relationship to the data registers.
+  signal s_sd_standalone_clk_27_pll : std_logic := '0';
 
 begin
 
@@ -281,23 +283,35 @@ begin
   -- identical to all other bitstream variants.
 
   GEN_SD_STANDALONE_IN : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
+    -- SD standalone supports NTSC and PAL only (13.5 MHz pipeline,
+    -- 27 MHz encoder/HDMI CLK). LLC always arrives at 27 MHz from the
+    -- ADV7181C in clock-generator-only mode. See yuv444_30b/core_top.vhd
+    -- for the full clock-tree diagram.
+    signal s_llc_div2_pre  : std_logic := '0';
+    signal s_vid_clk_div2  : std_logic := '0';
   begin
-    s_sd_standalone_ref_27 <= i_vid_dec_clk;
-
-    p_div2 : process(s_sd_standalone_ref_27)
+    p_llc_div2 : process(i_vid_dec_clk)
     begin
-      if rising_edge(s_sd_standalone_ref_27) then
-        s_sd_standalone_ref_13_5 <= not s_sd_standalone_ref_13_5;
+      if rising_edge(i_vid_dec_clk) then
+        s_llc_div2_pre <= not s_llc_div2_pre;
       end if;
     end process;
 
-    clk_mux_inst : entity work.glitch_free_clock_mux
+    pll_inst : entity work.sd_video_clk_pll_2x
     port map(
-      i_clk_a => s_sd_standalone_ref_13_5,
-      i_clk_b => s_sd_standalone_ref_27,
-      i_sel   => s_video_timing_id(2),
-      o_clk   => vid_clk
+      i_clk    => s_llc_div2_pre,
+      o_clk    => s_sd_standalone_clk_27_pll,
+      i_resetb => '1',
+      i_bypass => '0'
     );
+
+    p_vid_clk_div2 : process(s_sd_standalone_clk_27_pll)
+    begin
+      if rising_edge(s_sd_standalone_clk_27_pll) then
+        s_vid_clk_div2 <= not s_vid_clk_div2;
+      end if;
+    end process;
+    vid_clk <= s_vid_clk_div2;
 
     s_video_in.y(9 downto 0) <= (others => '0');
     s_video_in.c(9 downto 0) <= (others => '0');
@@ -305,8 +319,8 @@ begin
     s_video_in.vsync_n <= s_o_vsync;
     s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= s_o_hsync;
-    s_sync_ref_vsync_n <= s_o_vsync;
+    s_sync_ref_hsync_n <= '1';
+    s_sync_ref_vsync_n <= '1';
 
     o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= '0';
@@ -322,8 +336,8 @@ begin
     s_video_in.vsync_n <= s_o_vsync;
     s_video_in.avid    <= s_o_avid;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= s_o_hsync;
-    s_sync_ref_vsync_n <= s_o_vsync;
+    s_sync_ref_hsync_n <= '1';
+    s_sync_ref_vsync_n <= '1';
 
     o_mcu_gpout_clk <= s_o_avid;
     i_spi_sdo <= '0';
@@ -656,28 +670,22 @@ begin
   -- pixel_repetition. HD standalone uses vid_clk directly (74.25 MHz).
 
   GEN_SD_STANDALONE_OUT : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
-    signal s_enc_clk_27 : std_logic;
   begin
-    pll_inst : entity work.sd_video_clk_pll_2x
-    port map(
-      i_clk    => s_sd_standalone_ref_13_5,
-      o_clk    => s_enc_clk_27,
-      i_resetb => '1',
-      i_bypass => '0'
-    );
-
+    -- Encoder CLK = 27 MHz from standalone PLL (deterministic Y/C
+    -- interleave). HDMI tx CLK = vid_clk (13.5 MHz), matching the
+    -- working SD HDMI/Analog OUT paths.
     o_vid_enc_d(15 downto 8) <= s_video_out.y(9 downto 2);
     o_vid_enc_d(7 downto 0) <= s_video_out.c(9 downto 2);
     o_vid_enc_hsync <= not s_video_out.hsync_n;
     o_vid_enc_vsync <= not s_video_out.vsync_n;
-    o_vid_enc_clk <= not s_enc_clk_27;
+    o_vid_enc_clk <= not s_sd_standalone_clk_27_pll;
 
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
     o_hdmi_tx_hsync <= s_video_out.hsync_n;
     o_hdmi_tx_vsync <= s_video_out.vsync_n;
-    o_hdmi_tx_clk <= not s_enc_clk_27;
+    o_hdmi_tx_clk <= not vid_clk;
 
   end generate;
 
