@@ -80,9 +80,32 @@ rtl_lib.add_source_files(video_timing_dir / "pixel_counter.vhd")
 rtl_lib.add_source_files(video_timing_dir / "frame_counter.vhd")
 rtl_lib.add_source_files(video_timing_dir / "frame_phase_accumulator.vhd")
 
+# Add platform modules (iCE40)
+platform_ice40_dir = fpga_dir / "platform" / "ice40" / "rtl"
+rtl_lib.add_source_files(platform_ice40_dir / "glitch_free_clock_mux.vhd")
+
+# Behavioural SB_PLL40_CORE simulation stub.  The Lattice SiliconBlue
+# component file in third_party/ is synthesis-only (black-box declarations);
+# this stub provides a GHDL-friendly behavioural architecture so that any
+# wrapper instantiating SB_PLL40_CORE can be simulated end-to-end.  Must be
+# elaborated before standalone_hd_video_clk_pll so the component binding
+# resolves to the simulation entity.
+rtl_lib.add_source_files(test_dir / "sb_pll40_core_sim.vhd")
+rtl_lib.add_source_files(platform_ice40_dir / "standalone_hd_video_clk_pll.vhd")
+
 # Add test library
 test_lib = vu.add_library("test_lib")
-test_lib.add_source_files(test_dir / "tb_*.vhd")
+# Enumerate testbenches explicitly so we can skip in-progress files that
+# do not yet compile (e.g. tb_program_top_alignment.vhd, which depends on
+# a per-program program_top architecture not present in the SDK rtl_lib).
+_TEST_LIB_EXCLUDES = {
+    "tb_program_top_alignment.vhd",  # WIP: depends on program_top entity
+    "sb_pll40_core_sim.vhd",         # belongs to rtl_lib (added above)
+}
+for _tb in sorted(test_dir.glob("tb_*.vhd")):
+    if _tb.name in _TEST_LIB_EXCLUDES:
+        continue
+    test_lib.add_source_files(_tb)
 
 # ============================================================================
 # Generic-parameterized testbenches
