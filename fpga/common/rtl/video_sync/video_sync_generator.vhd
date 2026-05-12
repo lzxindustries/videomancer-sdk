@@ -104,6 +104,7 @@ architecture rtl of video_sync_generator is
   signal s_frame_width              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_frame_height             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_h_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+  signal s_h_active_end             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_v_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_counter_clks             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   signal s_counter_lines            : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
@@ -158,6 +159,15 @@ begin
       s_h_active_start           <=
         C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).clocks_per_line
         - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).frame_width
+        - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).h_front_porch;
+      -- Active window ends front_porch clocks before line wrap, giving
+      -- AVID a width of exactly frame_width clocks.  Without this upper
+      -- bound AVID would stay high until the line wraps, widening the
+      -- active region by front_porch clocks (e.g. 1280 -> 1390 for
+      -- 720p60), which downstream auto-measuring programs would treat
+      -- as a wider resolution and stretch their content off-screen.
+      s_h_active_end             <=
+        C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).clocks_per_line
         - C_VIDEO_SYNC_CONFIG_ARRAY(to_integer(unsigned(s_timing))).h_front_porch;
       -- Vertical back-porch threshold: active video starts after this many
       -- lines from the per-field (interlaced) or per-frame (progressive)
@@ -298,11 +308,13 @@ begin
       end if;
 
       -- AVID (active video) gate.
-      -- Horizontal: high when pixel counter is past the H back porch
-      -- (active window right-aligned in the line).
+      -- Horizontal: high when pixel counter is inside the active
+      -- window [h_active_start+1 .. h_active_end].  Bounded on both
+      -- ends so AVID width equals frame_width regardless of the
+      -- per-format front porch.
       -- Vertical: high after V back porch (per-standard, accounts for
       -- interlaced fields).
-      if s_counter_clks > s_h_active_start then
+      if s_counter_clks > s_h_active_start and s_counter_clks <= s_h_active_end then
         s_avid_h <= '1';
       else
         s_avid_h <= '0';
