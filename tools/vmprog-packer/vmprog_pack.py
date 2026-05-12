@@ -561,13 +561,14 @@ def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, 
         signed_descriptor[artifact_offset + 4:artifact_offset + 36] = bitstream_hash
         artifact_offset += ARTIFACT_HASH_SIZE
 
-    # flags (4 bytes at offset 324)
-    struct.pack_into('<I', signed_descriptor, 324, 0)  # no flags
+    # flags (4 bytes at offset 396 = 36 + MAX_ARTIFACTS*ARTIFACT_HASH_SIZE)
+    flags_offset = 36 + MAX_ARTIFACTS * ARTIFACT_HASH_SIZE
+    struct.pack_into('<I', signed_descriptor, flags_offset, 0)  # no flags
 
-    # build_id (4 bytes at offset 328)
+    # build_id (4 bytes at offset 400)
     import time
     build_id = int(time.time()) & 0xFFFFFFFF  # Use timestamp as build ID
-    struct.pack_into('<I', signed_descriptor, 328, build_id)
+    struct.pack_into('<I', signed_descriptor, flags_offset + 4, build_id)
 
     # Add signed descriptor entry
     descriptor_hash = calculate_sha256(bytes(signed_descriptor))
