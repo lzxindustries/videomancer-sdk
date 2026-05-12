@@ -671,9 +671,12 @@ begin
   -- ========================================================================
   -- STANDALONE OUTPUT GENERATES
   -- ========================================================================
-  -- Drive both the analog encoder (ADV7393) and HDMI transmitter
-  -- (ADV7513) outputs directly from vid_clk. No oversampling PLL is
-  -- used; vid_clk is the encoder pixel clock at the active rate.
+  -- ADV7393 analog encoder requires its CLK input at 2x the SD pixel
+  -- rate (27 MHz for 13.5 MHz NTSC/PAL pixels) and at 1x for HD.
+  -- ADV7513 HDMI transmitter is clocked at the pixel rate (vid_clk).
+  -- In SD standalone, LLC is already 27 MHz so we feed it directly to
+  -- the encoder without an oversampling PLL. In HD standalone, vid_clk
+  -- is already 74.25 MHz, so it drives both the encoder and HDMI tx.
 
   GEN_SD_STANDALONE_OUT : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
 
@@ -681,7 +684,10 @@ begin
     o_vid_enc_d(7 downto 0) <= s_video_out.c(9 downto 2);
     o_vid_enc_hsync <= not s_video_out.hsync_n;
     o_vid_enc_vsync <= not s_video_out.vsync_n;
-    o_vid_enc_clk <= not vid_clk;
+    -- ADV7393 needs 27 MHz CLK for SD: drive directly from LLC (always
+    -- 27 MHz in standalone), regardless of whether vid_clk is 13.5 MHz
+    -- (NTSC/PAL) or 27 MHz (480p/576p).
+    o_vid_enc_clk <= not i_vid_dec_clk;
 
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
