@@ -331,12 +331,23 @@ begin
     end if;
   end process;
 
-  s_trisync_p <= ((not s_hsync_2x) and s_trisync_en) when s_eq_pulses = '1' else
-    ((not s_hsync) and s_trisync_en);
+  -- Analog output is (trisync_p - trisync_n). For correct SMPTE bipolar
+  -- HD tri-level sync (negative excursion at end-of-line, positive
+  -- excursion at start-of-line), we need trisync_p HIGH during the
+  -- positive window and trisync_n HIGH during the negative window.
+  --
+  -- HD: trisync_p = s_hsync (HIGH at line start [1..hsync_pulse_width]).
+  -- HD: trisync_n = NOT s_csync (HIGH during csync sync tip at end of line).
+  --
+  -- SD: trisync_en=0 forces trisync_p to 0; trisync_n must remain
+  -- s_csync (active-low sync tip) to preserve SD output behaviour.
+  -- The XOR with s_trisync_en inverts s_csync only in HD.
+  s_trisync_p <= (s_hsync_2x and s_trisync_en) when s_eq_pulses = '1' else
+    (s_hsync and s_trisync_en);
 
   s_trisync_n <= s_csync_serration when s_vsync = '1' else
     s_csync_2x when s_eq_pulses = '1' else
-    s_csync;
+    (s_csync xor s_trisync_en);
 
   trisync_p <= s_trisync_p;
   trisync_n <= s_trisync_n;
