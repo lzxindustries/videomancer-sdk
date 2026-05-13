@@ -120,6 +120,20 @@ architecture rtl of video_sync_generator is
   signal s_avid_h                   : std_logic := '0';
   signal s_avid_v                   : std_logic := '0';
   signal s_avid                     : std_logic := '0';
+  -- Timing-id change detector. When firmware switches the video standard
+  -- (e.g. NTSC -> 720p60), the per-format sync-pulse register signals
+  -- (s_csync, s_csync_2x, s_csync_serration, s_eq_pulses, s_vsync,
+  -- s_hsync, s_hsync_2x) need to be reinitialised. Their set/clear
+  -- events are configured per-format and may simply never fire in the
+  -- new format, causing the registers to latch at whatever value the
+  -- previous format left them at. Symptom: in 720p60 (which has all
+  -- eq_pulses and csync_2x events at clk/line = 0, a position the
+  -- free-running counter never revisits in steady state) s_eq_pulses
+  -- and s_csync_2x would stay HIGH if NTSC left them HIGH at the
+  -- moment of timing change, driving both trisync_p and trisync_n
+  -- from the same stuck signal and producing zero analog output.
+  signal s_timing_d                 : t_video_timing_id := (others => '0');
+  signal s_timing_change            : std_logic := '0';
 
 begin
 
@@ -225,21 +239,23 @@ begin
   end process;
 
   -- Counter behavior:
-  --   * Free-runs from clk alone, wrapping at s_clocks_per_line and
-  --     s_lines_per_frame -- valid programmed video timing is produced
-  --     even with no external sync inputs at all.
-  --   * External HSYNC/VSYNC are *optional* resets: when present, the
-  --     vsync (or field) edge snaps the per-frame counters to the
-  --     per-standard fsync seed values, locking output phase to the
-  --     external source. Absent external edges, the counters simply
-  --     keep wrapping; output remains a valid free-run signal.
+  --   * Pure free-run from clk alone, wrapping at s_clocks_per_line and
+  --     s_lines_per_frame. No external sync resets.
+  --
+  --   The previous design optionally snapped the counter to per-format
+  --   fsync seed values on a ref_vsync/field edge. That path produced a
+  --   subtle bug in progressive HD modes: at power-up the internal
+  --   field-detector (which watches the tied-high standalone refs) could
+  --   emit a transient field_event, snapping the counter to a phase
+  --   that lay PAST the per-line csync set-event. s_csync then never
+  --   saw its '1' setpoint at clk=1 and stayed latched at '0' for the
+  --   life of the bitstream, killing the active-line negative tip on
+  --   trisync_n. Removing the reset entirely guarantees the counter
+  --   sweeps clk=1 every line and every sync edge fires correctly.
   counters : process (clk)
   begin
     if rising_edge(clk) then
-      if s_ref_fsync = '1' then
-        s_counter_clks  <= s_fsync_clks;
-        s_counter_lines <= s_fsync_lines;
-      elsif s_counter_clks = s_clocks_per_line then
+      if s_counter_clks = s_clocks_per_line then
         s_counter_clks <= to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
         if s_counter_lines = s_lines_per_frame then
           s_counter_lines <= to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
@@ -255,56 +271,76 @@ begin
   sync_gen : process (clk)
   begin
     if rising_edge(clk) then
-      if s_counter_clks = s_hsync_clks_0 then
-        s_hsync    <= '0';
-        s_hsync_2x <= '0';
-      elsif s_counter_clks = s_hsync_clks_1 then
-        s_hsync    <= '1';
-        s_hsync_2x <= '1';
-      elsif s_counter_clks = s_hsync_clks_b_0 then
-        s_hsync_2x <= '0';
-      elsif s_counter_clks = s_hsync_clks_b_1 then
-        s_hsync_2x <= '1';
+      s_timing_d <= s_timing;
+      if s_timing /= s_timing_d then
+        s_timing_change <= '1';
+      else
+        s_timing_change <= '0';
       end if;
 
-      if s_counter_clks = s_csync_clks_0 then
-        s_csync <= '0';
-      elsif s_counter_clks = s_csync_clks_1 then
-        s_csync <= '1';
-      end if;
-
-      -- Direct csync_2x comparison
-      if s_counter_clks = s_csync_2x_a_clks_0 or s_counter_clks = s_csync_2x_b_clks_0 then
-        s_csync_2x <= '0';
-      elsif s_counter_clks = s_csync_2x_a_clks_1 or s_counter_clks = s_csync_2x_b_clks_1 then
-        s_csync_2x <= '1';
-      end if;
-
-      -- Direct eq_pulses comparison
-      if (s_counter_lines = s_eq_pulses_a_lines_0 and s_counter_clks = s_eq_pulses_a_clks_0) or
-         (s_counter_lines = s_eq_pulses_b_lines_0 and s_counter_clks = s_eq_pulses_b_clks_0) then
-        s_eq_pulses <= '0';
-      elsif (s_counter_lines = s_eq_pulses_a_lines_1 and s_counter_clks = s_eq_pulses_a_clks_1) or
-            (s_counter_lines = s_eq_pulses_b_lines_1 and s_counter_clks = s_eq_pulses_b_clks_1) then
-        s_eq_pulses <= '1';
-      end if;
-
-      -- Direct csync_serration comparison
-      if s_counter_clks = s_csync_serration_a_clks_0 or s_counter_clks = s_csync_serration_b_clks_0 or
-         s_counter_clks = s_csync_serration_c_clks_0 or s_counter_clks = s_csync_serration_d_clks_0 then
+      -- On any timing-id change, force all derived sync-pulse signals
+      -- to a known LOW state. The per-format set events resume
+      -- driving them on subsequent cycles.
+      if s_timing_change = '1' then
+        s_hsync           <= '0';
+        s_hsync_2x        <= '0';
+        s_csync           <= '0';
+        s_csync_2x        <= '0';
+        s_eq_pulses       <= '0';
         s_csync_serration <= '0';
-      elsif s_counter_clks = s_csync_serration_a_clks_1 or s_counter_clks = s_csync_serration_b_clks_1 or
-            s_counter_clks = s_csync_serration_c_clks_1 or s_counter_clks = s_csync_serration_d_clks_1 then
-        s_csync_serration <= '1';
-      end if;
+        s_vsync           <= '0';
+      else
+        if s_counter_clks = s_hsync_clks_0 then
+          s_hsync    <= '0';
+          s_hsync_2x <= '0';
+        elsif s_counter_clks = s_hsync_clks_1 then
+          s_hsync    <= '1';
+          s_hsync_2x <= '1';
+        elsif s_counter_clks = s_hsync_clks_b_0 then
+          s_hsync_2x <= '0';
+        elsif s_counter_clks = s_hsync_clks_b_1 then
+          s_hsync_2x <= '1';
+        end if;
 
-      -- Direct vsync comparison
-      if (s_counter_lines = s_vsync_a_lines_0 and s_counter_clks = s_vsync_a_clks_0) or
-         (s_counter_lines = s_vsync_b_lines_0 and s_counter_clks = s_vsync_b_clks_0) then
-        s_vsync <= '0';
-      elsif (s_counter_lines = s_vsync_a_lines_1 and s_counter_clks = s_vsync_a_clks_1) or
-            (s_counter_lines = s_vsync_b_lines_1 and s_counter_clks = s_vsync_b_clks_1) then
-        s_vsync <= '1';
+        if s_counter_clks = s_csync_clks_0 then
+          s_csync <= '0';
+        elsif s_counter_clks = s_csync_clks_1 then
+          s_csync <= '1';
+        end if;
+
+        -- Direct csync_2x comparison
+        if s_counter_clks = s_csync_2x_a_clks_0 or s_counter_clks = s_csync_2x_b_clks_0 then
+          s_csync_2x <= '0';
+        elsif s_counter_clks = s_csync_2x_a_clks_1 or s_counter_clks = s_csync_2x_b_clks_1 then
+          s_csync_2x <= '1';
+        end if;
+
+        -- Direct eq_pulses comparison
+        if (s_counter_lines = s_eq_pulses_a_lines_0 and s_counter_clks = s_eq_pulses_a_clks_0) or
+           (s_counter_lines = s_eq_pulses_b_lines_0 and s_counter_clks = s_eq_pulses_b_clks_0) then
+          s_eq_pulses <= '0';
+        elsif (s_counter_lines = s_eq_pulses_a_lines_1 and s_counter_clks = s_eq_pulses_a_clks_1) or
+              (s_counter_lines = s_eq_pulses_b_lines_1 and s_counter_clks = s_eq_pulses_b_clks_1) then
+          s_eq_pulses <= '1';
+        end if;
+
+        -- Direct csync_serration comparison
+        if s_counter_clks = s_csync_serration_a_clks_0 or s_counter_clks = s_csync_serration_b_clks_0 or
+           s_counter_clks = s_csync_serration_c_clks_0 or s_counter_clks = s_csync_serration_d_clks_0 then
+          s_csync_serration <= '0';
+        elsif s_counter_clks = s_csync_serration_a_clks_1 or s_counter_clks = s_csync_serration_b_clks_1 or
+              s_counter_clks = s_csync_serration_c_clks_1 or s_counter_clks = s_csync_serration_d_clks_1 then
+          s_csync_serration <= '1';
+        end if;
+
+        -- Direct vsync comparison
+        if (s_counter_lines = s_vsync_a_lines_0 and s_counter_clks = s_vsync_a_clks_0) or
+           (s_counter_lines = s_vsync_b_lines_0 and s_counter_clks = s_vsync_b_clks_0) then
+          s_vsync <= '0';
+        elsif (s_counter_lines = s_vsync_a_lines_1 and s_counter_clks = s_vsync_a_clks_1) or
+              (s_counter_lines = s_vsync_b_lines_1 and s_counter_clks = s_vsync_b_clks_1) then
+          s_vsync <= '1';
+        end if;
       end if;
 
       -- AVID (active video) gate.
@@ -331,33 +367,50 @@ begin
     end if;
   end process;
 
-  -- Analog tri-level sync output is summed as approximately
-  --   analog = trisync_n - trisync_p
-  -- (i.e. trisync_n HIGH drives a positive analog excursion, trisync_p
-  -- HIGH drives a negative analog excursion).  This was confirmed by
-  -- observation: during VSYNC, where trisync_n follows s_csync_serration
-  -- and stays HIGH for long stretches, the analog output reads positive.
+  -- Tri-level sync output mapping.
   --
-  -- For correct SMPTE bipolar HD tri-level sync (NEGATIVE excursion at
-  -- the end of the line followed by POSITIVE excursion at the start of
-  -- the next line, straddling the HSYNC reference at the line wrap):
+  -- Analog summing convention (confirmed by staircase truth-table test):
+  --   analog ~= trisync_n - trisync_p
+  --   (n HIGH -> positive analog excursion;
+  --    p HIGH -> negative analog excursion).
   --
-  --   * trisync_p (analog NEG) must be HIGH during the end-of-line
-  --     csync sync-tip window. That window is `NOT s_csync` (since
-  --     s_csync is active-low at end of line in HD).
-  --   * trisync_n (analog POS) must be HIGH during the start-of-line
-  --     hsync window. That window is `s_hsync` directly (active-high
-  --     in HD).
+  -- IMPORTANT: the Rev B analog summing network is not a pure
+  -- differential amplifier. It contains DC-blocking / RC elements that
+  -- attenuate narrow pulses heavily. Driving narrow active-HIGH pulses
+  -- on both pins (e.g. p HIGH for 40 clks at end of line, n HIGH for
+  -- 40 clks at start of next line, both LOW the rest of the time)
+  -- produces a near-zero analog output in progressive HD modes, even
+  -- though it is differentially equivalent to the SMPTE waveform.
   --
-  -- SD (trisync_en = 0) must keep the original active-low csync on
-  -- trisync_n and zero on trisync_p, so the active-line branches gate
-  -- on s_trisync_en and fall back to s_csync on trisync_n in SD.
-  s_trisync_p <= (s_hsync_2x and s_trisync_en) when s_eq_pulses = '1' else
-    ((not s_csync) and s_trisync_en);
+  -- The robust approach is to keep BOTH pins HIGH for the majority of
+  -- each line and drop them LOW only inside the sync-tip windows. This
+  -- gives the summer a stable common-mode level and ensures the brief
+  -- LOW excursions translate cleanly into bipolar analog tips:
+  --
+  --   p = NOT s_hsync  -> LOW  for clks 1..40   (start-of-line window)
+  --                       HIGH for clks 41..end (rest of line)
+  --   n = s_csync      -> HIGH for clks 1..1610 (most of line)
+  --                       LOW  for clks 1611..end (end-of-line window)
+  --
+  -- analog = n - p:
+  --   clks 1..40        : HIGH - LOW  = +1  (positive tip, start of line)
+  --   clks 41..1610     : HIGH - HIGH =  0  (mid-line bias)
+  --   clks 1611..end    : LOW  - HIGH = -1  (negative tip, end of line)
+  --
+  -- That is the SMPTE bipolar tri-level shape (negative excursion at
+  -- end of line followed by positive excursion at start of next),
+  -- correctly straddling the line wrap.
+  --
+  -- During VSYNC and equalization regions the broader serration / 2x
+  -- patterns dominate; those branches are unchanged.
+  --
+  -- SD modes (trisync_en = 0) gate trisync_p to '0' so the analog sync
+  -- output reduces to plain active-low CSYNC on trisync_n.
+  s_trisync_p <= ((not s_hsync_2x) and s_trisync_en) when s_eq_pulses = '1' else
+    ((not s_hsync) and s_trisync_en);
 
   s_trisync_n <= s_csync_serration when s_vsync = '1' else
     s_csync_2x when s_eq_pulses = '1' else
-    s_hsync when s_trisync_en = '1' else
     s_csync;
 
   trisync_p <= s_trisync_p;
