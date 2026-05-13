@@ -55,41 +55,44 @@ from .sim_runner import run_simulation
 # Pipeline result type
 # ---------------------------------------------------------------------------
 
+
 class PipelineResult:
     """Holds the outcome of a completed simulation pipeline run."""
 
     def __init__(
         self,
-        success:      bool,
-        input_image:  Image.Image | None = None,
+        success: bool,
+        input_image: Image.Image | None = None,
         output_image: Image.Image | None = None,
-        elapsed_s:    float = 0.0,
-        error:        str   = "",
-        run_dir:      Path | None = None,
+        elapsed_s: float = 0.0,
+        error: str = "",
+        run_dir: Path | None = None,
     ) -> None:
-        self.success      = success
-        self.input_image  = input_image
+        self.success = success
+        self.input_image = input_image
         self.output_image = output_image
-        self.elapsed_s    = elapsed_s
-        self.error        = error
-        self.run_dir      = run_dir
+        self.elapsed_s = elapsed_s
+        self.error = error
+        self.run_dir = run_dir
 
 
 # ---------------------------------------------------------------------------
 # Pure-Python pipeline function (no Qt dependency)
 # ---------------------------------------------------------------------------
 
+
 def run_pipeline(
-    program:           Program,
-    source_image:      Image.Image,
-    register_values:   dict[str, int],
-    video_mode:        str                    = SIM_DEFAULT_VIDEO_MODE,
-    decimation:        int                    = SIM_DEFAULT_DECIMATION,
-    warmup_frames:     int                    = SIM_WARMUP_FRAMES,
-    capture_frames:    int                    = SIM_CAPTURE_FRAMES,
-    log_callback:      Callable[[str], None]  = print,
+    program: Program,
+    source_image: Image.Image,
+    register_values: dict[str, int],
+    video_mode: str = SIM_DEFAULT_VIDEO_MODE,
+    decimation: int = SIM_DEFAULT_DECIMATION,
+    warmup_frames: int = SIM_WARMUP_FRAMES,
+    capture_frames: int = SIM_CAPTURE_FRAMES,
+    log_callback: Callable[[str], None] = print,
     progress_callback: Callable[[int, int], None] | None = None,
-    build_dir:         Path | None            = None,
+    build_dir: Path | None = None,
+    reuse_build: bool = False,
 ) -> PipelineResult:
     """Run the full VHDL simulation pipeline synchronously.
 
@@ -106,6 +109,9 @@ def run_pipeline(
         capture_frames:  Number of frames captured for output.
         log_callback:    Callable receiving log-line strings (default: ``print``).
         build_dir:       Override the GHDL build directory (default: ``BUILD_DIR/<name>``).
+        reuse_build:     If True, keep existing build artefacts and only
+                         re-analyse the testbench.  Dramatically faster for
+                         batch processing where only the stimulus changes.
 
     Returns:
         A :class:`PipelineResult` with ``success``, ``input_image``,
@@ -123,14 +129,16 @@ def run_pipeline(
         # ── Build directory ──────────────────────────────────────────────────
         # Clean stale GHDL artefacts (work library cache, object files) to
         # prevent GHDL internal errors caused by mismatched .cf entries.
-        run_dir = (build_dir or (BUILD_DIR / program.name))
-        if run_dir.exists():
+        # When reuse_build is True, keep existing artefacts to avoid
+        # re-analysing unchanged SDK sources on every frame.
+        run_dir = build_dir or (BUILD_DIR / program.name)
+        if not reuse_build and run_dir.exists():
             shutil.rmtree(run_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
 
         stim_path = run_dir / "stimulus.txt"
-        out_path  = run_dir / "output.txt"
-        tb_path   = run_dir / "tb_vit.vhd"
+        out_path = run_dir / "output.txt"
+        tb_path = run_dir / "tb_vit.vhd"
 
         # ── 1. Prepare image ─────────────────────────────────────────────────
         emit(
@@ -147,13 +155,13 @@ def run_pipeline(
             f"[2/5] Building stimulus "
             f"({warmup_frames + capture_frames} frames + {SIM_DRAIN_LINES} drain lines)..."
         )
-        yuv10    = rgb_to_yuv10(input_img)
+        yuv10 = rgb_to_yuv10(input_img)
         stimulus = build_stimulus(
             yuv10,
-            warmup_frames  = warmup_frames,
-            capture_frames = capture_frames,
-            drain_lines    = SIM_DRAIN_LINES,
-            is_interlaced  = vs.is_interlaced,
+            warmup_frames=warmup_frames,
+            capture_frames=capture_frames,
+            drain_lines=SIM_DRAIN_LINES,
+            is_interlaced=vs.is_interlaced,
         )
         write_stimulus_file(stimulus, stim_path)
         emit(f"      → {len(stimulus):,} clock cycles → {stim_path.name}")
@@ -164,15 +172,15 @@ def run_pipeline(
         # Set ABI register 8 to the video timing ID
         reg_array[ABI_REG_VIDEO_TIMING] = vs.timing_id
         generate_testbench(
-            output_path     = tb_path,
-            stimulus_path   = stim_path,
-            output_img_path = out_path,
-            register_values = reg_array,
-            img_width       = w,
-            img_height      = h,
-            clk_period_ns   = SIM_CLK_PERIOD_NS,
-            warmup_frames   = warmup_frames,
-            is_interlaced   = vs.is_interlaced,
+            output_path=tb_path,
+            stimulus_path=stim_path,
+            output_img_path=out_path,
+            register_values=reg_array,
+            img_width=w,
+            img_height=h,
+            clk_period_ns=SIM_CLK_PERIOD_NS,
+            warmup_frames=warmup_frames,
+            is_interlaced=vs.is_interlaced,
         )
         mode_str = "interlaced" if vs.is_interlaced else "progressive"
         emit(f"      → {tb_path.name} ({mode_str} capture, {w}×{h})")
@@ -182,13 +190,14 @@ def run_pipeline(
         # ── 4. Run GHDL ──────────────────────────────────────────────────────
         emit("[4/5] Running GHDL simulation...")
         run_simulation(
-            program_dir       = program.program_dir,
-            testbench_path    = tb_path,
-            build_dir         = run_dir,
-            config            = vs.fpga_config,
-            core              = program.core,
-            log_callback      = emit,
-            progress_callback = progress_callback,
+            program_dir=program.program_dir,
+            testbench_path=tb_path,
+            build_dir=run_dir,
+            config=vs.fpga_config,
+            core=program.core,
+            log_callback=emit,
+            progress_callback=progress_callback,
+            reuse_build=reuse_build,
         )
 
         # ── 5. Read output ───────────────────────────────────────────────────
@@ -199,16 +208,18 @@ def run_pipeline(
                 "The simulation may have produced no active-video output."
             )
         output_img = read_output_file(
-            out_path, w, h,
+            out_path,
+            w,
+            h,
             is_interlaced=vs.is_interlaced,
         )
         emit(f"      → captured {out_path.stat().st_size // 8} pixels")
 
         result = PipelineResult(
-            success      = True,
-            input_image  = input_img,
-            output_image = output_img,
-            run_dir      = run_dir,
+            success=True,
+            input_image=input_img,
+            output_image=output_img,
+            run_dir=run_dir,
         )
 
     except Exception:  # noqa: BLE001
@@ -223,6 +234,7 @@ def run_pipeline(
 # ---------------------------------------------------------------------------
 # QThread wrapper (GUI use only — imports PyQt6)
 # ---------------------------------------------------------------------------
+
 
 class SimulationWorker:  # type: ignore[no-redef]
     """Lazy-imported QThread wrapper so that importing this module never forces
@@ -251,34 +263,34 @@ def _make_simulation_worker_class() -> type:
 
         def __init__(
             self,
-            program:         Program,
-            source_image:    Image.Image,
+            program: Program,
+            source_image: Image.Image,
             register_values: dict[str, int],
-            video_mode:      str = SIM_DEFAULT_VIDEO_MODE,
-            decimation:      int = SIM_DEFAULT_DECIMATION,
-            warmup_frames:   int = SIM_WARMUP_FRAMES,
-            capture_frames:  int = SIM_CAPTURE_FRAMES,
+            video_mode: str = SIM_DEFAULT_VIDEO_MODE,
+            decimation: int = SIM_DEFAULT_DECIMATION,
+            warmup_frames: int = SIM_WARMUP_FRAMES,
+            capture_frames: int = SIM_CAPTURE_FRAMES,
         ) -> None:
             super().__init__()
-            self._program         = program
-            self._source_image    = source_image
+            self._program = program
+            self._source_image = source_image
             self._register_values = register_values
-            self._video_mode      = video_mode
-            self._decimation      = decimation
-            self._warmup_frames   = warmup_frames
-            self._capture_frames  = capture_frames
+            self._video_mode = video_mode
+            self._decimation = decimation
+            self._warmup_frames = warmup_frames
+            self._capture_frames = capture_frames
 
         def run(self) -> None:
             result = run_pipeline(
-                program           = self._program,
-                source_image      = self._source_image,
-                register_values   = self._register_values,
-                video_mode        = self._video_mode,
-                decimation        = self._decimation,
-                warmup_frames     = self._warmup_frames,
-                capture_frames    = self._capture_frames,
-                log_callback      = self.log_line.emit,
-                progress_callback = self.progress.emit,
+                program=self._program,
+                source_image=self._source_image,
+                register_values=self._register_values,
+                video_mode=self._video_mode,
+                decimation=self._decimation,
+                warmup_frames=self._warmup_frames,
+                capture_frames=self._capture_frames,
+                log_callback=self.log_line.emit,
+                progress_callback=self.progress.emit,
             )
             self.finished.emit(result)
 

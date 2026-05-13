@@ -50,6 +50,7 @@ _log = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _resolve_programs_root(raw: str | None) -> Path | None:
     return Path(raw) if raw else None
 
@@ -98,7 +99,7 @@ def _load_registers(
                 regs[k] = int(v)
         print(f"[cli] Imported registers from {import_path}")
 
-    for kv in (set_args or []):
+    for kv in set_args or []:
         if "=" not in kv:
             print(f"[cli] WARNING: ignoring malformed --set argument: {kv!r} (expected KEY=VALUE)")
             continue
@@ -111,6 +112,7 @@ def _load_registers(
 # ---------------------------------------------------------------------------
 # Sub-command: list
 # ---------------------------------------------------------------------------
+
 
 def _cmd_list(args: argparse.Namespace) -> int:
     from .core.program_loader import list_programs
@@ -129,6 +131,7 @@ def _cmd_list(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # Sub-command: info
 # ---------------------------------------------------------------------------
+
 
 def _cmd_info(args: argparse.Namespace) -> int:
     from .core.program_loader import load_program
@@ -156,7 +159,7 @@ def _cmd_info(args: argparse.Namespace) -> int:
                 f"  {p.parameter_id:<35}  "
                 f"default={p.initial_value:>4}  "
                 f"[{p.display_min_value}–{p.display_max_value}{' ' + p.suffix_label if p.suffix_label else ''}]"
-                f"  \"{p.name_label}\""
+                f'  "{p.name_label}"'
             )
     else:
         print("\n(no parameters)")
@@ -164,13 +167,14 @@ def _cmd_info(args: argparse.Namespace) -> int:
         print(f"\nPresets ({len(prog.presets)}):")
         for preset in prog.presets:
             overrides = ", ".join(f"{k}={v}" for k, v in preset.values.items())
-            print(f"  \"{preset.name}\"  [{overrides}]")
+            print(f'  "{preset.name}"  [{overrides}]')
     return 0
 
 
 # ---------------------------------------------------------------------------
 # Sub-command: export-regs
 # ---------------------------------------------------------------------------
+
 
 def _cmd_export_regs(args: argparse.Namespace) -> int:
     from .core.program_loader import load_program
@@ -198,6 +202,7 @@ def _cmd_export_regs(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # Sub-command: simulate
 # ---------------------------------------------------------------------------
+
 
 def _cmd_simulate(args: argparse.Namespace) -> int:
     from PIL import Image
@@ -232,25 +237,28 @@ def _cmd_simulate(args: argparse.Namespace) -> int:
 
     # Assemble register values
     regs = _load_registers(
-        prog, args.set,
+        prog,
+        args.set,
         getattr(args, "import_regs", None),
         getattr(args, "preset", None),
     )
 
     # Determine build dir override
     build_dir = Path(args.build_dir) if getattr(args, "build_dir", None) else None
+    reuse_build = getattr(args, "reuse_build", False)
 
     # Run pipeline
     result = run_pipeline(
-        program         = prog,
-        source_image    = source,
-        register_values = regs,
-        video_mode      = args.video_mode,
-        decimation      = args.decimation,
-        warmup_frames   = args.warmup_frames,
-        capture_frames  = args.capture_frames,
-        log_callback    = print,
-        build_dir       = build_dir,
+        program=prog,
+        source_image=source,
+        register_values=regs,
+        video_mode=args.video_mode,
+        decimation=args.decimation,
+        warmup_frames=args.warmup_frames,
+        capture_frames=args.capture_frames,
+        log_callback=print,
+        build_dir=build_dir,
+        reuse_build=reuse_build,
     )
 
     print(f"\nElapsed: {result.elapsed_s:.1f}s")
@@ -277,10 +285,11 @@ def _cmd_simulate(args: argparse.Namespace) -> int:
 # Argument parser
 # ---------------------------------------------------------------------------
 
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog        = "lzx-vhdl-cli",
-        description = "Headless CLI for the LZX VHDL Image Tester.",
+        prog="lzx-vhdl-cli",
+        description="Headless CLI for the LZX VHDL Image Tester.",
     )
     sub = parser.add_subparsers(dest="subcommand", metavar="SUBCOMMAND")
     sub.required = True
@@ -288,7 +297,9 @@ def _build_parser() -> argparse.ArgumentParser:
     # ── list ─────────────────────────────────────────────────────────────────
     p_list = sub.add_parser("list", help="List available programs.")
     p_list.add_argument(
-        "--programs-dir", metavar="DIR", default=None,
+        "--programs-dir",
+        metavar="DIR",
+        default=None,
         help=f"Override programs directory (default: {PROGRAMS_ROOT})",
     )
 
@@ -302,7 +313,10 @@ def _build_parser() -> argparse.ArgumentParser:
     p_export.add_argument("name", help="Program name")
     p_export.add_argument("--programs-dir", metavar="DIR", default=None)
     p_export.add_argument(
-        "--output", "-o", metavar="PATH", default=None,
+        "--output",
+        "-o",
+        metavar="PATH",
+        default=None,
         help="Output JSON file (default: <name>_registers.json)",
     )
 
@@ -310,57 +324,90 @@ def _build_parser() -> argparse.ArgumentParser:
     p_sim = sub.add_parser("simulate", help="Run the full VHDL simulation pipeline.")
     p_sim.add_argument("name", help="Program name (e.g. cascade)")
     p_sim.add_argument(
-        "--image", "-i", metavar="PATH", default=None,
+        "--image",
+        "-i",
+        metavar="PATH",
+        default=None,
         help="Source image file (PNG, JPEG, BMP, …). "
-             "Omit for synthesis programs (a black frame is used).",
+        "Omit for synthesis programs (a black frame is used).",
     )
     p_sim.add_argument(
-        "--programs-dir", metavar="DIR", default=None,
+        "--programs-dir",
+        metavar="DIR",
+        default=None,
         help=f"Override programs directory (default: {PROGRAMS_ROOT})",
     )
     p_sim.add_argument(
-        "--video-mode", metavar="MODE", default=SIM_DEFAULT_VIDEO_MODE,
+        "--video-mode",
+        metavar="MODE",
+        default=SIM_DEFAULT_VIDEO_MODE,
         choices=VIDEO_MODE_KEYS,
         help=f"Video standard (default: {SIM_DEFAULT_VIDEO_MODE}). "
-             f"Choices: {', '.join(VIDEO_MODE_KEYS)}",
+        f"Choices: {', '.join(VIDEO_MODE_KEYS)}",
     )
     p_sim.add_argument(
-        "--decimation", metavar="N", type=int, default=SIM_DEFAULT_DECIMATION,
+        "--decimation",
+        metavar="N",
+        type=int,
+        default=SIM_DEFAULT_DECIMATION,
         choices=DECIMATION_VALUES,
         help=f"Resolution decimation factor (default: {SIM_DEFAULT_DECIMATION}). "
-             f"Choices: {', '.join(str(d) for d in DECIMATION_VALUES)}",
+        f"Choices: {', '.join(str(d) for d in DECIMATION_VALUES)}",
     )
     p_sim.add_argument(
-        "--warmup-frames", metavar="N", type=int, default=SIM_WARMUP_FRAMES,
+        "--warmup-frames",
+        metavar="N",
+        type=int,
+        default=SIM_WARMUP_FRAMES,
         help=f"Warmup frames (default: {SIM_WARMUP_FRAMES})",
     )
     p_sim.add_argument(
-        "--capture-frames", metavar="N", type=int, default=SIM_CAPTURE_FRAMES,
+        "--capture-frames",
+        metavar="N",
+        type=int,
+        default=SIM_CAPTURE_FRAMES,
         help=f"Capture frames (default: {SIM_CAPTURE_FRAMES})",
     )
     p_sim.add_argument(
-        "--preset", metavar="NAME",
+        "--preset",
+        metavar="NAME",
         help="Load an embedded factory preset by name before applying other overrides.",
     )
     p_sim.add_argument(
-        "--set", metavar="KEY=VALUE", action="append", dest="set",
+        "--set",
+        metavar="KEY=VALUE",
+        action="append",
+        dest="set",
         help="Override a register value, e.g. --set rotary_potentiometer_1=512. Repeatable.",
     )
     p_sim.add_argument(
-        "--import-regs", metavar="PATH",
+        "--import-regs",
+        metavar="PATH",
         help="Import register values from a JSON file (see export-regs).",
     )
     p_sim.add_argument(
-        "--output", "-o", metavar="PATH",
+        "--output",
+        "-o",
+        metavar="PATH",
         help="Output image path (default: <name>_output.png)",
     )
     p_sim.add_argument(
-        "--save-input", action="store_true",
+        "--save-input",
+        action="store_true",
         help="Also save the (resized) input image alongside the output.",
     )
     p_sim.add_argument(
-        "--build-dir", metavar="DIR", default=None,
+        "--build-dir",
+        metavar="DIR",
+        default=None,
         help="Override the GHDL build directory for this run.",
+    )
+    p_sim.add_argument(
+        "--reuse-build",
+        action="store_true",
+        dest="reuse_build",
+        help="Reuse existing build artefacts — only re-analyse the testbench. "
+        "Much faster for batch processing where only the stimulus changes.",
     )
 
     return parser
@@ -370,6 +417,7 @@ def _build_parser() -> argparse.ArgumentParser:
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main(argv: list[str] | None = None) -> None:
     """CLI entry point.  Call with ``argv=None`` to use ``sys.argv``."""
     logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
@@ -378,10 +426,10 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     handlers: dict[str, object] = {
-        "list":        _cmd_list,
-        "info":        _cmd_info,
+        "list": _cmd_list,
+        "info": _cmd_info,
         "export-regs": _cmd_export_regs,
-        "simulate":    _cmd_simulate,
+        "simulate": _cmd_simulate,
     }
 
     handler = handlers.get(args.subcommand)

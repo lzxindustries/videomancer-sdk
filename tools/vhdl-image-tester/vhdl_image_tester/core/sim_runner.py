@@ -34,7 +34,7 @@ from .config import (
 # GHDL constants
 # ---------------------------------------------------------------------------
 
-_GHDL_STD   = "--std=08"
+_GHDL_STD = "--std=08"
 _TOP_ENTITY = "tb_vit"
 
 LogCallback = Callable[[str], None]
@@ -45,13 +45,15 @@ ProgressCallback = Callable[[int, int], None]  # (current_frame, total_frames)
 # GHDL backend detection
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class GhdlInfo:
     """Describes the resolved GHDL installation."""
-    path: str               # absolute path to the ghdl binary
-    version: str            # first line of --version output
-    backend: str            # "llvm", "gcc", or "mcode"
-    is_compiled: bool       # True for llvm/gcc (native-code) backends
+
+    path: str  # absolute path to the ghdl binary
+    version: str  # first line of --version output
+    backend: str  # "llvm", "gcc", or "mcode"
+    is_compiled: bool  # True for llvm/gcc (native-code) backends
 
 
 def _detect_backend(version_output: str) -> str:
@@ -78,7 +80,9 @@ def _probe_ghdl(path: str) -> GhdlInfo | None:
     try:
         result = subprocess.run(
             [path, "--version"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode != 0:
             return None
@@ -157,6 +161,7 @@ def _get_ghdl_info() -> GhdlInfo:
 # Source-file ordering
 # ---------------------------------------------------------------------------
 
+
 def _ordered_sdk_sources(config: str, core: str) -> list[Path]:
     """
     Return SDK VHDL files in correct analysis order for GHDL.
@@ -186,14 +191,14 @@ def _ordered_sdk_sources(config: str, core: str) -> list[Path]:
 
     # 1. Packages first — strict dependency order
     #    video_stream_pkg → video_timing_pkg → video_sync_pkg
-    vs_dir    = SDK_FPGA / "common/rtl/video_stream"
-    vt_dir    = SDK_FPGA / "common/rtl/video_timing"
+    vs_dir = SDK_FPGA / "common/rtl/video_stream"
+    vt_dir = SDK_FPGA / "common/rtl/video_timing"
     vsync_dir = SDK_FPGA / "common/rtl/video_sync"
-    dsp_dir   = SDK_FPGA / "common/rtl/dsp"
+    dsp_dir = SDK_FPGA / "common/rtl/dsp"
     utils_dir = SDK_FPGA / "common/rtl/utils"
 
-    _append_if_exists(sources, vs_dir    / "video_stream_pkg.vhd")
-    _append_if_exists(sources, vt_dir    / "video_timing_pkg.vhd")
+    _append_if_exists(sources, vs_dir / "video_stream_pkg.vhd")
+    _append_if_exists(sources, vt_dir / "video_timing_pkg.vhd")
     _append_if_exists(sources, vsync_dir / "video_sync_pkg.vhd")
 
     # 2. Core config package (e.g. sd_analog_pkg.vhd)
@@ -210,9 +215,9 @@ def _ordered_sdk_sources(config: str, core: str) -> list[Path]:
     #    multiplier.vhd must be first: diff_multiplier_s and proc_amp both
     #    instantiate entity work.multiplier_s defined there.
     #    edge_detector.vhd is instantiated by video_timing_generator.vhd (step 6).
-    dsp_all   = sorted(dsp_dir.glob("*.vhd")) if dsp_dir.exists() else []
+    dsp_all = sorted(dsp_dir.glob("*.vhd")) if dsp_dir.exists() else []
     dsp_first = [f for f in dsp_all if f.name == "multiplier.vhd"]
-    dsp_rest  = [f for f in dsp_all if f.name != "multiplier.vhd"]
+    dsp_rest = [f for f in dsp_all if f.name != "multiplier.vhd"]
     sources.extend(dsp_first + dsp_rest)
 
     # 4b. video_field_detector promoted early — video_timing_generator instantiates
@@ -263,7 +268,7 @@ def _ordered_program_sources(program_dir: Path) -> list[Path]:
     ``entity work.<name>``.  Files with no cross-dependencies fall back
     to alphabetical order.
     """
-    all_vhd   = sorted(program_dir.glob("*.vhd"))
+    all_vhd = sorted(program_dir.glob("*.vhd"))
     main_arch = [f for f in all_vhd if _is_program_top_arch(f)]
     supporting = [f for f in all_vhd if f not in main_arch]
     return _toposort_vhdl(supporting) + main_arch
@@ -279,12 +284,8 @@ def _toposort_vhdl(files: list[Path]) -> list[Path]:
     if len(files) <= 1:
         return list(files)
 
-    _re_entity_decl = re.compile(
-        r"^\s*entity\s+(\w+)\s+is\b", re.IGNORECASE | re.MULTILINE
-    )
-    _re_entity_inst = re.compile(
-        r"\bentity\s+work\.(\w+)\b", re.IGNORECASE
-    )
+    _re_entity_decl = re.compile(r"^\s*entity\s+(\w+)\s+is\b", re.IGNORECASE | re.MULTILINE)
+    _re_entity_inst = re.compile(r"\bentity\s+work\.(\w+)\b", re.IGNORECASE)
 
     # Map: entity name → file that declares it
     entity_to_file: dict[str, Path] = {}
@@ -352,14 +353,16 @@ def _is_program_top_arch(path: Path) -> bool:
 # Main simulation runner
 # ---------------------------------------------------------------------------
 
+
 def run_simulation(
-    program_dir:      Path,
-    testbench_path:   Path,
-    build_dir:        Path,
-    config:           str = "sd_analog",
-    core:             str = "yuv444_30b",
-    log_callback:     LogCallback | None = None,
+    program_dir: Path,
+    testbench_path: Path,
+    build_dir: Path,
+    config: str = "sd_analog",
+    core: str = "yuv444_30b",
+    log_callback: LogCallback | None = None,
     progress_callback: ProgressCallback | None = None,
+    reuse_build: bool = False,
 ) -> None:
     """
     Analyse, elaborate and run the GHDL simulation.
@@ -374,6 +377,10 @@ def run_simulation(
     log_callback    : Called with each line of output (stdout+stderr).
     progress_callback : Called with (current_frame, total_frames) on each
                         simulated frame boundary.
+    reuse_build     : If True, skip analysis/elaboration when the build
+                      directory already contains a compiled design.  Only
+                      the testbench is re-analysed (for new stimulus data)
+                      and re-elaborated before running.
 
     Raises
     ------
@@ -386,9 +393,9 @@ def run_simulation(
     workdir_flag = f"--workdir={build_dir}"
 
     # Collect all sources in analysis order
-    sdk_sources     = _ordered_sdk_sources(config, core)
+    sdk_sources = _ordered_sdk_sources(config, core)
     program_sources = _ordered_program_sources(program_dir)
-    all_sources     = sdk_sources + program_sources + [testbench_path]
+    all_sources = sdk_sources + program_sources + [testbench_path]
 
     backend_label = f"{ghdl_info.backend} backend"
     if ghdl_info.is_compiled:
@@ -398,11 +405,21 @@ def run_simulation(
     _log(log_callback, f"    Backend: {backend_label}")
 
     # ── Step 1: Analyse ──────────────────────────────────────────────────────
-    _log(log_callback, "\n[1/3] Analysing VHDL sources...")
-    for src in all_sources:
-        cmd = [ghdl, "-a", _GHDL_STD, workdir_flag, str(src)]
-        _log(log_callback, f"  + {src.name}")
-        _run(cmd, build_dir, log_callback, description=f"analyse {src.name}")
+    # When reuse_build is set and a work library already exists, only
+    # re-analyse the testbench (which embeds stimulus/register changes)
+    # and skip the unchanged SDK + program sources.
+    cf_file = build_dir / "work-obj08.cf"
+    if reuse_build and cf_file.exists():
+        _log(log_callback, "\n[1/3] Re-analysing testbench only (reusing build)...")
+        _log(log_callback, f"  + {testbench_path.name}")
+        cmd = [ghdl, "-a", _GHDL_STD, workdir_flag, str(testbench_path)]
+        _run(cmd, build_dir, log_callback, description=f"analyse {testbench_path.name}")
+    else:
+        _log(log_callback, "\n[1/3] Analysing VHDL sources...")
+        for src in all_sources:
+            cmd = [ghdl, "-a", _GHDL_STD, workdir_flag, str(src)]
+            _log(log_callback, f"  + {src.name}")
+            _run(cmd, build_dir, log_callback, description=f"analyse {src.name}")
 
     # ── Step 2: Elaborate ────────────────────────────────────────────────────
     _log(log_callback, "\n[2/3] Elaborating testbench...")
@@ -417,9 +434,14 @@ def run_simulation(
     # ── Step 3: Run ──────────────────────────────────────────────────────────
     _log(log_callback, "\n[3/3] Running simulation...")
     run_cmd = [ghdl, "-r", _GHDL_STD, workdir_flag, _TOP_ENTITY]
-    _run(run_cmd, build_dir, log_callback, description="run simulation",
-         check_output_marker="VIT_DONE",
-         progress_callback=progress_callback)
+    _run(
+        run_cmd,
+        build_dir,
+        log_callback,
+        description="run simulation",
+        check_output_marker="VIT_DONE",
+        progress_callback=progress_callback,
+    )
 
     _log(log_callback, "\n=== Simulation complete ===")
 
@@ -427,6 +449,7 @@ def run_simulation(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _log(cb: LogCallback | None, msg: str) -> None:
     if cb is not None:
@@ -440,7 +463,7 @@ def _run(
     cmd: list[str],
     cwd: Path,
     log_callback: LogCallback | None,
-    description:  str = "",
+    description: str = "",
     check_output_marker: str | None = None,
     progress_callback: ProgressCallback | None = None,
 ) -> str:
@@ -466,7 +489,7 @@ def _run(
         frame_match = _RE_VIT_FRAME.search(line)
         if frame_match:
             current = int(frame_match.group(1))
-            total   = int(frame_match.group(2))
+            total = int(frame_match.group(2))
             if progress_callback is not None:
                 progress_callback(current, total)
         # Highlight capture reports from the testbench
