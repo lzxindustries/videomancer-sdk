@@ -331,23 +331,34 @@ begin
     end if;
   end process;
 
-  -- Analog output is (trisync_p - trisync_n). For correct SMPTE bipolar
-  -- HD tri-level sync (negative excursion at end-of-line, positive
-  -- excursion at start-of-line), we need trisync_p HIGH during the
-  -- positive window and trisync_n HIGH during the negative window.
+  -- Analog tri-level sync output is summed as approximately
+  --   analog = trisync_n - trisync_p
+  -- (i.e. trisync_n HIGH drives a positive analog excursion, trisync_p
+  -- HIGH drives a negative analog excursion).  This was confirmed by
+  -- observation: during VSYNC, where trisync_n follows s_csync_serration
+  -- and stays HIGH for long stretches, the analog output reads positive.
   --
-  -- HD: trisync_p = s_hsync (HIGH at line start [1..hsync_pulse_width]).
-  -- HD: trisync_n = NOT s_csync (HIGH during csync sync tip at end of line).
+  -- For correct SMPTE bipolar HD tri-level sync (NEGATIVE excursion at
+  -- the end of the line followed by POSITIVE excursion at the start of
+  -- the next line, straddling the HSYNC reference at the line wrap):
   --
-  -- SD: trisync_en=0 forces trisync_p to 0; trisync_n must remain
-  -- s_csync (active-low sync tip) to preserve SD output behaviour.
-  -- The XOR with s_trisync_en inverts s_csync only in HD.
+  --   * trisync_p (analog NEG) must be HIGH during the end-of-line
+  --     csync sync-tip window. That window is `NOT s_csync` (since
+  --     s_csync is active-low at end of line in HD).
+  --   * trisync_n (analog POS) must be HIGH during the start-of-line
+  --     hsync window. That window is `s_hsync` directly (active-high
+  --     in HD).
+  --
+  -- SD (trisync_en = 0) must keep the original active-low csync on
+  -- trisync_n and zero on trisync_p, so the active-line branches gate
+  -- on s_trisync_en and fall back to s_csync on trisync_n in SD.
   s_trisync_p <= (s_hsync_2x and s_trisync_en) when s_eq_pulses = '1' else
-    (s_hsync and s_trisync_en);
+    ((not s_csync) and s_trisync_en);
 
   s_trisync_n <= s_csync_serration when s_vsync = '1' else
     s_csync_2x when s_eq_pulses = '1' else
-    (s_csync xor s_trisync_en);
+    s_hsync when s_trisync_en = '1' else
+    s_csync;
 
   trisync_p <= s_trisync_p;
   trisync_n <= s_trisync_n;
