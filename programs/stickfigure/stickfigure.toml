@@ -23,7 +23,7 @@ name_label = "Threshold"
 control_mode = "linear"
 display_min_value = 0
 display_max_value = 100
-initial_value = 300
+initial_value = 80
 display_float_digits = 1
 suffix_label = "%"
 
@@ -33,7 +33,7 @@ name_label = "Line Wt"
 control_mode = "linear"
 display_min_value = 0
 display_max_value = 100
-initial_value = 512
+initial_value = 400
 display_float_digits = 1
 suffix_label = "%"
 
@@ -43,7 +43,7 @@ name_label = "Smooth"
 control_mode = "linear"
 display_min_value = 0
 display_max_value = 100
-initial_value = 256
+initial_value = 200
 display_float_digits = 1
 suffix_label = "%"
 
@@ -119,33 +119,33 @@ suffix_label = "%"
 
 [[preset]]
 name = "Pencil"
-rotary_potentiometer_1 = 250
-rotary_potentiometer_2 = 400
+rotary_potentiometer_1 = 80
+rotary_potentiometer_2 = 300
 rotary_potentiometer_3 = 300
 rotary_potentiometer_4 = 1023
 
 [[preset]]
 name = "Bold Ink"
-rotary_potentiometer_1 = 150
-rotary_potentiometer_2 = 800
+rotary_potentiometer_1 = 40
+rotary_potentiometer_2 = 600
 rotary_potentiometer_3 = 100
 rotary_potentiometer_4 = 1023
 toggle_switch_7 = 1
 
 [[preset]]
 name = "Neon Lines"
-rotary_potentiometer_1 = 350
-rotary_potentiometer_2 = 600
+rotary_potentiometer_1 = 60
+rotary_potentiometer_2 = 450
 rotary_potentiometer_3 = 200
-rotary_potentiometer_4 = 0
+rotary_potentiometer_4 = 1023
 rotary_potentiometer_5 = 600
 rotary_potentiometer_6 = 800
 toggle_switch_8 = 1
 
 [[preset]]
 name = "Blueprint"
-rotary_potentiometer_1 = 280
-rotary_potentiometer_2 = 500
+rotary_potentiometer_1 = 70
+rotary_potentiometer_2 = 350
 rotary_potentiometer_3 = 400
 rotary_potentiometer_4 = 100
 rotary_potentiometer_5 = 682
@@ -153,8 +153,8 @@ rotary_potentiometer_6 = 700
 
 [[preset]]
 name = "Woodcut"
-rotary_potentiometer_1 = 200
-rotary_potentiometer_2 = 900
+rotary_potentiometer_1 = 50
+rotary_potentiometer_2 = 500
 rotary_potentiometer_3 = 50
 rotary_potentiometer_4 = 900
 toggle_switch_11 = 1

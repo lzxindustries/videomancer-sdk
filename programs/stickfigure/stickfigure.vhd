@@ -243,11 +243,10 @@ begin
         variable v_comp_v      : integer range -1024 to 2047;
         -- IIR variables
         variable v_iir_sum     : unsigned(C_VIDEO_DATA_WIDTH downto 0);
+        variable v_filtered_y  : unsigned(C_VIDEO_DATA_WIDTH - 1 downto 0);
         -- Hue-to-UV variables
         variable v_hue_quad    : unsigned(1 downto 0);
         variable v_hue_frac    : unsigned(7 downto 0);
-        variable v_sat_prod_u  : unsigned(2 * C_VIDEO_DATA_WIDTH - 1 downto 0);
-        variable v_sat_prod_v  : unsigned(2 * C_VIDEO_DATA_WIDTH - 1 downto 0);
         variable v_u_offset    : integer range -512 to 511;
         variable v_v_offset    : integer range -512 to 511;
     begin
@@ -263,17 +262,16 @@ begin
             s1_avid   <= data_in.avid;
 
             if s_pre_filter = '1' then
-                -- Simple IIR: out = (prev + current) / 2, weighted by smooth
-                -- Approximate: out = iir_prev * alpha + input * (1-alpha)
-                -- Use top 4 bits of smooth as alpha (0..15)/16
+                -- Simple IIR: out = (prev + current) / 2
                 v_iir_sum := resize(s_iir_y, C_VIDEO_DATA_WIDTH + 1)
                            + resize(unsigned(data_in.y), C_VIDEO_DATA_WIDTH + 1);
-                s1_y     <= v_iir_sum(C_VIDEO_DATA_WIDTH downto 1);  -- (prev+curr)/2
-                s_iir_y  <= v_iir_sum(C_VIDEO_DATA_WIDTH downto 1);
+                v_filtered_y := v_iir_sum(C_VIDEO_DATA_WIDTH downto 1);
+                s_iir_y      <= v_filtered_y;
             else
-                s1_y    <= unsigned(data_in.y);
-                s_iir_y <= unsigned(data_in.y);
+                v_filtered_y := unsigned(data_in.y);
+                s_iir_y      <= unsigned(data_in.y);
             end if;
+            s1_y      <= v_filtered_y;
             s1_y_prev <= s1_y;
 
             -- =================================================================
@@ -286,8 +284,9 @@ begin
                 s2_prev_line_ym1 <= s_prev_line_y;
                 s_prev_line_y    <= s_line_buf(to_integer(s_pixel_addr));
 
-                -- Write current filtered Y to line buffer
-                s_line_buf(to_integer(s_pixel_addr)) <= s1_y;
+                -- Write current filtered Y to line buffer (use variable
+                -- for same-cycle value, not the 1-clk-delayed signal s1_y)
+                s_line_buf(to_integer(s_pixel_addr)) <= v_filtered_y;
 
                 -- Advance pixel counter
                 if s_pixel_addr = C_LINE_BUF_DEPTH - 1 then
@@ -371,11 +370,11 @@ begin
             -- Scales edge magnitude: weighted = (mag * weight) >> 10
             -- =================================================================
             v_weight_prod := s3_edge_mag * s_line_weight;
-            -- Shift right by 9 (not 10) so weight=512 gives ~1:1
-            if v_weight_prod(2 * C_VIDEO_DATA_WIDTH - 1 downto 9) > 1023 then
+            -- Shift right by 7: weight=128 → 1:1, weight=512 → 4:1
+            if v_weight_prod(2 * C_VIDEO_DATA_WIDTH - 1 downto 7) > 1023 then
                 s4_weighted_mag <= to_unsigned(1023, C_VIDEO_DATA_WIDTH);
             else
-                s4_weighted_mag <= v_weight_prod(C_VIDEO_DATA_WIDTH + 8 downto 9);
+                s4_weighted_mag <= v_weight_prod(C_VIDEO_DATA_WIDTH + 6 downto 7);
             end if;
 
             -- =================================================================
@@ -386,10 +385,12 @@ begin
 
             if v_above_thr <= 0 then
                 v_edge_out := (others => '0');
-            elsif v_above_thr > 1023 then
+            elsif v_above_thr >= 128 then
+                -- Saturate: strong edges snap to full intensity
                 v_edge_out := to_unsigned(1023, C_VIDEO_DATA_WIDTH);
             else
-                v_edge_out := to_unsigned(v_above_thr, C_VIDEO_DATA_WIDTH);
+                -- Amplify 8×: stretch 0..127 → 0..1016 for visible lines
+                v_edge_out := to_unsigned(v_above_thr * 8, C_VIDEO_DATA_WIDTH);
             end if;
 
             -- Posterize: quantise to 4 levels for woodcut effect
@@ -436,15 +437,16 @@ begin
                     v_v_offset := -200 + to_integer(resize(v_hue_frac, 10));
             end case;
 
-            -- Apply saturation scaling
-            v_sat_prod_u := to_unsigned(512 + v_u_offset, C_VIDEO_DATA_WIDTH)
-                          * s_hue_sat;
-            v_sat_prod_v := to_unsigned(512 + v_v_offset, C_VIDEO_DATA_WIDTH)
-                          * s_hue_sat;
-
-            -- Line pixel: low luma (dark line) with optional hue
-            v_line_u := v_sat_prod_u(2 * C_VIDEO_DATA_WIDTH - 1 downto C_VIDEO_DATA_WIDTH);
-            v_line_v := v_sat_prod_v(2 * C_VIDEO_DATA_WIDTH - 1 downto C_VIDEO_DATA_WIDTH);
+            -- Apply saturation scaling: interpolate between achromatic (512)
+            -- and fully saturated (512 ± offset).
+            -- line_u/v = 512 + (offset * hue_sat) / 1024
+            -- When hue_sat=0 → 512 (neutral).  When hue_sat=1023 → 512+offset.
+            v_line_u := to_unsigned(
+                512 + (v_u_offset * to_integer(s_hue_sat)) / 1024,
+                C_VIDEO_DATA_WIDTH);
+            v_line_v := to_unsigned(
+                512 + (v_v_offset * to_integer(s_hue_sat)) / 1024,
+                C_VIDEO_DATA_WIDTH);
 
             -- Edge compositing: edge_val as blend factor between fill and line
             v_edge_k := s5_edge_val;
