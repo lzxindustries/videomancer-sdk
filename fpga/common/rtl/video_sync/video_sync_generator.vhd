@@ -331,19 +331,9 @@ begin
     end if;
   end process;
 
-  -- trisync_p is the HD positive-excursion pulse and is gated to '0'
-  -- in SD modes via s_trisync_en. Use s_hsync / s_hsync_2x directly
-  -- (without the leading 'not') so the positive excursion is asserted
-  -- in-phase with the hsync timing window. The previous inversion
-  -- produced an out-of-phase pulse that summed with trisync_n at the
-  -- analog stage to a sync waveform that scopes/monitors interpreted
-  -- as inverted.
-  s_trisync_p <= (s_hsync_2x and s_trisync_en) when s_eq_pulses = '1' else
-    (s_hsync and s_trisync_en);
+  s_trisync_p <= ((not s_hsync_2x) and s_trisync_en) when s_eq_pulses = '1' else
+    ((not s_hsync) and s_trisync_en);
 
-  -- trisync_n is the standard composite sync. Same in SD and HD: the
-  -- analog circuit combines this with trisync_p to form the tri-level
-  -- HD sync waveform, or drives bi-level SD csync directly.
   s_trisync_n <= s_csync_serration when s_vsync = '1' else
     s_csync_2x when s_eq_pulses = '1' else
     s_csync;
