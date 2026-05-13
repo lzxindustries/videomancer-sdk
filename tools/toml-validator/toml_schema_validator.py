@@ -19,9 +19,9 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 try:
-    import tomli as tomllib  # Python 3.10 and below
-except ImportError:
     import tomllib  # Python 3.11+
+except ModuleNotFoundError:
+    import tomli as tomllib  # Python 3.10 and below
 
 try:
     import jsonschema

@@ -37,9 +37,9 @@ from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 
 try:
-    import tomli as tomllib  # Python 3.10 and below
-except ImportError:
     import tomllib  # Python 3.11+
+except ModuleNotFoundError:
+    import tomli as tomllib  # Python 3.10 and below
 
 try:
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey

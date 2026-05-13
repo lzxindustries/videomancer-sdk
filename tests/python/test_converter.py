@@ -17,12 +17,12 @@ sys.path.insert(0, str(TOOLS_DIR))
 
 # Check for TOML library
 try:
-    import tomli as tomllib
-    print("Using tomli library")
-except ImportError:
+    import tomllib
+    print("Using tomllib (Python 3.11+)")
+except ModuleNotFoundError:
     try:
-        import tomllib
-        print("Using tomllib (Python 3.11+)")
+        import tomli as tomllib
+        print("Using tomli library")
     except ImportError:
         print("Error: No TOML library found. Install with: pip3 install tomli")
         sys.exit(1)

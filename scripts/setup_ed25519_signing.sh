@@ -24,8 +24,8 @@ else
     RESET=""
 fi
 
-# Get script directory (SDK root)
-SDK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get SDK root (parent of script directory)
+SDK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo "${BLUE}SDK Root: ${SDK_ROOT}${RESET}"
 echo ""
 
@@ -93,14 +93,14 @@ if [ -f "${PRIV_KEY}" ] && [ -f "${PUB_KEY}" ]; then
 else
     echo "${YELLOW}⚠ Ed25519 keys not found${RESET}"
     echo "Generating new Ed25519 key pair..."
-    python3 "${SDK_ROOT}/scripts/vmprog_pack/generate_ed25519_keys.py" --output-dir "${KEYS_DIR}"
+    python3 "${SDK_ROOT}/tools/vmprog-packer/generate_ed25519_keys.py" --output-dir "${KEYS_DIR}"
     echo "${GREEN}✓ Ed25519 keys generated${RESET}"
 fi
 echo ""
 
 # Step 3: Test signing functionality
 echo "${BLUE}Step 3: Testing Ed25519 signing functionality...${RESET}"
-python3 "${SDK_ROOT}/scripts/vmprog_pack/test_ed25519_signing.py"
+python3 "${SDK_ROOT}/tests/python/test_ed25519_signing.py"
 echo ""
 
 # Step 4: Example package creation
@@ -109,17 +109,17 @@ echo ""
 echo "The vmprog_pack.py script can now create signed packages:"
 echo ""
 echo "${GREEN}# Create signed package (default):${RESET}"
-echo "  python scripts/vmprog_pack/vmprog_pack.py \\"
+echo "  python tools/vmprog-packer/vmprog_pack.py \\"
 echo "    ./build/programs/passthru \\"
 echo "    ./output/passthru.vmprog"
 echo ""
 echo "${GREEN}# Create unsigned package:${RESET}"
-echo "  python scripts/vmprog_pack/vmprog_pack.py --no-sign \\"
+echo "  python tools/vmprog-packer/vmprog_pack.py --no-sign \\"
 echo "    ./build/programs/passthru \\"
 echo "    ./output/passthru.vmprog"
 echo ""
 echo "${GREEN}# Use custom key directory:${RESET}"
-echo "  python scripts/vmprog_pack/vmprog_pack.py --keys-dir ./my_keys \\"
+echo "  python tools/vmprog-packer/vmprog_pack.py --keys-dir ./my_keys \\"
 echo "    ./build/programs/passthru \\"
 echo "    ./output/passthru.vmprog"
 echo ""
