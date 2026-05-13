@@ -249,16 +249,57 @@ echo "Estimated processing time: ~$((ACTUAL_FRAMES * 23))s (~$((ACTUAL_FRAMES * 
 # --- Step 2: Process through GHDL simulation ---
 echo ""
 echo "[Step 2/3] Processing $ACTUAL_FRAMES frames through $PROG_NAME simulation..."
-echo ""
+
+# Progress bar helpers
+BAR_WIDTH=20
+BOLD="\033[1m"
+DIM="\033[2m"
+GREEN="\033[32m"
+CYAN="\033[36m"
+YELLOW="\033[33m"
+RESET="\033[0m"
+
+format_time() {
+    local secs=$1
+    if [[ $secs -ge 3600 ]]; then
+        printf "%dh%02dm" $((secs/3600)) $(((secs%3600)/60))
+    elif [[ $secs -ge 60 ]]; then
+        printf "%dm%02ds" $((secs/60)) $((secs%60))
+    else
+        printf "%ds" "$secs"
+    fi
+}
+
+draw_progress() {
+    local current=$1 total=$2 elapsed=$3 eta=$4 fname=$5
+    local pct=$((current * 100 / total))
+    local filled=$((pct * BAR_WIDTH / 100))
+    local empty=$((BAR_WIDTH - filled))
+    local bar=""
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    for ((i=0; i<empty;  i++)); do bar+="░"; done
+
+    local elapsed_str eta_str
+    elapsed_str=$(format_time "$elapsed")
+    eta_str=$(format_time "$eta")
+
+    # Single-line overwrite: \r returns to start, \033[2K clears line — no \n, no scroll
+    printf "\r\033[2K  ${GREEN}%s${RESET} %3d%% ${BOLD}[%d/%d]${RESET} ${CYAN}%s${RESET}  ${DIM}elapsed${RESET} %s  ${DIM}remaining${RESET} ${YELLOW}%s${RESET}" \
+        "$bar" "$pct" "$current" "$total" "$fname" "$elapsed_str" "$eta_str"
+}
 
 COUNTER=0
 SECONDS=0
+AVG_TIME=0
 for frame in "$FRAMES_IN"/frame_*.png; do
     COUNTER=$((COUNTER + 1))
     BASENAME=$(basename "$frame")
     OUT_FILE="$FRAMES_OUT/$BASENAME"
 
-    printf "[%d/%d] %s ... " "$COUNTER" "$ACTUAL_FRAMES" "$BASENAME"
+    # Show "processing" state
+    draw_progress "$COUNTER" "$ACTUAL_FRAMES" "$SECONDS" \
+        "$(( (ACTUAL_FRAMES - COUNTER + 1) * (AVG_TIME > 0 ? AVG_TIME : 23) ))" \
+        "$BASENAME ..."
     FRAME_START=$SECONDS
 
     PRESET_ARGS=()
@@ -283,11 +324,20 @@ for frame in "$FRAMES_IN"/frame_*.png; do
             "${PRESET_ARGS[@]}" \
             "${REUSE_ARGS[@]}" \
             --programs-dir "$PROGRAMS_DIR" \
-        2>/dev/null
+        >/dev/null 2>&1
 
     ELAPSED=$((SECONDS - FRAME_START))
-    echo "${ELAPSED}s"
+    if [[ "$COUNTER" -eq 1 ]]; then
+        AVG_TIME=$ELAPSED
+    else
+        AVG_TIME=$(( (AVG_TIME * (COUNTER - 1) + ELAPSED) / COUNTER ))
+    fi
+    REMAINING=$(( (ACTUAL_FRAMES - COUNTER) * AVG_TIME ))
+
+    # Redraw with final state for this frame
+    draw_progress "$COUNTER" "$ACTUAL_FRAMES" "$SECONDS" "$REMAINING" "$BASENAME ✓"
 done
+echo ""
 
 echo ""
 echo "All $ACTUAL_FRAMES frames processed."

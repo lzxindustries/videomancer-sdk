@@ -8,7 +8,7 @@ program_id = "com.lzxindustries.stickfigure"
 program_name = "Stickfigure"
 program_version = "1.0.0"
 abi_version = ">=1.0,<2.0"
-author = "Lars Larsen"
+author = "Holger Rupprecht"
 license = "GPL-3.0"
 categories = ["Edges", "Print"]
 program_type = "processing"
