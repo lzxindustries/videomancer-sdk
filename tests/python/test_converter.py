@@ -12,16 +12,18 @@ from pathlib import Path
 
 # Add tools directory to Python path
 REPO_ROOT = Path(__file__).parent.parent.parent
-TOOLS_DIR = REPO_ROOT / 'tools' / 'toml-converter'
+TOOLS_DIR = REPO_ROOT / "tools" / "toml-converter"
 sys.path.insert(0, str(TOOLS_DIR))
 
 # Check for TOML library
 try:
     import tomllib
+
     print("Using tomllib (Python 3.11+)")
 except ModuleNotFoundError:
     try:
         import tomli as tomllib
+
         print("Using tomli library")
     except ImportError:
         print("Error: No TOML library found. Install with: pip3 install tomli")
@@ -36,11 +38,12 @@ except ImportError:
     print(f"Python path: {sys.path}")
     sys.exit(1)
 
+
 def verify_binary_output(binary_path: Path):
     """Verify the binary output structure."""
     print(f"\n=== Verifying Binary Output ===")
 
-    with open(binary_path, 'rb') as f:
+    with open(binary_path, "rb") as f:
         data = f.read()
 
     print(f"File size: {len(data)} bytes (expected: 7936)")
@@ -55,37 +58,37 @@ def verify_binary_output(binary_path: Path):
     import struct
 
     # Read program_id (first 64 bytes)
-    program_id = data[0:64].rstrip(b'\x00').decode('utf-8')
+    program_id = data[0:64].rstrip(b"\x00").decode("utf-8")
     print(f"\nProgram ID: {program_id}")
 
     # Read version fields (bytes 64-76)
-    version_major, version_minor, version_patch = struct.unpack('<HHH', data[64:70])
+    version_major, version_minor, version_patch = struct.unpack("<HHH", data[64:70])
     print(f"Version: {version_major}.{version_minor}.{version_patch}")
 
     # Read ABI fields
-    abi_min_major, abi_min_minor = struct.unpack('<HH', data[70:74])
-    abi_max_major, abi_max_minor = struct.unpack('<HH', data[74:78])
+    abi_min_major, abi_min_minor = struct.unpack("<HH", data[70:74])
+    abi_max_major, abi_max_minor = struct.unpack("<HH", data[74:78])
     print(f"ABI Min: {abi_min_major}.{abi_min_minor}")
     print(f"ABI Max: {abi_max_major}.{abi_max_minor}")
 
     # Read hw_mask (uint32_t at offset 78)
-    hw_mask = struct.unpack('<I', data[78:82])[0]
+    hw_mask = struct.unpack("<I", data[78:82])[0]
     print(f"HW Mask: 0x{hw_mask:08x}")
 
     # Read core_id (uint32_t at offset 82)
-    core_id = struct.unpack('<I', data[82:86])[0]
+    core_id = struct.unpack("<I", data[82:86])[0]
     print(f"Core ID: {core_id}")
 
     # Read program_name (bytes 86-118)
-    program_name = data[86:118].rstrip(b'\x00').decode('utf-8')
+    program_name = data[86:118].rstrip(b"\x00").decode("utf-8")
     print(f"Program Name: {program_name}")
 
     # Read author (bytes 118-182)
-    author = data[118:182].rstrip(b'\x00').decode('utf-8')
+    author = data[118:182].rstrip(b"\x00").decode("utf-8")
     print(f"Author: {author}")
 
     # Read license (bytes 182-214)
-    license_str = data[182:214].rstrip(b'\x00').decode('utf-8')
+    license_str = data[182:214].rstrip(b"\x00").decode("utf-8")
     print(f"License: {license_str}")
 
     # Read categories (bytes 214-470: 8 × 32-byte slots)
@@ -93,24 +96,28 @@ def verify_binary_output(binary_path: Path):
     for i in range(8):
         cat_start = 214 + i * 32
         cat_end = cat_start + 32
-        cat = data[cat_start:cat_end].rstrip(b'\x00').decode('utf-8')
+        cat = data[cat_start:cat_end].rstrip(b"\x00").decode("utf-8")
         if cat:
             categories.append(cat)
     print(f"Categories: {', '.join(categories) if categories else '(none)'}")
 
     # Read description (bytes 470-598)
-    description = data[470:598].rstrip(b'\x00').decode('utf-8')
+    description = data[470:598].rstrip(b"\x00").decode("utf-8")
     print(f"Description: {description}")
 
     # Read parameter_count (bytes 726-728)
-    parameter_count = struct.unpack('<H', data[726:728])[0]
+    parameter_count = struct.unpack("<H", data[726:728])[0]
     print(f"\nParameter Count: {parameter_count}")
 
     # Read first parameter (starts at byte 730)
     if parameter_count > 0:
         param_offset = 730
-        param_id, control_mode = struct.unpack('<II', data[param_offset:param_offset+8])
-        min_val, max_val, init_val = struct.unpack('<HHH', data[param_offset+8:param_offset+14])
+        param_id, control_mode = struct.unpack(
+            "<II", data[param_offset : param_offset + 8]
+        )
+        min_val, max_val, init_val = struct.unpack(
+            "<HHH", data[param_offset + 8 : param_offset + 14]
+        )
         print(f"\nParameter 1:")
         print(f"  ID: {param_id}")
         print(f"  Control Mode: {control_mode}")
@@ -118,7 +125,11 @@ def verify_binary_output(binary_path: Path):
 
         # Read parameter name (at offset 730 + 22 = 752)
         param_name_offset = param_offset + 22
-        param_name = data[param_name_offset:param_name_offset+32].rstrip(b'\x00').decode('utf-8')
+        param_name = (
+            data[param_name_offset : param_name_offset + 32]
+            .rstrip(b"\x00")
+            .decode("utf-8")
+        )
         print(f"  Name: {param_name}")
 
     print("\n✓ Binary structure verified!")
@@ -130,8 +141,8 @@ def main():
     print("=== Videomancer Config Converter Test ===\n")
 
     # Use template TOML from examples
-    toml_path = REPO_ROOT / 'examples' / 'templates' / 'template.toml'
-    output_path = Path('/tmp/test_program_config.bin')
+    toml_path = REPO_ROOT / "examples" / "templates" / "template.toml"
+    output_path = Path("/tmp/test_program_config.bin")
 
     # Check input file exists
     if not toml_path.exists():
@@ -145,6 +156,7 @@ def main():
     except Exception as e:
         print(f"\n✗ Conversion failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
@@ -166,5 +178,5 @@ def main():
     print("\n=== All Tests Passed ===")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

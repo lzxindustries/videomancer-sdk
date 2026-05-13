@@ -38,18 +38,19 @@ def simplify_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
     that aren't supported by standard jsonschema library
     """
     import copy
+
     schema = copy.deepcopy(schema)
 
     def remove_data_refs(obj):
         """Recursively remove $data references"""
         if isinstance(obj, dict):
             # Remove allOf sections that contain $data references
-            if 'allOf' in obj:
-                del obj['allOf']
+            if "allOf" in obj:
+                del obj["allOf"]
 
             # Recursively process all dict values
             for key, value in list(obj.items()):
-                if isinstance(value, dict) and '$data' in value:
+                if isinstance(value, dict) and "$data" in value:
                     # Remove this validation as it uses $data
                     del obj[key]
                 else:
@@ -65,7 +66,7 @@ def simplify_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
 def load_toml(toml_path: Path) -> Dict[str, Any]:
     """Load and parse TOML file"""
     try:
-        with open(toml_path, 'rb') as f:
+        with open(toml_path, "rb") as f:
             return tomllib.load(f)
     except Exception as e:
         print(f"ERROR: Failed to load TOML file '{toml_path}': {e}", file=sys.stderr)
@@ -75,10 +76,12 @@ def load_toml(toml_path: Path) -> Dict[str, Any]:
 def load_schema(schema_path: Path) -> Dict[str, Any]:
     """Load and parse JSON schema file"""
     try:
-        with open(schema_path, 'r') as f:
+        with open(schema_path, "r") as f:
             return json.load(f)
     except Exception as e:
-        print(f"ERROR: Failed to load schema file '{schema_path}': {e}", file=sys.stderr)
+        print(
+            f"ERROR: Failed to load schema file '{schema_path}': {e}", file=sys.stderr
+        )
         sys.exit(1)
 
 
@@ -126,18 +129,20 @@ def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str
         msg = f"{location}: {error.message}"
 
         # Add additional context for specific error types
-        if error.validator == 'required':
+        if error.validator == "required":
             missing = error.validator_value
             msg = f"{location}: Missing required field(s): {missing}"
-        elif error.validator == 'additionalProperties':
+        elif error.validator == "additionalProperties":
             if isinstance(error.instance, dict):
-                extra_keys = set(error.instance.keys()) - set(error.schema.get('properties', {}).keys())
+                extra_keys = set(error.instance.keys()) - set(
+                    error.schema.get("properties", {}).keys()
+                )
                 if extra_keys:
                     msg += f" (unexpected: {', '.join(sorted(extra_keys))})"
-        elif error.validator == 'enum':
+        elif error.validator == "enum":
             allowed = error.validator_value
             msg += f" (allowed: {', '.join(map(str, allowed))})"
-        elif error.validator == 'type':
+        elif error.validator == "type":
             expected = error.validator_value
             if isinstance(error.instance, (int, float, str, bool, list, dict)):
                 actual = type(error.instance).__name__
@@ -151,9 +156,15 @@ def validate_toml(toml_data: Dict[str, Any], schema: Dict[str, Any]) -> List[str
 def main():
     # Parse arguments
     if len(sys.argv) < 2:
-        print("Usage: python toml_schema_validator.py input.toml [schema.json]", file=sys.stderr)
+        print(
+            "Usage: python toml_schema_validator.py input.toml [schema.json]",
+            file=sys.stderr,
+        )
         print("", file=sys.stderr)
-        print("Validates a TOML configuration file against a JSON schema.", file=sys.stderr)
+        print(
+            "Validates a TOML configuration file against a JSON schema.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     toml_path = Path(sys.argv[1])
@@ -164,7 +175,14 @@ def main():
     else:
         # Default to schema in docs/schemas/
         script_dir = Path(__file__).parent
-        schema_path = script_dir / ".." / ".." / "docs" / "schemas" / "vmprog_program_config_schema_v1_0.json"
+        schema_path = (
+            script_dir
+            / ".."
+            / ".."
+            / "docs"
+            / "schemas"
+            / "vmprog_program_config_schema_v1_0.json"
+        )
         schema_path = schema_path.resolve()
 
     # Check if files exist
@@ -174,7 +192,10 @@ def main():
 
     if not schema_path.exists():
         print(f"ERROR: Schema file not found: {schema_path}", file=sys.stderr)
-        print(f"Provide schema path as second argument or ensure default schema exists.", file=sys.stderr)
+        print(
+            f"Provide schema path as second argument or ensure default schema exists.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # Load files

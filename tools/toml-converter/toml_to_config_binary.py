@@ -57,8 +57,8 @@ PRESET_STRUCT_SIZE = 40
 CONFIG_STRUCT_SIZE = 7936
 
 PROGRAM_TYPE_MAP = {
-    'processing': 0,
-    'synthesis': 1,
+    "processing": 0,
+    "synthesis": 1,
 }
 
 # Enum value bounds
@@ -67,90 +67,90 @@ MAX_CONTROL_MODE = 35  # expo_in_out
 
 # Enum string to integer mappings
 PARAMETER_ID_MAP = {
-    'none': 0,
-    'rotary_potentiometer_1': 1,
-    'rotary_potentiometer_2': 2,
-    'rotary_potentiometer_3': 3,
-    'rotary_potentiometer_4': 4,
-    'rotary_potentiometer_5': 5,
-    'rotary_potentiometer_6': 6,
-    'toggle_switch_7': 7,
-    'toggle_switch_8': 8,
-    'toggle_switch_9': 9,
-    'toggle_switch_10': 10,
-    'toggle_switch_11': 11,
-    'linear_potentiometer_12': 12
+    "none": 0,
+    "rotary_potentiometer_1": 1,
+    "rotary_potentiometer_2": 2,
+    "rotary_potentiometer_3": 3,
+    "rotary_potentiometer_4": 4,
+    "rotary_potentiometer_5": 5,
+    "rotary_potentiometer_6": 6,
+    "toggle_switch_7": 7,
+    "toggle_switch_8": 8,
+    "toggle_switch_9": 9,
+    "toggle_switch_10": 10,
+    "toggle_switch_11": 11,
+    "linear_potentiometer_12": 12,
 }
 
 CONTROL_MODE_MAP = {
-    'linear': 0,
-    'linear_half': 1,
-    'linear_quarter': 2,
-    'linear_double': 3,
-    'boolean': 4,
-    'steps_4': 5,
-    'steps_8': 6,
-    'steps_16': 7,
-    'steps_32': 8,
-    'steps_64': 9,
-    'steps_128': 10,
-    'steps_256': 11,
-    'polar_degs_90': 12,
-    'polar_degs_180': 13,
-    'polar_degs_360': 14,
-    'polar_degs_720': 15,
-    'polar_degs_1440': 16,
-    'polar_degs_2880': 17,
-    'quad_in': 18,
-    'quad_out': 19,
-    'quad_in_out': 20,
-    'sine_in': 21,
-    'sine_out': 22,
-    'sine_in_out': 23,
-    'circ_in': 24,
-    'circ_out': 25,
-    'circ_in_out': 26,
-    'quint_in': 27,
-    'quint_out': 28,
-    'quint_in_out': 29,
-    'quart_in': 30,
-    'quart_out': 31,
-    'quart_in_out': 32,
-    'expo_in': 33,
-    'expo_out': 34,
-    'expo_in_out': 35
+    "linear": 0,
+    "linear_half": 1,
+    "linear_quarter": 2,
+    "linear_double": 3,
+    "boolean": 4,
+    "steps_4": 5,
+    "steps_8": 6,
+    "steps_16": 7,
+    "steps_32": 8,
+    "steps_64": 9,
+    "steps_128": 10,
+    "steps_256": 11,
+    "polar_degs_90": 12,
+    "polar_degs_180": 13,
+    "polar_degs_360": 14,
+    "polar_degs_720": 15,
+    "polar_degs_1440": 16,
+    "polar_degs_2880": 17,
+    "quad_in": 18,
+    "quad_out": 19,
+    "quad_in_out": 20,
+    "sine_in": 21,
+    "sine_out": 22,
+    "sine_in_out": 23,
+    "circ_in": 24,
+    "circ_out": 25,
+    "circ_in_out": 26,
+    "quint_in": 27,
+    "quint_out": 28,
+    "quint_in_out": 29,
+    "quart_in": 30,
+    "quart_out": 31,
+    "quart_in_out": 32,
+    "expo_in": 33,
+    "expo_out": 34,
+    "expo_in_out": 35,
 }
 
 # Hardware compatibility flags
 HARDWARE_FLAGS_MAP = {
-    'rev_a': 0x00000001,
-    'rev_b': 0x00000002,
+    "rev_a": 0x00000001,
+    "rev_b": 0x00000002,
 }
 
 # Core architecture identifiers
 CORE_ID_MAP = {
-    'none': 0,
-    'yuv444_30b': 1,
-    'yuv422_20b': 2,
+    "none": 0,
+    "yuv444_30b": 1,
+    "yuv422_20b": 2,
 }
 
 # Video timing ID name → 4-bit ID mapping (matches videomancer_abi.hpp)
 VIDEO_TIMING_ID_MAP = {
-    'ntsc':       0x0,
-    '1080i50':    0x1,
-    '1080i5994':  0x2,
-    '1080p24':    0x3,
-    '480p':       0x4,
-    '720p50':     0x5,
-    '720p5994':   0x6,
-    '1080p30':    0x7,
-    'pal':        0x8,
-    '1080p2398':  0x9,
-    '1080i60':    0xA,
-    '1080p25':    0xB,
-    '576p':       0xC,
-    '1080p2997':  0xD,
-    '720p60':     0xE,
+    "ntsc": 0x0,
+    "1080i50": 0x1,
+    "1080i5994": 0x2,
+    "1080p24": 0x3,
+    "480p": 0x4,
+    "720p50": 0x5,
+    "720p5994": 0x6,
+    "1080p30": 0x7,
+    "pal": 0x8,
+    "1080p2398": 0x9,
+    "1080i60": 0xA,
+    "1080p25": 0xB,
+    "576p": 0xC,
+    "1080p2997": 0xD,
+    "720p60": 0xE,
 }
 
 # Global flag for quiet mode
@@ -160,6 +160,7 @@ QUIET = False
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
 
 def parse_semver(version_str: str) -> Tuple[int, int, int]:
     """
@@ -174,9 +175,11 @@ def parse_semver(version_str: str) -> Tuple[int, int, int]:
     Raises:
         ValueError: If version string is invalid
     """
-    match = re.match(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$', version_str)
+    match = re.match(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$", version_str)
     if not match:
-        raise ValueError(f"Invalid SemVer format: '{version_str}' (expected 'major.minor.patch')")
+        raise ValueError(
+            f"Invalid SemVer format: '{version_str}' (expected 'major.minor.patch')"
+        )
 
     major, minor, patch = match.groups()
     return int(major), int(minor), int(patch)
@@ -196,7 +199,9 @@ def parse_abi_version_range(range_str: str) -> Tuple[int, int, int, int]:
     Raises:
         ValueError: If range string is invalid
     """
-    match = re.match(r'^>=?(0|[1-9]\d*)\.(0|[1-9]\d*),<(0|[1-9]\d*)\.(0|[1-9]\d*)$', range_str)
+    match = re.match(
+        r"^>=?(0|[1-9]\d*)\.(0|[1-9]\d*),<(0|[1-9]\d*)\.(0|[1-9]\d*)$", range_str
+    )
     if not match:
         raise ValueError(
             f"Invalid ABI version range: '{range_str}' "
@@ -221,12 +226,14 @@ def pack_string(s: str, max_length: int) -> bytes:
     Raises:
         ValueError: If string is too long
     """
-    encoded = s.encode('utf-8')
+    encoded = s.encode("utf-8")
     if len(encoded) >= max_length:
-        raise ValueError(f"String '{s}' is too long ({len(encoded)} bytes, max {max_length - 1})")
+        raise ValueError(
+            f"String '{s}' is too long ({len(encoded)} bytes, max {max_length - 1})"
+        )
 
     # Pad with zeros to max_length
-    return encoded + b'\x00' * (max_length - len(encoded))
+    return encoded + b"\x00" * (max_length - len(encoded))
 
 
 def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
@@ -241,7 +248,7 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
         ValueError: If validation fails
     """
     # Check parameter_id (convert string to int if needed)
-    param_id = param.get('parameter_id', 0)
+    param_id = param.get("parameter_id", 0)
     if isinstance(param_id, str):
         if param_id not in PARAMETER_ID_MAP:
             raise ValueError(
@@ -255,7 +262,7 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
         )
 
     # Check control_mode (convert string to int if needed)
-    control_mode = param.get('control_mode', 0)
+    control_mode = param.get("control_mode", 0)
     if isinstance(control_mode, str):
         if control_mode not in CONTROL_MODE_MAP:
             raise ValueError(
@@ -269,10 +276,17 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
         )
 
     # Check for value_labels vs numeric fields mutual exclusivity
-    value_labels = param.get('value_labels', [])
+    value_labels = param.get("value_labels", [])
     has_value_labels = len(value_labels) > 0
-    numeric_fields = ['min_value', 'max_value', 'initial_value', 'display_min_value',
-                      'display_max_value', 'suffix_label', 'display_float_digits']
+    numeric_fields = [
+        "min_value",
+        "max_value",
+        "initial_value",
+        "display_min_value",
+        "display_max_value",
+        "suffix_label",
+        "display_float_digits",
+    ]
     has_numeric_fields = any(field in param for field in numeric_fields)
 
     if has_value_labels and has_numeric_fields:
@@ -283,7 +297,7 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
         )
 
     # Check control_mode mutual exclusivity with value_labels
-    if has_value_labels and 'control_mode' in param:
+    if has_value_labels and "control_mode" in param:
         raise ValueError(
             f"Parameter {index}: control_mode should not be defined when value_labels are present. "
             f"Remove control_mode field."
@@ -291,7 +305,7 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
 
     if has_value_labels:
         # Toggle switches are binary controls — exactly 2 value_labels
-        param_id_str = param.get('parameter_id', '')
+        param_id_str = param.get("parameter_id", "")
         if isinstance(param_id_str, str) and param_id_str in TOGGLE_SWITCH_IDS:
             if len(value_labels) != 2:
                 raise ValueError(
@@ -312,23 +326,23 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
             )
 
         # Validate initial_value_label if present
-        if 'initial_value_label' in param:
-            initial_label = param['initial_value_label']
+        if "initial_value_label" in param:
+            initial_label = param["initial_value_label"]
             if initial_label not in value_labels:
                 raise ValueError(
                     f"Parameter {index}: initial_value_label '{initial_label}' not found in value_labels"
                 )
     else:
         # Numeric mode validation
-        if 'initial_value_label' in param:
+        if "initial_value_label" in param:
             raise ValueError(
                 f"Parameter {index}: initial_value_label can only be used with value_labels"
             )
 
         # Check value ranges for numeric mode
-        min_val = param.get('min_value', 0)
-        max_val = param.get('max_value', 1023)
-        init_val = param.get('initial_value', 512)
+        min_val = param.get("min_value", 0)
+        max_val = param.get("max_value", 1023)
+        init_val = param.get("initial_value", 512)
 
         # Validate ranges
         if min_val < 0:
@@ -357,11 +371,12 @@ def validate_parameter_config(param: Dict[str, Any], index: int) -> None:
             )
 
     # Warn if value_label_count is specified (deprecated)
-    if 'value_label_count' in param:
-        specified_count = param['value_label_count']
+    if "value_label_count" in param:
+        specified_count = param["value_label_count"]
         if specified_count != auto_count:
-            print(f"WARNING: Parameter {index}: value_label_count ({specified_count}) ignored, using actual count ({auto_count})")
-
+            print(
+                f"WARNING: Parameter {index}: value_label_count ({specified_count}) ignored, using actual count ({auto_count})"
+            )
 
 
 def pack_parameter_config(param: Dict[str, Any]) -> bytes:
@@ -393,30 +408,30 @@ def pack_parameter_config(param: Dict[str, Any]) -> bytes:
     data = bytearray()
 
     # Convert string enums to integers if needed
-    param_id = param.get('parameter_id', 0)
+    param_id = param.get("parameter_id", 0)
     if isinstance(param_id, str):
         param_id = PARAMETER_ID_MAP.get(param_id, 0)
 
     # Handle control_mode: default to linear (0) if not defined or if value_labels present
-    value_labels = param.get('value_labels', [])
+    value_labels = param.get("value_labels", [])
     has_value_labels = len(value_labels) > 0
 
     if has_value_labels:
         # 2 value_labels = boolean toggle; 3+ = stepped/enum (treated as linear for now)
-        control_mode = CONTROL_MODE_MAP['boolean'] if len(value_labels) == 2 else 0
-    elif 'control_mode' not in param:
+        control_mode = CONTROL_MODE_MAP["boolean"] if len(value_labels) == 2 else 0
+    elif "control_mode" not in param:
         control_mode = 0  # linear
     else:
-        control_mode = param.get('control_mode', 0)
+        control_mode = param.get("control_mode", 0)
         if isinstance(control_mode, str):
             control_mode = CONTROL_MODE_MAP.get(control_mode, 0)
 
     # Pack parameter ID and control mode
-    data += struct.pack('<I', param_id)
-    data += struct.pack('<I', control_mode)
+    data += struct.pack("<I", param_id)
+    data += struct.pack("<I", control_mode)
 
     # Handle value_labels mode vs numeric mode
-    value_labels = param.get('value_labels', [])
+    value_labels = param.get("value_labels", [])
     has_value_labels = len(value_labels) > 0
 
     if has_value_labels:
@@ -426,64 +441,66 @@ def pack_parameter_config(param: Dict[str, Any]) -> bytes:
         max_val = num_labels - 1
 
         # Determine initial_value from initial_value_label if present
-        if 'initial_value_label' in param:
-            initial_label = param['initial_value_label']
+        if "initial_value_label" in param:
+            initial_label = param["initial_value_label"]
             init_val = value_labels.index(initial_label)
         else:
             init_val = 0
 
         # Value range (uint16_t x 3)
-        data += struct.pack('<H', min_val)
-        data += struct.pack('<H', max_val)
-        data += struct.pack('<H', init_val)
+        data += struct.pack("<H", min_val)
+        data += struct.pack("<H", max_val)
+        data += struct.pack("<H", init_val)
 
         # Display range (int16_t x 2) - same as value range for labels
-        data += struct.pack('<h', min_val)
-        data += struct.pack('<h', max_val)
+        data += struct.pack("<h", min_val)
+        data += struct.pack("<h", max_val)
 
         # Display float digits (uint8_t) - 0 for label mode
-        data += struct.pack('<B', 0)
+        data += struct.pack("<B", 0)
 
         # Value label count (uint8_t)
-        data += struct.pack('<B', num_labels)
+        data += struct.pack("<B", num_labels)
     else:
         # Numeric mode - use provided values or defaults
-        min_val = param.get('min_value', 0)
-        max_val = param.get('max_value', 1023)
-        init_val = param.get('initial_value', 512)
+        min_val = param.get("min_value", 0)
+        max_val = param.get("max_value", 1023)
+        init_val = param.get("initial_value", 512)
 
-        data += struct.pack('<H', min_val)
-        data += struct.pack('<H', max_val)
-        data += struct.pack('<H', init_val)
+        data += struct.pack("<H", min_val)
+        data += struct.pack("<H", max_val)
+        data += struct.pack("<H", init_val)
 
         # Display fields default to min/max values if not specified
-        data += struct.pack('<h', param.get('display_min_value', min_val))
-        data += struct.pack('<h', param.get('display_max_value', max_val))
-        data += struct.pack('<B', param.get('display_float_digits', 0))
+        data += struct.pack("<h", param.get("display_min_value", min_val))
+        data += struct.pack("<h", param.get("display_max_value", max_val))
+        data += struct.pack("<B", param.get("display_float_digits", 0))
 
         # Value label count (uint8_t) - 0 for numeric mode
-        data += struct.pack('<B', 0)
+        data += struct.pack("<B", 0)
 
     # Reserved padding (2 bytes)
-    data += b'\x00' * 2
+    data += b"\x00" * 2
 
     # Name label (32 bytes)
-    data += pack_string(param.get('name_label', ''), PARAM_NAME_LABEL_MAX_LENGTH)
+    data += pack_string(param.get("name_label", ""), PARAM_NAME_LABEL_MAX_LENGTH)
 
     # Value labels array (512 bytes = 16 * 32)
     for i in range(PARAM_MAX_VALUE_LABELS):
         if i < len(value_labels):
             data += pack_string(value_labels[i], PARAM_VALUE_LABEL_MAX_LENGTH)
         else:
-            data += b'\x00' * PARAM_VALUE_LABEL_MAX_LENGTH
+            data += b"\x00" * PARAM_VALUE_LABEL_MAX_LENGTH
 
     # Suffix label (4 bytes)
-    data += pack_string(param.get('suffix_label', ''), PARAM_SUFFIX_LABEL_MAX_LENGTH)
+    data += pack_string(param.get("suffix_label", ""), PARAM_SUFFIX_LABEL_MAX_LENGTH)
 
     # Reserved (2 bytes)
-    data += b'\x00' * 2
+    data += b"\x00" * 2
 
-    assert len(data) == PARAM_STRUCT_SIZE, f"Parameter size mismatch: {len(data)} != {PARAM_STRUCT_SIZE}"
+    assert len(data) == PARAM_STRUCT_SIZE, (
+        f"Parameter size mismatch: {len(data)} != {PARAM_STRUCT_SIZE}"
+    )
     return bytes(data)
 
 
@@ -494,13 +511,16 @@ def pack_empty_parameter() -> bytes:
     Returns:
         572 bytes of zeros
     """
-    return b'\x00' * PARAM_STRUCT_SIZE
+    return b"\x00" * PARAM_STRUCT_SIZE
 
 
 # Toggle switch parameter IDs (binary hardware controls: 0 or 1023)
 TOGGLE_SWITCH_IDS = {
-    'toggle_switch_7', 'toggle_switch_8', 'toggle_switch_9',
-    'toggle_switch_10', 'toggle_switch_11'
+    "toggle_switch_7",
+    "toggle_switch_8",
+    "toggle_switch_9",
+    "toggle_switch_10",
+    "toggle_switch_11",
 }
 
 
@@ -535,8 +555,8 @@ def pack_preset(preset_dict: Dict[str, Any], parameters: list) -> bytes:
     Raises:
         ValueError: If preset name is too long or values are out of range
     """
-    name = preset_dict.get('name', '')
-    if len(name.encode('utf-8')) > 15:
+    name = preset_dict.get("name", "")
+    if len(name.encode("utf-8")) > 15:
         raise ValueError(f"Preset name '{name}' exceeds 15 characters")
 
     # Build initial_value lookup from parameter definitions.
@@ -545,32 +565,38 @@ def pack_preset(preset_dict: Dict[str, Any], parameters: list) -> bytes:
     defaults = {}
     toggle_slots = set()  # array indices that are toggle switches
     for param in parameters:
-        pid = param.get('parameter_id', 'none')
-        if isinstance(pid, str) and pid in PARAMETER_ID_MAP and PARAMETER_ID_MAP[pid] >= 1:
+        pid = param.get("parameter_id", "none")
+        if (
+            isinstance(pid, str)
+            and pid in PARAMETER_ID_MAP
+            and PARAMETER_ID_MAP[pid] >= 1
+        ):
             idx = PARAMETER_ID_MAP[pid] - 1  # 1-indexed enum -> 0-indexed array
             if pid in TOGGLE_SWITCH_IDS:
                 toggle_slots.add(idx)
-                value_labels = param.get('value_labels', [])
-                if value_labels and 'initial_value_label' in param:
-                    label_index = value_labels.index(param['initial_value_label'])
+                value_labels = param.get("value_labels", [])
+                if value_labels and "initial_value_label" in param:
+                    label_index = value_labels.index(param["initial_value_label"])
                     defaults[idx] = 1023 if label_index >= 1 else 0
                 else:
                     defaults[idx] = 0
             else:
-                value_labels = param.get('value_labels', [])
+                value_labels = param.get("value_labels", [])
                 if value_labels:
                     # Non-toggle with value_labels: resolve initial value
                     # through the label curve for defaults only
-                    if 'initial_value_label' in param:
-                        label_index = value_labels.index(param['initial_value_label'])
+                    if "initial_value_label" in param:
+                        label_index = value_labels.index(param["initial_value_label"])
                     else:
                         label_index = 0
                     if len(value_labels) == 2:
                         defaults[idx] = 1023 if label_index >= 1 else 0
                     else:
-                        defaults[idx] = round(label_index * 1023 / max(len(value_labels) - 1, 1))
+                        defaults[idx] = round(
+                            label_index * 1023 / max(len(value_labels) - 1, 1)
+                        )
                 else:
-                    defaults[idx] = param.get('initial_value', 512)
+                    defaults[idx] = param.get("initial_value", 512)
 
     # Start with defaults for all 12 parameter slots
     values = [defaults.get(i, 512) for i in range(12)]
@@ -579,7 +605,7 @@ def pack_preset(preset_dict: Dict[str, Any], parameters: list) -> bytes:
     # Toggle switches accept label indices (0 or 1) and are converted to
     # raw register values (0 or 1023); all other parameters use raw 0-1023.
     for key, value in preset_dict.items():
-        if key == 'name':
+        if key == "name":
             continue
         param_enum = PARAMETER_ID_MAP.get(key)
         if param_enum is None or param_enum < 1:
@@ -601,12 +627,14 @@ def pack_preset(preset_dict: Dict[str, Any], parameters: list) -> bytes:
         values[array_index] = raw_value
 
     # Pack: 16-byte name (null-padded) + 12 x uint16_t LE
-    name_bytes = name.encode('utf-8')[:15].ljust(16, b'\x00')
+    name_bytes = name.encode("utf-8")[:15].ljust(16, b"\x00")
     data = bytearray(name_bytes)
     for v in values:
-        data += struct.pack('<H', v)
+        data += struct.pack("<H", v)
 
-    assert len(data) == PRESET_STRUCT_SIZE, f"Preset size mismatch: {len(data)} != {PRESET_STRUCT_SIZE}"
+    assert len(data) == PRESET_STRUCT_SIZE, (
+        f"Preset size mismatch: {len(data)} != {PRESET_STRUCT_SIZE}"
+    )
     return bytes(data)
 
 
@@ -620,20 +648,27 @@ def validate_program_config(config: Dict[str, Any]) -> None:
     Raises:
         ValueError: If validation fails
     """
-    if 'program' not in config:
+    if "program" not in config:
         raise ValueError("TOML must contain a [program] section")
 
-    program = config['program']
+    program = config["program"]
 
     # Check required fields (only program_id and program_name are mandatory)
-    required_fields = ['program_id', 'program_name']
+    required_fields = ["program_id", "program_name"]
     for field in required_fields:
         if field not in program or not program[field]:
             raise ValueError(f"Missing or empty required field: program.{field}")
 
     # Check version format (support both old and new formats)
-    has_semver = 'program_version' in program
-    has_numeric = all(f in program for f in ['program_version_major', 'program_version_minor', 'program_version_patch'])
+    has_semver = "program_version" in program
+    has_numeric = all(
+        f in program
+        for f in [
+            "program_version_major",
+            "program_version_minor",
+            "program_version_patch",
+        ]
+    )
 
     if not has_semver and not has_numeric:
         raise ValueError(
@@ -644,13 +679,16 @@ def validate_program_config(config: Dict[str, Any]) -> None:
 
     if has_semver:
         try:
-            parse_semver(program['program_version'])
+            parse_semver(program["program_version"])
         except ValueError as e:
             raise ValueError(f"Invalid program_version: {e}")
 
     # Check ABI version format (support both old and new formats)
-    has_abi_range = 'abi_version' in program
-    has_abi_numeric = all(f in program for f in ['abi_min_major', 'abi_min_minor', 'abi_max_major', 'abi_max_minor'])
+    has_abi_range = "abi_version" in program
+    has_abi_numeric = all(
+        f in program
+        for f in ["abi_min_major", "abi_min_minor", "abi_max_major", "abi_max_minor"]
+    )
 
     if not has_abi_range and not has_abi_numeric:
         raise ValueError(
@@ -661,7 +699,9 @@ def validate_program_config(config: Dict[str, Any]) -> None:
 
     if has_abi_range:
         try:
-            min_maj, min_min, max_maj, max_min = parse_abi_version_range(program['abi_version'])
+            min_maj, min_min, max_maj, max_min = parse_abi_version_range(
+                program["abi_version"]
+            )
             # Validate range
             abi_min = (min_maj << 16) | min_min
             abi_max = (max_maj << 16) | max_min
@@ -673,10 +713,10 @@ def validate_program_config(config: Dict[str, Any]) -> None:
             raise ValueError(f"Invalid abi_version: {e}")
     else:
         # Validate numeric ABI version ranges
-        abi_min_major = program.get('abi_min_major', 1)
-        abi_min_minor = program.get('abi_min_minor', 0)
-        abi_max_major = program.get('abi_max_major', 2)
-        abi_max_minor = program.get('abi_max_minor', 0)
+        abi_min_major = program.get("abi_min_major", 1)
+        abi_min_minor = program.get("abi_min_minor", 0)
+        abi_max_major = program.get("abi_max_major", 2)
+        abi_max_minor = program.get("abi_max_minor", 0)
 
         abi_min = (abi_min_major << 16) | abi_min_minor
         abi_max = (abi_max_major << 16) | abi_max_minor
@@ -687,14 +727,16 @@ def validate_program_config(config: Dict[str, Any]) -> None:
             )
 
     # Validate parameter count
-    parameters = config.get('parameter', [])
+    parameters = config.get("parameter", [])
     actual_count = len(parameters)
 
     # Check if parameter_count was specified (deprecated)
-    if 'parameter_count' in program:
-        declared_count = program['parameter_count']
+    if "parameter_count" in program:
+        declared_count = program["parameter_count"]
         if declared_count != actual_count:
-            print(f"WARNING: parameter_count ({declared_count}) ignored, using actual parameter count ({actual_count})")
+            print(
+                f"WARNING: parameter_count ({declared_count}) ignored, using actual parameter count ({actual_count})"
+            )
 
     if actual_count > NUM_PARAMETERS:
         raise ValueError(
@@ -702,13 +744,15 @@ def validate_program_config(config: Dict[str, Any]) -> None:
         )
 
     # Validate supported_timings (optional)
-    supported_timings = program.get('supported_timings', [])
+    supported_timings = program.get("supported_timings", [])
     if not isinstance(supported_timings, list):
         raise ValueError("supported_timings must be an array of timing name strings")
     seen_timings = set()
     for timing_name in supported_timings:
         if not isinstance(timing_name, str):
-            raise ValueError(f"supported_timings entry must be a string, got {type(timing_name).__name__}")
+            raise ValueError(
+                f"supported_timings entry must be a string, got {type(timing_name).__name__}"
+            )
         if timing_name not in VIDEO_TIMING_ID_MAP:
             raise ValueError(
                 f"Unknown video timing '{timing_name}' in supported_timings. "
@@ -721,8 +765,8 @@ def validate_program_config(config: Dict[str, Any]) -> None:
     # Check for unique parameter_ids
     param_ids = []
     for i, param in enumerate(parameters):
-        param_id = param.get('parameter_id')
-        if param_id and param_id != 'none' and param_id != 'No parameter assigned':
+        param_id = param.get("parameter_id")
+        if param_id and param_id != "none" and param_id != "No parameter assigned":
             if param_id in param_ids:
                 raise ValueError(
                     f"Duplicate parameter_id '{param_id}' found. Each parameter must have a unique parameter_id."
@@ -734,23 +778,25 @@ def validate_program_config(config: Dict[str, Any]) -> None:
         validate_parameter_config(param, i)
 
     # Validate presets
-    presets = config.get('preset', [])
+    presets = config.get("preset", [])
     if len(presets) > MAX_PRESETS:
         raise ValueError(f"Too many presets ({len(presets)}, maximum: {MAX_PRESETS})")
 
     for i, preset in enumerate(presets):
-        if 'name' not in preset or not preset['name']:
+        if "name" not in preset or not preset["name"]:
             raise ValueError(f"Preset {i}: missing or empty 'name' field")
-        name = preset['name']
-        if len(name.encode('utf-8')) > 15:
+        name = preset["name"]
+        if len(name.encode("utf-8")) > 15:
             raise ValueError(f"Preset {i}: name '{name}' exceeds 15 characters")
         for key, value in preset.items():
-            if key == 'name':
+            if key == "name":
                 continue
             if key not in PARAMETER_ID_MAP:
                 raise ValueError(f"Preset {i}: unknown parameter_id '{key}'")
             if PARAMETER_ID_MAP[key] < 1:
-                raise ValueError(f"Preset {i}: parameter_id '{key}' is not a valid control")
+                raise ValueError(
+                    f"Preset {i}: parameter_id '{key}' is not a valid control"
+                )
             if key in TOGGLE_SWITCH_IDS:
                 # Toggle switch: binary control, value must be 0 or 1
                 if not isinstance(value, int) or value not in (0, 1):
@@ -761,7 +807,9 @@ def validate_program_config(config: Dict[str, Any]) -> None:
             else:
                 # Continuous parameter: value must be raw 0-1023
                 if not isinstance(value, int) or not (0 <= value <= 1023):
-                    raise ValueError(f"Preset {i}: value for '{key}' must be integer 0-1023")
+                    raise ValueError(
+                        f"Preset {i}: value for '{key}' must be integer 0-1023"
+                    )
 
 
 def pack_program_config(config: Dict[str, Any]) -> bytes:
@@ -802,98 +850,109 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     """
     data = bytearray()
 
-    program = config.get('program', {})
+    program = config.get("program", {})
 
     # Program ID (64 bytes)
-    data += pack_string(program.get('program_id', ''), PROGRAM_ID_MAX_LENGTH)
+    data += pack_string(program.get("program_id", ""), PROGRAM_ID_MAX_LENGTH)
 
     # Version fields (12 bytes) - support both old and new formats
-    if 'program_version' in program:
+    if "program_version" in program:
         # Parse SemVer string
-        major, minor, patch = parse_semver(program['program_version'])
-        data += struct.pack('<H', major)
-        data += struct.pack('<H', minor)
-        data += struct.pack('<H', patch)
+        major, minor, patch = parse_semver(program["program_version"])
+        data += struct.pack("<H", major)
+        data += struct.pack("<H", minor)
+        data += struct.pack("<H", patch)
     else:
         # Use individual numeric fields
-        data += struct.pack('<H', program.get('program_version_major', 0))
-        data += struct.pack('<H', program.get('program_version_minor', 0))
-        data += struct.pack('<H', program.get('program_version_patch', 0))
+        data += struct.pack("<H", program.get("program_version_major", 0))
+        data += struct.pack("<H", program.get("program_version_minor", 0))
+        data += struct.pack("<H", program.get("program_version_patch", 0))
 
     # ABI version fields (8 bytes) - support both old and new formats
-    if 'abi_version' in program:
+    if "abi_version" in program:
         # Parse range string
-        min_maj, min_min, max_maj, max_min = parse_abi_version_range(program['abi_version'])
-        data += struct.pack('<H', min_maj)
-        data += struct.pack('<H', min_min)
-        data += struct.pack('<H', max_maj)
-        data += struct.pack('<H', max_min)
+        min_maj, min_min, max_maj, max_min = parse_abi_version_range(
+            program["abi_version"]
+        )
+        data += struct.pack("<H", min_maj)
+        data += struct.pack("<H", min_min)
+        data += struct.pack("<H", max_maj)
+        data += struct.pack("<H", max_min)
     else:
         # Use individual numeric fields
-        data += struct.pack('<H', program.get('abi_min_major', 1))
-        data += struct.pack('<H', program.get('abi_min_minor', 0))
-        data += struct.pack('<H', program.get('abi_max_major', 2))
-        data += struct.pack('<H', program.get('abi_max_minor', 0))
+        data += struct.pack("<H", program.get("abi_min_major", 1))
+        data += struct.pack("<H", program.get("abi_min_minor", 0))
+        data += struct.pack("<H", program.get("abi_max_major", 2))
+        data += struct.pack("<H", program.get("abi_max_minor", 0))
 
     # Hardware mask (4 bytes) - build from hardware_compatibility array
     hw_mask = 0
-    hardware_compat = program.get('hardware_compatibility', [])
+    hardware_compat = program.get("hardware_compatibility", [])
     if hardware_compat:
         for hw_name in hardware_compat:
             if hw_name in HARDWARE_FLAGS_MAP:
                 hw_mask |= HARDWARE_FLAGS_MAP[hw_name]
             else:
                 if not QUIET:
-                    print(f"WARNING: Unknown hardware platform '{hw_name}', ignoring", file=sys.stderr)
+                    print(
+                        f"WARNING: Unknown hardware platform '{hw_name}', ignoring",
+                        file=sys.stderr,
+                    )
     else:
         # Default to all platforms if not specified
         hw_mask = 0x00000003  # rev_a | rev_b
         if not QUIET:
-            print("WARNING: No hardware_compatibility specified, defaulting to all platforms", file=sys.stderr)
+            print(
+                "WARNING: No hardware_compatibility specified, defaulting to all platforms",
+                file=sys.stderr,
+            )
 
-    data += struct.pack('<I', hw_mask)
+    data += struct.pack("<I", hw_mask)
 
     # Core ID (4 bytes)
-    core_str = program.get('core', 'yuv444_30b')
+    core_str = program.get("core", "yuv444_30b")
     if core_str in CORE_ID_MAP:
         core_id = CORE_ID_MAP[core_str]
     else:
         if not QUIET:
-            print(f"WARNING: Unknown core '{core_str}', defaulting to yuv444_30b", file=sys.stderr)
-        core_id = CORE_ID_MAP['yuv444_30b']
-    data += struct.pack('<I', core_id)
+            print(
+                f"WARNING: Unknown core '{core_str}', defaulting to yuv444_30b",
+                file=sys.stderr,
+            )
+        core_id = CORE_ID_MAP["yuv444_30b"]
+    data += struct.pack("<I", core_id)
 
     # String metadata fields (288 bytes)
-    data += pack_string(program.get('program_name', ''), PROGRAM_NAME_MAX_LENGTH)
-    data += pack_string(program.get('author', ''), AUTHOR_MAX_LENGTH)
-    data += pack_string(program.get('license', ''), LICENSE_MAX_LENGTH)
+    data += pack_string(program.get("program_name", ""), PROGRAM_NAME_MAX_LENGTH)
+    data += pack_string(program.get("author", ""), AUTHOR_MAX_LENGTH)
+    data += pack_string(program.get("license", ""), LICENSE_MAX_LENGTH)
 
     # Categories (256 bytes = 8 × 32)
-    categories = program.get('categories', [])
+    categories = program.get("categories", [])
     # Backward compatibility: fall back to single 'category' field
-    if not categories and 'category' in program:
-        cat = program['category']
+    if not categories and "category" in program:
+        cat = program["category"]
         categories = [cat] if cat else []
     category_count = min(len(categories), MAX_CATEGORIES)
     for i in range(MAX_CATEGORIES):
         if i < len(categories):
             data += pack_string(categories[i], CATEGORY_MAX_LENGTH)
         else:
-            data += b'\x00' * CATEGORY_MAX_LENGTH
+            data += b"\x00" * CATEGORY_MAX_LENGTH
 
-    data += pack_string(program.get('description', ''), DESCRIPTION_MAX_LENGTH)
+    data += pack_string(program.get("description", ""), DESCRIPTION_MAX_LENGTH)
 
     # URL field (128 bytes)
-    data += pack_string(program.get('url', ''), URL_MAX_LENGTH)
+    data += pack_string(program.get("url", ""), URL_MAX_LENGTH)
 
     # Parameter count, preset count, and padding (4 bytes)
-    parameters = config.get('parameter', [])
+    parameters = config.get("parameter", [])
     parameter_count = min(len(parameters), NUM_PARAMETERS)
-    presets = config.get('preset', [])
+    presets = config.get("preset", [])
     preset_count = min(len(presets), MAX_PRESETS)
-    data += struct.pack('<H', parameter_count)
-    data += struct.pack('<B', preset_count)  # preset_count (uint8_t)
-    data += struct.pack('<B', category_count)  # category_count (uint8_t)
+    data += struct.pack("<H", parameter_count)
+    data += struct.pack("<B", preset_count)  # preset_count (uint8_t)
+    data += struct.pack("<B", category_count)  # category_count (uint8_t)
 
     # Pack parameter array (6864 bytes = 12 * 572)
     for i in range(NUM_PARAMETERS):
@@ -907,31 +966,34 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         if i < len(presets):
             data += pack_preset(presets[i], parameters)
         else:
-            data += b'\x00' * PRESET_STRUCT_SIZE
+            data += b"\x00" * PRESET_STRUCT_SIZE
 
     # Supported timings bitmask (2 bytes)
-    supported_timings = program.get('supported_timings', [])
+    supported_timings = program.get("supported_timings", [])
     timing_mask = 0
     for timing_name in supported_timings:
         timing_id = VIDEO_TIMING_ID_MAP[timing_name]
-        timing_mask |= (1 << timing_id)
-    data += struct.pack('<H', timing_mask)
+        timing_mask |= 1 << timing_id
+    data += struct.pack("<H", timing_mask)
 
     # Program type (1 byte) - 0=processing, 1=synthesis
-    program_type_str = program.get('program_type', 'processing')
+    program_type_str = program.get("program_type", "processing")
     program_type_val = PROGRAM_TYPE_MAP.get(program_type_str, 0)
-    data += struct.pack('<B', program_type_val)
+    data += struct.pack("<B", program_type_val)
 
     # Reserved (19 bytes)
-    data += b'\x00' * 19
+    data += b"\x00" * 19
 
-    assert len(data) == CONFIG_STRUCT_SIZE, f"Config size mismatch: {len(data)} != {CONFIG_STRUCT_SIZE}"
+    assert len(data) == CONFIG_STRUCT_SIZE, (
+        f"Config size mismatch: {len(data)} != {CONFIG_STRUCT_SIZE}"
+    )
     return bytes(data)
 
 
 # =============================================================================
 # Main Converter
 # =============================================================================
+
 
 def convert_toml_to_binary(toml_path: Path, output_path: Path) -> None:
     """
@@ -949,7 +1011,7 @@ def convert_toml_to_binary(toml_path: Path, output_path: Path) -> None:
     if not QUIET:
         print(f"Reading TOML from: {toml_path}")
 
-    with open(toml_path, 'rb') as f:
+    with open(toml_path, "rb") as f:
         config = tomllib.load(f)
 
     # Validate configuration
@@ -966,40 +1028,40 @@ def convert_toml_to_binary(toml_path: Path, output_path: Path) -> None:
     if not QUIET:
         print(f"Writing binary to: {output_path}")
 
-    with open(output_path, 'wb') as f:
+    with open(output_path, "wb") as f:
         f.write(binary_data)
 
     if not QUIET:
-        program = config['program']
-        param_count = len(config.get('parameter', []))
+        program = config["program"]
+        param_count = len(config.get("parameter", []))
 
         # Display version - support both new and old formats
-        if 'program_version' in program:
-            version_str = program['program_version']
+        if "program_version" in program:
+            version_str = program["program_version"]
         else:
-            major = program.get('program_version_major', 0)
-            minor = program.get('program_version_minor', 0)
-            patch = program.get('program_version_patch', 0)
+            major = program.get("program_version_major", 0)
+            minor = program.get("program_version_minor", 0)
+            patch = program.get("program_version_patch", 0)
             version_str = f"{major}.{minor}.{patch}"
 
         # Display hardware compatibility
-        hw_compat = program.get('hardware_compatibility', [])
-        hw_str = ', '.join(hw_compat) if hw_compat else 'all platforms (default)'
+        hw_compat = program.get("hardware_compatibility", [])
+        hw_str = ", ".join(hw_compat) if hw_compat else "all platforms (default)"
 
         # Display core architecture
-        core_str = program.get('core', 'yuv444_10b')
+        core_str = program.get("core", "yuv444_10b")
 
         print(f"✓ Successfully converted {toml_path.name} → {output_path.name}")
         print(f"  Program: {program.get('program_name', 'Unknown')}")
         print(f"  Version: {version_str}")
         print(f"  Hardware: {hw_str}")
         print(f"  Core: {core_str}")
-        preset_count = len(config.get('preset', []))
+        preset_count = len(config.get("preset", []))
         print(f"  Parameters: {param_count}/{NUM_PARAMETERS}")
         print(f"  Presets: {preset_count}/{MAX_PRESETS}")
 
         # Display supported timings
-        sup_timings = program.get('supported_timings', [])
+        sup_timings = program.get("supported_timings", [])
         if sup_timings:
             print(f"  Timings: {', '.join(sup_timings)}")
         else:
@@ -1014,15 +1076,17 @@ def main():
 
     # Parse arguments
     args = sys.argv[1:]
-    if '--quiet' in args:
+    if "--quiet" in args:
         QUIET = True
-        args.remove('--quiet')
-    if '-q' in args:
+        args.remove("--quiet")
+    if "-q" in args:
         QUIET = True
-        args.remove('-q')
+        args.remove("-q")
 
     if len(args) != 2:
-        print("Usage: python toml_to_config_binary.py <input.toml> <output.bin> [--quiet]")
+        print(
+            "Usage: python toml_to_config_binary.py <input.toml> <output.bin> [--quiet]"
+        )
         print()
         print("Arguments:")
         print("  input.toml   TOML configuration file to convert")
@@ -1030,7 +1094,9 @@ def main():
         print("  --quiet, -q  Suppress output messages")
         print()
         print("Example:")
-        print("  python toml_to_config_binary.py example_program_config.toml program_config.bin")
+        print(
+            "  python toml_to_config_binary.py example_program_config.toml program_config.bin"
+        )
         sys.exit(1)
 
     toml_path = Path(args[0])
@@ -1050,5 +1116,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
