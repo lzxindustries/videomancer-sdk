@@ -160,10 +160,7 @@ architecture pong of program_top is
     -- Resolution (auto-measured from actual pixel/line counts)
     -- ========================================================================
     -- These are measured from the incoming timing signals rather than looked
-    -- up from resolution_pkg.  This correctly handles clock division
-    -- (hd_clock_divisor > 1) where the pixel_counter sees fewer pixels per
-    -- line than the native video standard (e.g., 960 instead of 1920 with
-    -- div2).  Values stabilise after the first complete frame.
+    -- up from resolution_pkg. Values stabilise after the first complete frame.
     signal s_h_active      : integer range 0 to 4095;
     signal s_v_active      : integer range 0 to 4095;
     signal s_h_center      : integer range 0 to 4095;

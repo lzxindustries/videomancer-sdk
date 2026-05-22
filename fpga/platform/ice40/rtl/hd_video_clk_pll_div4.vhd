@@ -20,7 +20,7 @@
 -- Description:
 --   PLL wrapper that divides the 74.25 MHz HD pixel clock by 4, producing
 --   an 18.5625 MHz program clock for HD clock decimation mode.
---   Used when C_HD_CLOCK_DIVISOR = 4 in core_config_pkg.
+--   Note: This PLL is no longer instantiated by core_top.
 --
 --   PLL parameters (verified with icepll):
 --     F_PLLIN:  74.250 MHz

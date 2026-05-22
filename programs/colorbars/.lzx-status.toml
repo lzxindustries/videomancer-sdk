@@ -28,7 +28,6 @@ sd_status = "PASS"
 sd_fmax_mhz = 100.0
 hd_status = "PASS"
 hd_fmax_mhz = 100.0
-hd_divisor = 2
 lcs = 200
 rams = 0
 notes = "GHDL analysis passed. yosys unavailable locally. Estimated ~200 LUTs, trivial design."

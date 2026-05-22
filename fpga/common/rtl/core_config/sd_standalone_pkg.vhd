@@ -41,5 +41,4 @@ package core_config_pkg is
   constant C_ENABLE_STANDALONE : boolean := true;
   constant C_ENABLE_SD         : boolean := true;
   constant C_ENABLE_HD         : boolean := false;
-  constant C_HD_CLOCK_DIVISOR  : integer := 1;
 end package core_config_pkg;

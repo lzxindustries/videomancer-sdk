@@ -27,7 +27,6 @@ sd_status = "PASS"
 sd_fmax_mhz = 29.35
 hd_status = "PASS"
 hd_fmax_mhz = 31.85
-hd_divisor = 4
 lcs = 4835
 rams = 0
 

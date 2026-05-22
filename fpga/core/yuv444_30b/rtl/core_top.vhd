@@ -114,12 +114,6 @@ architecture rtl of core_top is
   signal s_hdmi_rx_hsync_meta  : std_logic := '1';
   signal s_hdmi_rx_vsync_meta  : std_logic := '1';
 
-  -- HD clock decimation signals
-  signal prog_clk : std_logic := '0';
-  signal s_prog_data_in : t_video_stream_yuv444_30b;
-  signal s_prog_data_out : t_video_stream_yuv444_30b;
-  signal s_prog_registers : t_spi_ram := (others => (others => '0'));
-
   -- SD standalone clean PLL clock. Derived inside GEN_SD_STANDALONE_IN by
   -- feeding the ADV7181C LLC pad through a fabric ÷2 register and into
   -- sd_video_clk_pll_2x (which puts a clean 27 MHz on a global clock net).
@@ -445,76 +439,12 @@ begin
 
   s_video_timing_id <= s_spi_ram_d(8)(3 downto 0);
 
-  -- ========================================================================
-  -- HD CLOCK DECIMATION
-  -- ========================================================================
-  -- When C_HD_CLOCK_DIVISOR > 1 and HD mode is active, the program runs at
-  -- a divided pixel clock (37.125 MHz for div2, 18.5625 MHz for div4).
-  -- The PLL produces a phase-aligned divided clock. Input video data is
-  -- sampled into the slow clock domain, and output data is held for N
-  -- fast clock cycles, producing pixel repetition.
-  -- SD modes and HD with divisor=1 use direct connection (no PLL, no CDC).
-
-  GEN_DIRECT_PROG_CLK : if (not C_ENABLE_HD) or (C_HD_CLOCK_DIVISOR = 1) generate
-    prog_clk <= vid_clk;
-    s_prog_data_in <= s_program_in;
-    s_program_out <= s_prog_data_out;
-    s_prog_registers <= s_spi_ram_d;
-  end generate;
-
-  GEN_DECIMATED_PROG_CLK : if C_ENABLE_HD and (C_HD_CLOCK_DIVISOR > 1) generate
-
-    GEN_DIV2_PLL : if C_HD_CLOCK_DIVISOR = 2 generate
-      hd_pll_div2_inst : entity work.hd_video_clk_pll_div2
-        port map(
-          i_clk    => vid_clk,
-          o_clk    => prog_clk,
-          i_resetb => '1',
-          i_bypass => '0'
-        );
-    end generate;
-
-    GEN_DIV4_PLL : if C_HD_CLOCK_DIVISOR = 4 generate
-      hd_pll_div4_inst : entity work.hd_video_clk_pll_div4
-        port map(
-          i_clk    => vid_clk,
-          o_clk    => prog_clk,
-          i_resetb => '1',
-          i_bypass => '0'
-        );
-    end generate;
-
-    -- Input CDC: vid_clk -> prog_clk (single register stage)
-    -- prog_clk is a phase-aligned integer division of vid_clk, so a single
-    -- register provides clean capture. The program sees one pixel per
-    -- prog_clk cycle (every Nth input pixel).
-    p_input_cdc : process(prog_clk)
-    begin
-      if rising_edge(prog_clk) then
-        s_prog_data_in <= s_program_in;
-        s_prog_registers <= s_spi_ram_d;
-      end if;
-    end process;
-
-    -- Output CDC: prog_clk -> vid_clk (single register stage)
-    -- Program output changes once per prog_clk cycle and is stable for N
-    -- vid_clk cycles. Each output pixel is held/repeated N times, producing
-    -- pixel repetition at the full output rate.
-    p_output_cdc : process(vid_clk)
-    begin
-      if rising_edge(vid_clk) then
-        s_program_out <= s_prog_data_out;
-      end if;
-    end process;
-
-  end generate;
-
   yuv444_30b_top_inst : entity work.program_top
     port map(
-      clk => prog_clk,
-      registers_in => s_prog_registers,
-      data_in => s_prog_data_in,
-      data_out => s_prog_data_out
+      clk => vid_clk,
+      registers_in => s_spi_ram_d,
+      data_in => s_program_in,
+      data_out => s_program_out
     );
 
   -- ========================================================================

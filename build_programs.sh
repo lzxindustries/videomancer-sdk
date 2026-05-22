@@ -353,21 +353,12 @@ for PROGRAM in $PROGRAMS; do
         CORE="yuv444_27b"
     fi
 
-    # Get HD clock divisor (optional, defaults to 1 = full speed)
-    HD_CLK_DIV=$(parse_toml_field "$PROGRAM_TOML" "program.hd_clock_divisor")
-    if [ -z "$HD_CLK_DIV" ]; then
-        HD_CLK_DIV=1
-    fi
-
     # Get optional nextpnr placement seed override (defaults to Makefile's SEED ?= 1).
     # Use to work around occasional nextpnr-ice40 router assertions on specific designs.
     NEXTPNR_SEED=$(parse_toml_field "$PROGRAM_TOML" "firmware.seed")
 
     echo -e "${CYAN}Supported hardware: ${HARDWARE_VARIANTS}${NC}"
     echo -e "${CYAN}Core architecture: ${CORE}${NC}"
-    if [ "$HD_CLK_DIV" -gt 1 ]; then
-        echo -e "${CYAN}HD clock divisor: ${HD_CLK_DIV}x (program clock = $(echo "scale=4; 74.25 / $HD_CLK_DIV" | bc) MHz)${NC}"
-    fi
     if [ -n "$NEXTPNR_SEED" ]; then
         echo -e "${CYAN}nextpnr seed override: ${NEXTPNR_SEED}${NC}"
     fi
@@ -435,7 +426,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [1/8] HD Analog - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -484,7 +475,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [3/8] HD HDMI - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -533,7 +524,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [5/8] HD Dual - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -582,7 +573,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [7/8] HD Standalone - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM HD_CLOCK_DIVISOR=$HD_CLK_DIV ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"

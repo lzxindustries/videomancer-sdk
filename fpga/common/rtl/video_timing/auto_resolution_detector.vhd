@@ -24,12 +24,9 @@
 --   720/1280/1920 values driven by a firmware-supplied timing ID and
 --   ignore clock division).
 --
---   The auto-measured outputs are correct under any clock divisor:
---   for example, with hd_clock_divisor = 2 the visible active region is
---   960x1080 even though the native standard is 1920x1080, and the
---   detector reports 960/1080 directly.  Values stabilise after the
---   first full frame; default boot-time values (1920x1080) are emitted
---   until then.
+--   The auto-measured outputs are correct for all supported video standards.
+--   Values stabilise after the first full frame; default boot-time values
+--   (1920x1080) are emitted until then.
 --
 --   Outputs are registered.  Centre signals are computed by a single
 --   right-shift of the measured dimensions and are also registered, so
