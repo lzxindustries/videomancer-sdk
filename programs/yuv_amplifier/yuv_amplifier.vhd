@@ -106,6 +106,7 @@ architecture yuv_amplifier of program_top is
     -- Control Signals (from registers)
     --------------------------------------------------------------------------------
     signal s_bypass_enable        : std_logic;
+    signal s_avid_out       : std_logic := '0';
     signal s_invert_y             : std_logic;
     signal s_invert_u             : std_logic;
     signal s_invert_v             : std_logic;
@@ -359,7 +360,8 @@ begin
         -- Shift register variables (initialized to safe defaults)
         variable v_hsync_delay : t_sync_delay := (others => '1');  -- Sync inactive high
         variable v_vsync_delay : t_sync_delay := (others => '1');  -- Sync inactive high
-        variable v_field_delay : t_sync_delay := (others => '1');  -- Field inactive high
+        variable v_field_delay : t_sync_delay := (others => '1');
+        variable v_avid_delay  : t_sync_delay := (others => '0');  -- Field inactive high
         variable v_y_delay     : t_data_delay := (others => (others => '0'));
         variable v_u_delay     : t_data_delay := (others => (others => '0'));
         variable v_v_delay     : t_data_delay := (others => (others => '0'));
@@ -373,12 +375,14 @@ begin
             v_y_delay     := data_in.y       & v_y_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_u_delay     := data_in.u       & v_u_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_v_delay     := data_in.v       & v_v_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
+            v_avid_delay  := data_in.avid    & v_avid_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
 
             -- Output the oldest values (index DELAY_CLKS-1)
             -- These are aligned with the processed video output
             s_hsync_n_delayed <= v_hsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_vsync_n_delayed <= v_vsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_field_n_delayed <= v_field_delay(C_PROCESSING_DELAY_CLKS - 1);
+            s_avid_out        <= v_avid_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_y_delayed       <= v_y_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_u_delayed       <= v_u_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_v_delayed       <= v_v_delay(C_PROCESSING_DELAY_CLKS - 1);
@@ -393,20 +397,27 @@ begin
     -- Video data outputs: Choose processed or bypassed data
     -- When bypass_enable = '0': Output fully processed video (with all effects)
     -- When bypass_enable = '1': Output delayed input (unprocessed, latency-matched)
-    data_out.y <= std_logic_vector(s_interpolator_y_result) when s_bypass_enable = '0' else
-                  s_y_delayed;
+    -- Gate to studio blanking outside AVID: gain/offset/invert math
+    -- must never rewrite the blanking interval (Y Invert at max turned
+    -- blanking white before this gate).
+    data_out.y <= s_y_delayed when s_bypass_enable = '1'
+                  else std_logic_vector(s_interpolator_y_result)
+                       when s_avid_out = '1'
+                  else std_logic_vector(to_unsigned(64, s_y_delayed'length));
 
-    data_out.u <= std_logic_vector(s_interpolator_u_result) when s_bypass_enable = '0' else
-                  s_u_delayed;
+    data_out.u <= s_u_delayed when s_bypass_enable = '1'
+                  else std_logic_vector(s_interpolator_u_result)
+                       when s_avid_out = '1'
+                  else std_logic_vector(to_unsigned(512, s_u_delayed'length));
 
-    data_out.v <= std_logic_vector(s_interpolator_v_result) when s_bypass_enable = '0' else
-                  s_v_delayed;
+    data_out.v <= s_v_delayed when s_bypass_enable = '1'
+                  else std_logic_vector(s_interpolator_v_result)
+                       when s_avid_out = '1'
+                  else std_logic_vector(to_unsigned(512, s_v_delayed'length));
 
-    -- Valid signal: Active when all interpolators have valid output
-    -- This indicates when processed data is available and stable
-    data_out.avid <= s_interpolator_y_valid and
-                     s_interpolator_u_valid and
-                     s_interpolator_v_valid;
+    -- AVID is the delay-matched input AVID (the interpolator valid
+    -- chain free-runs through blanking and must not gate the output).
+    data_out.avid <= s_avid_out;
 
     -- Sync signals: Always use delayed versions (matched to processing latency)
     -- These ensure proper timing alignment regardless of bypass state

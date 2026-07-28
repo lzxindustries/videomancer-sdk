@@ -22,12 +22,34 @@
 --   inputs and timing configurations.
 --
 -- Timing Behavior:
---   This is a counter-based sync waveform generator, not a fixed-depth
---   pipeline. The timing input has a 2-cycle configuration pipeline
---   (timing -> s_timing -> config registers). Sync outputs are registered
---   comparisons against free-running counters, so output latency relative
---   to ref_hsync/ref_vsync depends on the video standard's counter periods.
---   HSYNC output period matches the configured clocks-per-line exactly.
+--   Counter-based sync waveform generator with a 2-cycle timing config
+--   pipeline (timing -> s_timing -> config registers). Sync outputs are
+--   registered comparisons against clk/line counters.
+--
+--   When G_LOCK_TO_REF is true, counters snap to per-format fsync seed values
+--   on ref_vsync (progressive) or ref_field_n (interlaced) edges so sync
+--   output tracks the reference.
+--
+--   When G_LOCK_TO_REF is false, counters free-run from clk alone with no
+--   external sync resets (testbench / legacy only).
+--
+--   When G_PHASE_ADVANCE is true, horizontal compares use v_eff_clks
+--   (counter - phase_advance_clks modulo line length) and line-gated
+--   compares use v_eff_lines (counter_lines - 1 on borrow) so every
+--   constituent — hsync, hsync_2x, csync, csync_2x, eq_pulses,
+--   csync_serration, vsync clk/line events, and AVID H/V gates — shifts
+--   together across line boundaries. Register outputs hold between
+--   set/clear edges as in the non-offset path.
+--
+--   Sync Out is intentionally DELAYED vs program *input* by
+--   phase_advance_clks (firmware: processing_delay_clks + core_post) so
+--   the external jack tracks the pipeline latency and coincides with
+--   processed-video H at the encoder/HDMI pins under the calibrated
+--   per-format fsync seeds. (The port keeps its historical name; the
+--   original implementation ADVANCED the waveform, driving the jack
+--   sync 2x the pipeline delay ahead of the jack video — VMT-F004.)
+--   Program video ports keep H/V on the same delayed pipeline as their
+--   pixels (not this generator).
 
 --------------------------------------------------------------------------------
 
@@ -40,17 +62,22 @@ use work.video_timing_pkg.all;
 use work.video_sync_pkg.all;
 
 entity video_sync_generator is
+  generic (
+    G_LOCK_TO_REF    : boolean := true;
+    G_PHASE_ADVANCE  : boolean := false
+  );
   port (
-    clk           : in std_logic;
-    ref_hsync     : in std_logic;
-    ref_vsync     : in std_logic;
-    ref_field_n   : in std_logic;
-    timing        : in std_logic_vector(3 downto 0);
-    trisync_p     : out std_logic;
-    trisync_n     : out std_logic;
-    hsync         : out std_logic;
-    vsync         : out std_logic;
-    avid          : out std_logic
+    clk                : in std_logic;
+    ref_hsync          : in std_logic;
+    ref_vsync          : in std_logic;
+    ref_field_n        : in std_logic;
+    timing             : in std_logic_vector(3 downto 0);
+    phase_advance_clks : in unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+    trisync_p          : out std_logic;
+    trisync_n          : out std_logic;
+    hsync              : out std_logic;
+    vsync              : out std_logic;
+    avid               : out std_logic
   );
 end entity;
 
@@ -61,53 +88,53 @@ architecture rtl of video_sync_generator is
   signal s_ref_field_event          : std_logic := '0';
   signal s_ref_fsync                : std_logic := '0';
   signal s_trisync_en               : std_logic := '0';
-  signal s_timing                   : t_video_timing_id;
+  signal s_timing                   : t_video_timing_id := (others => '0');
   signal s_is_interlaced            : std_logic := '0';
-  signal s_fsync_clks               : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_fsync_lines              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_hsync_clks_1             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_hsync_clks_0             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_hsync_clks_b_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_hsync_clks_b_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_clks_1             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_clks_0             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_2x_a_clks_1        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_2x_a_clks_0        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_2x_b_clks_1        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_2x_b_clks_0        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_a_clks_1       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_a_lines_1      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_a_clks_0       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_a_lines_0      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_b_clks_1       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_b_lines_1      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_b_clks_0       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_eq_pulses_b_lines_0      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_a_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_a_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_b_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_b_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_c_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_c_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_d_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_csync_serration_d_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_a_clks_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_a_lines_1          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_a_clks_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_a_lines_0          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_b_clks_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_b_lines_1          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_b_clks_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_vsync_b_lines_0          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_clocks_per_line          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_lines_per_frame          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_frame_width              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_frame_height             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_h_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_h_active_end             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_v_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_counter_clks             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
-  signal s_counter_lines            : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+  signal s_fsync_clks               : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_fsync_lines              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_hsync_clks_1             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_hsync_clks_0             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_hsync_clks_b_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_hsync_clks_b_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_clks_1             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_clks_0             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_2x_a_clks_1        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_2x_a_clks_0        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_2x_b_clks_1        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_2x_b_clks_0        : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_a_clks_1       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_a_lines_1      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_a_clks_0       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_a_lines_0      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_b_clks_1       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_b_lines_1      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_b_clks_0       : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_eq_pulses_b_lines_0      : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_a_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_a_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_b_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_b_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_c_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_c_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_d_clks_1 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_csync_serration_d_clks_0 : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_a_clks_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_a_lines_1          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_a_clks_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_a_lines_0          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_b_clks_1           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_b_lines_1          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_b_clks_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_vsync_b_lines_0          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_clocks_per_line          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_lines_per_frame          : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_frame_width              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_frame_height             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_h_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_h_active_end             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_v_active_start           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_counter_clks             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_counter_lines            : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
   signal s_trisync_p                : std_logic := '0';
   signal s_trisync_n                : std_logic := '0';
   signal s_hsync                    : std_logic := '0';
@@ -140,7 +167,7 @@ begin
   event_detectors : process (clk)
   begin
     if rising_edge(clk) then
-      s_ref_vsync_d <= ref_vsync;
+      s_ref_vsync_d   <= ref_vsync;
       s_ref_field_n_d <= ref_field_n;
     end if;
   end process;
@@ -239,23 +266,16 @@ begin
   end process;
 
   -- Counter behavior:
-  --   * Pure free-run from clk alone, wrapping at s_clocks_per_line and
-  --     s_lines_per_frame. No external sync resets.
-  --
-  --   The previous design optionally snapped the counter to per-format
-  --   fsync seed values on a ref_vsync/field edge. That path produced a
-  --   subtle bug in progressive HD modes: at power-up the internal
-  --   field-detector (which watches the tied-high standalone refs) could
-  --   emit a transient field_event, snapping the counter to a phase
-  --   that lay PAST the per-line csync set-event. s_csync then never
-  --   saw its '1' setpoint at clk=1 and stayed latched at '0' for the
-  --   life of the bitstream, killing the active-line negative tip on
-  --   trisync_n. Removing the reset entirely guarantees the counter
-  --   sweeps clk=1 every line and every sync edge fires correctly.
+  --   * G_LOCK_TO_REF true: snap to fsync seed on ref_vsync/field edge,
+  --     then wrap at s_clocks_per_line / s_lines_per_frame.
+  --   * G_LOCK_TO_REF false: pure free-run (standalone only).
   counters : process (clk)
   begin
     if rising_edge(clk) then
-      if s_counter_clks = s_clocks_per_line then
+      if G_LOCK_TO_REF and s_ref_fsync = '1' then
+        s_counter_clks <= s_fsync_clks;
+        s_counter_lines <= s_fsync_lines;
+      elsif s_counter_clks = s_clocks_per_line then
         s_counter_clks <= to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
         if s_counter_lines = s_lines_per_frame then
           s_counter_lines <= to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
@@ -269,6 +289,8 @@ begin
   end process;
 
   sync_gen : process (clk)
+    variable v_eff_clks  : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+    variable v_eff_lines : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
   begin
     if rising_edge(clk) then
       s_timing_d <= s_timing;
@@ -276,6 +298,32 @@ begin
         s_timing_change <= '1';
       else
         s_timing_change <= '0';
+      end if;
+
+      v_eff_clks  := s_counter_clks;
+      v_eff_lines := s_counter_lines;
+      if G_PHASE_ADVANCE then
+        -- Positive register values DELAY the jack waveform by that many
+        -- clocks so Sync Out tracks the processed video, which emerges
+        -- prog_delay + core_post clocks after the program input this
+        -- generator locks to. (The register was historically applied as
+        -- an ADVANCE — subtracted here as an effective-counter offset —
+        -- which moved the jack waveform AWAY from the delayed output:
+        -- jack sync led jack video by 2x the pipeline delay, found by
+        -- the vmtest processing-delay validation, VMT-F004.)
+        if s_counter_clks <= phase_advance_clks then
+          v_eff_clks := s_counter_clks + s_clocks_per_line - phase_advance_clks;
+          -- Horizontal borrow retreats the *effective* line so eq/vsync
+          -- line gates stay coupled to v_eff_clks (mirror of the
+          -- Fix C / rc.37 wrap).
+          if s_counter_lines = to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH) then
+            v_eff_lines := s_lines_per_frame;
+          else
+            v_eff_lines := s_counter_lines - to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
+          end if;
+        else
+          v_eff_clks := s_counter_clks - phase_advance_clks;
+        end if;
       end if;
 
       -- On any timing-id change, force all derived sync-pulse signals
@@ -290,55 +338,53 @@ begin
         s_csync_serration <= '0';
         s_vsync           <= '0';
       else
-        if s_counter_clks = s_hsync_clks_0 then
+        if v_eff_clks = s_hsync_clks_0 then
           s_hsync    <= '0';
           s_hsync_2x <= '0';
-        elsif s_counter_clks = s_hsync_clks_1 then
+        elsif v_eff_clks = s_hsync_clks_1 then
           s_hsync    <= '1';
-          s_hsync_2x <= '1';
-        elsif s_counter_clks = s_hsync_clks_b_0 then
-          s_hsync_2x <= '0';
-        elsif s_counter_clks = s_hsync_clks_b_1 then
           s_hsync_2x <= '1';
         end if;
 
-        if s_counter_clks = s_csync_clks_0 then
+        if v_eff_clks = s_csync_clks_0 then
           s_csync <= '0';
-        elsif s_counter_clks = s_csync_clks_1 then
+        elsif v_eff_clks = s_csync_clks_1 then
           s_csync <= '1';
         end if;
 
-        -- Direct csync_2x comparison
-        if s_counter_clks = s_csync_2x_a_clks_0 or s_counter_clks = s_csync_2x_b_clks_0 then
+        if v_eff_clks = s_hsync_clks_b_0 then
+          s_hsync_2x <= '0';
+        elsif v_eff_clks = s_hsync_clks_b_1 then
+          s_hsync_2x <= '1';
+        end if;
+
+        if v_eff_clks = s_csync_2x_a_clks_0 or v_eff_clks = s_csync_2x_b_clks_0 then
           s_csync_2x <= '0';
-        elsif s_counter_clks = s_csync_2x_a_clks_1 or s_counter_clks = s_csync_2x_b_clks_1 then
+        elsif v_eff_clks = s_csync_2x_a_clks_1 or v_eff_clks = s_csync_2x_b_clks_1 then
           s_csync_2x <= '1';
         end if;
 
-        -- Direct eq_pulses comparison
-        if (s_counter_lines = s_eq_pulses_a_lines_0 and s_counter_clks = s_eq_pulses_a_clks_0) or
-           (s_counter_lines = s_eq_pulses_b_lines_0 and s_counter_clks = s_eq_pulses_b_clks_0) then
+        if (v_eff_lines = s_eq_pulses_a_lines_0 and v_eff_clks = s_eq_pulses_a_clks_0) or
+           (v_eff_lines = s_eq_pulses_b_lines_0 and v_eff_clks = s_eq_pulses_b_clks_0) then
           s_eq_pulses <= '0';
-        elsif (s_counter_lines = s_eq_pulses_a_lines_1 and s_counter_clks = s_eq_pulses_a_clks_1) or
-              (s_counter_lines = s_eq_pulses_b_lines_1 and s_counter_clks = s_eq_pulses_b_clks_1) then
+        elsif (v_eff_lines = s_eq_pulses_a_lines_1 and v_eff_clks = s_eq_pulses_a_clks_1) or
+              (v_eff_lines = s_eq_pulses_b_lines_1 and v_eff_clks = s_eq_pulses_b_clks_1) then
           s_eq_pulses <= '1';
         end if;
 
-        -- Direct csync_serration comparison
-        if s_counter_clks = s_csync_serration_a_clks_0 or s_counter_clks = s_csync_serration_b_clks_0 or
-           s_counter_clks = s_csync_serration_c_clks_0 or s_counter_clks = s_csync_serration_d_clks_0 then
+        if v_eff_clks = s_csync_serration_a_clks_0 or v_eff_clks = s_csync_serration_b_clks_0 or
+           v_eff_clks = s_csync_serration_c_clks_0 or v_eff_clks = s_csync_serration_d_clks_0 then
           s_csync_serration <= '0';
-        elsif s_counter_clks = s_csync_serration_a_clks_1 or s_counter_clks = s_csync_serration_b_clks_1 or
-              s_counter_clks = s_csync_serration_c_clks_1 or s_counter_clks = s_csync_serration_d_clks_1 then
+        elsif v_eff_clks = s_csync_serration_a_clks_1 or v_eff_clks = s_csync_serration_b_clks_1 or
+              v_eff_clks = s_csync_serration_c_clks_1 or v_eff_clks = s_csync_serration_d_clks_1 then
           s_csync_serration <= '1';
         end if;
 
-        -- Direct vsync comparison
-        if (s_counter_lines = s_vsync_a_lines_0 and s_counter_clks = s_vsync_a_clks_0) or
-           (s_counter_lines = s_vsync_b_lines_0 and s_counter_clks = s_vsync_b_clks_0) then
+        if (v_eff_lines = s_vsync_a_lines_0 and v_eff_clks = s_vsync_a_clks_0) or
+           (v_eff_lines = s_vsync_b_lines_0 and v_eff_clks = s_vsync_b_clks_0) then
           s_vsync <= '0';
-        elsif (s_counter_lines = s_vsync_a_lines_1 and s_counter_clks = s_vsync_a_clks_1) or
-              (s_counter_lines = s_vsync_b_lines_1 and s_counter_clks = s_vsync_b_clks_1) then
+        elsif (v_eff_lines = s_vsync_a_lines_1 and v_eff_clks = s_vsync_a_clks_1) or
+              (v_eff_lines = s_vsync_b_lines_1 and v_eff_clks = s_vsync_b_clks_1) then
           s_vsync <= '1';
         end if;
       end if;
@@ -349,14 +395,14 @@ begin
       -- ends so AVID width equals frame_width regardless of the
       -- per-format front porch.
       -- Vertical: high after V back porch (per-standard, accounts for
-      -- interlaced fields).
-      if s_counter_clks > s_h_active_start and s_counter_clks <= s_h_active_end then
+      -- interlaced fields). Uses v_eff_lines under phase advance.
+      if v_eff_clks > s_h_active_start and v_eff_clks <= s_h_active_end then
         s_avid_h <= '1';
       else
         s_avid_h <= '0';
       end if;
 
-      if s_counter_lines > s_v_active_start then
+      if v_eff_lines > s_v_active_start then
         s_avid_v <= '1';
       else
         s_avid_v <= '0';

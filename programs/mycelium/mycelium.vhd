@@ -124,7 +124,14 @@ use work.video_timing_pkg.all;
 
 architecture mycelium of program_top is
 
-    constant C_PROCESSING_DELAY_CLKS : integer := 29;
+    -- interpolator_u wet/dry mix pipeline depth (dsp/interpolator.vhd)
+    constant C_MIX_LATENCY_CLKS : integer := 4;
+    -- Total program_top data latency: 32-deep dry chain + 4-clk mix.
+    -- (Was 29 with sync tapped at the same depth as dry data — the mix
+    -- latency skewed video +4 px against the program's own delayed
+    -- sync. Padded to 36 to satisfy the vmprog %4 rule.)
+    constant C_PROCESSING_DELAY_CLKS : integer := 36;
+    constant C_DRY_TAP : integer := C_PROCESSING_DELAY_CLKS - C_MIX_LATENCY_CLKS;
     constant C_LINE_DEPTH            : integer := 11;  -- log2(2048) = 11
 
     -- Radix-4 Booth multiplier data latency for G_WIDTH=10: (10+1)/2 + 3 = 8
@@ -332,6 +339,7 @@ architecture mycelium of program_top is
     signal s_hsync_n_d : std_logic;
     signal s_vsync_n_d : std_logic;
     signal s_field_n_d : std_logic;
+    signal s_avid_d    : std_logic := '0';
     signal s_y_d       : std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
     signal s_u_d       : std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
     signal s_v_d       : std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
@@ -364,7 +372,11 @@ begin
     -- Diffusion, Growth, and Decay Decode (combinatorial)
     -- ========================================================================
     process(s_diffusion, s_pattern, s_net_growth, s_net_decay)
-        variable v_base  : integer range 2 to 9;
+        -- Range covers the pre-clamp intermediate (base 8 + extra 2):
+        -- the old upper bound of 9 tripped a bound check (sim-fatal,
+        -- silently truncated in synthesis) whenever Diffusion sat in
+        -- its lowest octave with Spots pattern selected.
+        variable v_base  : integer range 2 to 11;
         variable v_extra : integer range 1 to 2;
         variable v_gs    : integer range 3 to 10;
         variable v_gams  : integer range 3 to 11;
@@ -1070,6 +1082,7 @@ begin
         variable v_hsync_delay : t_sync_delay := (others => '1');
         variable v_vsync_delay : t_sync_delay := (others => '1');
         variable v_field_delay : t_sync_delay := (others => '1');
+        variable v_avid_delay  : t_sync_delay := (others => '0');
         variable v_y_delay     : t_data_delay := (others => (others => '0'));
         variable v_u_delay     : t_data_delay := (others => (others => '0'));
         variable v_v_delay     : t_data_delay := (others => (others => '0'));
@@ -1078,6 +1091,7 @@ begin
             v_hsync_delay := data_in.hsync_n & v_hsync_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_vsync_delay := data_in.vsync_n & v_vsync_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_field_delay := data_in.field_n & v_field_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
+            v_avid_delay  := data_in.avid    & v_avid_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_y_delay     := data_in.y       & v_y_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_u_delay     := data_in.u       & v_u_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_v_delay     := data_in.v       & v_v_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
@@ -1085,19 +1099,28 @@ begin
             s_hsync_n_d <= v_hsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_vsync_n_d <= v_vsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_field_n_d <= v_field_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_y_d       <= v_y_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_u_d       <= v_u_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_v_d       <= v_v_delay(C_PROCESSING_DELAY_CLKS - 1);
+            s_avid_d    <= v_avid_delay(C_PROCESSING_DELAY_CLKS - 1);
+            -- Dry data taps mix-latency short of the sync taps so
+            -- data-through-mix and sync reach data_out co-timed.
+            s_y_d       <= v_y_delay(C_DRY_TAP - 1);
+            s_u_d       <= v_u_delay(C_DRY_TAP - 1);
+            s_v_d       <= v_v_delay(C_DRY_TAP - 1);
         end if;
     end process;
 
     -- ========================================================================
     -- Output Assignment
     -- ========================================================================
-    data_out.y       <= std_logic_vector(s_mix_y_result);
-    data_out.u       <= std_logic_vector(s_mix_u_result);
-    data_out.v       <= std_logic_vector(s_mix_v_result);
-    data_out.avid    <= s_mix_y_valid and s_mix_u_valid and s_mix_v_valid;
+    -- Gate to studio blanking outside the delay-matched input AVID (the
+    -- mix free-runs during blanking), and drive AVID from the same
+    -- chain as H/V/field so all output timing is co-phased.
+    data_out.y       <= std_logic_vector(s_mix_y_result) when s_avid_d = '1'
+                        else std_logic_vector(to_unsigned(64, C_VIDEO_DATA_WIDTH));
+    data_out.u       <= std_logic_vector(s_mix_u_result) when s_avid_d = '1'
+                        else std_logic_vector(C_CHROMA_MID);
+    data_out.v       <= std_logic_vector(s_mix_v_result) when s_avid_d = '1'
+                        else std_logic_vector(C_CHROMA_MID);
+    data_out.avid    <= s_avid_d;
     data_out.hsync_n <= s_hsync_n_d;
     data_out.vsync_n <= s_vsync_n_d;
     data_out.field_n <= s_field_n_d;

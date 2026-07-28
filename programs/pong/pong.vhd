@@ -1165,7 +1165,8 @@ begin
             s_io_0.v       <= std_logic_vector(s_mix_v_result);
             s_io_0.hsync_n <= s_sync_pipe(10)(0);
             s_io_0.vsync_n <= s_sync_pipe(10)(1);
-            s_io_0.avid    <= s_mix_y_valid and s_mix_u_valid and s_mix_v_valid;
+            -- Delay-matched input AVID (mix valids free-run in blanking).
+            s_io_0.avid    <= s_sync_pipe(10)(2);
             s_io_0.field_n <= s_sync_pipe(10)(3);
             s_io_1 <= s_io_0;
         end if;
@@ -1173,9 +1174,14 @@ begin
 
     -- Output Assignment
     -- ========================================================================
-    data_out.y       <= s_io_1.y;
-    data_out.u       <= s_io_1.u;
-    data_out.v       <= s_io_1.v;
+    -- Gate to studio blanking outside AVID: court/score rendering is
+    -- position-based and must never paint the blanking interval.
+    data_out.y       <= s_io_1.y when s_io_1.avid = '1'
+                        else std_logic_vector(to_unsigned(64, s_io_1.y'length));
+    data_out.u       <= s_io_1.u when s_io_1.avid = '1'
+                        else std_logic_vector(to_unsigned(512, s_io_1.u'length));
+    data_out.v       <= s_io_1.v when s_io_1.avid = '1'
+                        else std_logic_vector(to_unsigned(512, s_io_1.v'length));
     data_out.hsync_n <= s_io_1.hsync_n;
     data_out.vsync_n <= s_io_1.vsync_n;
     data_out.avid    <= s_io_1.avid;

@@ -132,6 +132,8 @@ CORE_ID_MAP = {
     'none': 0,
     'yuv444_30b': 1,
     'yuv422_20b': 2,
+    'gbr444_30b': 3,
+    'gbr422_20b': 4,
 }
 
 # Video timing ID name → 4-bit ID mapping (matches videomancer_abi.hpp)
@@ -764,7 +766,187 @@ def validate_program_config(config: Dict[str, Any]) -> None:
                     raise ValueError(f"Preset {i}: value for '{key}' must be integer 0-1023")
 
 
-def pack_program_config(config: Dict[str, Any]) -> bytes:
+# =============================================================================
+# Processing delay resolution (vmprog 1.1)
+# =============================================================================
+
+_RE_DELAY_CONST = re.compile(
+    r"constant\s+C_PROCESSING_DELAY_CLKS\s*:\s*integer\s*:=\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_CRACK_CENTERING = re.compile(
+    r"constant\s+C_CRACK_CENTERING\s*:\s*integer\s*:=\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_DELAY_PLUS_CRACK = re.compile(
+    r"constant\s+C_PROCESSING_DELAY_CLKS\s*:\s*integer\s*:=\s*(\d+)\s*\+\s*C_CRACK_CENTERING",
+    re.IGNORECASE,
+)
+_RE_SYNC_DELAY_CLKS = re.compile(
+    r"constant\s+C_SYNC_DELAY_CLKS\s*:\s*integer\s*:=\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_SYNC_DELAY = re.compile(
+    r"constant\s+C_SYNC_DELAY\s*:\s*integer\s*:=\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_DRY_TOTAL_EXPR = re.compile(
+    r"constant\s+C_DRY_TOTAL_DELAY\s*:\s*integer\s*:=\s*C_PROCESSING_DELAY_CLKS\s*\+\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_PROC_LATENCY = re.compile(
+    r"constant\s+C_PROC_LATENCY\s*:\s*integer\s*:=\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_MIX_LATENCY = re.compile(
+    r"constant\s+C_MIX_LATENCY\s*:\s*integer\s*:=\s*(\d+)",
+    re.IGNORECASE,
+)
+_RE_IO_STAGE = re.compile(r"\bs_io_(\d+)\s*:\s*t_video_stream", re.IGNORECASE)
+
+
+def _count_io_align_stages(vhd_text: str) -> int:
+    indices = [int(m.group(1)) for m in _RE_IO_STAGE.finditer(vhd_text)]
+    if indices:
+        return max(indices) + 1
+    if re.search(r"\bs_io_(?:y|u|v|hsync_n|avid)\s*:", vhd_text, re.IGNORECASE):
+        return 1
+    return 0
+
+
+def _resolve_delay_from_vhd(vhd_text: str) -> int | None:
+    """Infer program_top output latency from VHDL constants and IO-align stages."""
+    match = _RE_DELAY_PLUS_CRACK.search(vhd_text)
+    if match:
+        crack = _RE_CRACK_CENTERING.search(vhd_text)
+        crack_val = int(crack.group(1)) if crack else 0
+        return int(match.group(1)) + crack_val
+
+    if 'C_TOTAL_DELAY' in vhd_text:
+        proc = _RE_PROC_LATENCY.search(vhd_text)
+        mix = _RE_MIX_LATENCY.search(vhd_text)
+        if proc and mix:
+            return int(proc.group(1)) + int(mix.group(1))
+
+    base_match = _RE_DELAY_CONST.search(vhd_text)
+    base = int(base_match.group(1)) if base_match else None
+
+    dry_match = _RE_DRY_TOTAL_EXPR.search(vhd_text)
+    if base is not None and dry_match:
+        return base + int(dry_match.group(1))
+
+    io_stages = _count_io_align_stages(vhd_text)
+    sync_clks_match = _RE_SYNC_DELAY_CLKS.search(vhd_text)
+    if sync_clks_match and io_stages:
+        return int(sync_clks_match.group(1)) + io_stages
+
+    if base is not None and io_stages:
+        return base + io_stages
+
+    if sync_clks_match:
+        sync_val = int(sync_clks_match.group(1))
+        if base is None or sync_val >= base:
+            return sync_val
+
+    sync_match = _RE_SYNC_DELAY.search(vhd_text)
+    if sync_match:
+        sync_val = int(sync_match.group(1))
+        # colorbars: 3 IO-align stages after C_SYNC_DELAY
+        if io_stages:
+            return sync_val + io_stages
+        if 's_io_2' in vhd_text and io_stages == 0:
+            return sync_val + 3
+
+    if base is not None:
+        return base
+
+    return None
+
+
+def validate_processing_delay_clks(
+    delay: int,
+    program_id: str,
+    program_type: str = 'processing',
+) -> None:
+    """Ensure pipeline delay meets sync-phase / YUV422 chroma alignment rules."""
+    if delay > 1023:
+        raise ValueError(
+            f"processing_delay_clks={delay} for '{program_id}' exceeds 1023"
+        )
+
+    if program_type == 'synthesis':
+        if delay == 0:
+            return
+        if delay % 2 != 0 or delay % 4 != 0:
+            raise ValueError(
+                f"processing_delay_clks={delay} for synthesis program '{program_id}' "
+                "must be 0 or divisible by 4"
+            )
+        return
+
+    logical_id = program_id.rsplit('.', 1)[-1]
+    if logical_id == 'passthru' or program_id == 'passthru':
+        if delay != 1:
+            raise ValueError(
+                f"processing_delay_clks={delay} for passthru must be 1"
+            )
+        return
+
+    if delay % 2 != 0:
+        raise ValueError(
+            f"processing_delay_clks={delay} for '{program_id}' must be even "
+            "(odd delay inverts Cb/Cr vs Sync Out / encoder phase)"
+        )
+    if delay % 4 != 0:
+        raise ValueError(
+            f"processing_delay_clks={delay} for '{program_id}' must be divisible "
+            "by 4 (program_top I/O latency including IO-align registers)"
+        )
+
+
+def resolve_processing_delay_clks(config: Dict[str, Any], toml_path: Path) -> int:
+    """Resolve program_top pipeline delay for vmprog config packing."""
+    program = config.get('program', {})
+    if 'processing_delay_clks' in program:
+        return int(program['processing_delay_clks'])
+
+    prog_dir = toml_path.parent
+    program_id = program.get('program_id', prog_dir.name)
+    if program_id == 'passthru' or prog_dir.name == 'videomancer_passthru_vmprog':
+        return 1
+
+    for vhd_path in sorted(prog_dir.glob('*.vhd')):
+        try:
+            text = vhd_path.read_text(encoding='utf-8', errors='replace')
+        except OSError:
+            continue
+        resolved = _resolve_delay_from_vhd(text)
+        if resolved is not None:
+            return resolved
+
+    status_path = prog_dir / '.lzx-status.toml'
+    if status_path.exists():
+        with open(status_path, 'rb') as f:
+            status = tomllib.load(f)
+        alignment = status.get('stages', {}).get('alignment', {})
+        if 'delay_clks' in alignment:
+            return int(alignment['delay_clks'])
+
+    program_type = program.get('program_type', 'processing')
+    program_id = program.get('program_id', prog_dir.name)
+    if program_id == 'passthru' or prog_dir.name == 'passthru':
+        return 1
+    if program_type == 'synthesis':
+        return 0
+
+    raise ValueError(
+        f"No processing_delay_clks for program '{program_id}': declare "
+        "C_PROCESSING_DELAY_CLKS in VHDL, run alignment, or set "
+        "processing_delay_clks in TOML."
+    )
+
+
+def pack_program_config(config: Dict[str, Any], toml_path: Path | None = None) -> bytes:
     """
     Pack a complete program configuration into binary format.
 
@@ -792,7 +974,8 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
         - presets: vmprog_preset_config_v1_0[8] (320 bytes)
         - supported_timings: uint16_t (2 bytes) - bitmask of supported video timing IDs
         - program_type: uint8_t (1 byte) - 0=processing, 1=synthesis
-        - reserved: uint8_t[19] (19 bytes)
+        - processing_delay_clks: uint16_t (2 bytes) - program_top pipeline delay
+        - reserved: uint8_t[17] (17 bytes)
 
     Args:
         config: Dictionary containing program configuration from TOML
@@ -922,8 +1105,16 @@ def pack_program_config(config: Dict[str, Any]) -> bytes:
     program_type_val = PROGRAM_TYPE_MAP.get(program_type_str, 0)
     data += struct.pack('<B', program_type_val)
 
-    # Reserved (19 bytes)
-    data += b'\x00' * 19
+    if toml_path is None:
+        toml_path = Path('.')
+    processing_delay = resolve_processing_delay_clks(config, toml_path)
+    program_id = config.get('program', {}).get('program_id', toml_path.parent.name)
+    program_type_str = program.get('program_type', 'processing')
+    validate_processing_delay_clks(processing_delay, program_id, program_type_str)
+    data += struct.pack('<H', processing_delay)
+
+    # Reserved (17 bytes)
+    data += b'\x00' * 17
 
     assert len(data) == CONFIG_STRUCT_SIZE, f"Config size mismatch: {len(data)} != {CONFIG_STRUCT_SIZE}"
     return bytes(data)
@@ -960,7 +1151,7 @@ def convert_toml_to_binary(toml_path: Path, output_path: Path) -> None:
     # Pack to binary
     if not QUIET:
         print(f"Packing to binary format ({CONFIG_STRUCT_SIZE} bytes)...")
-    binary_data = pack_program_config(config)
+    binary_data = pack_program_config(config, toml_path)
 
     # Write output
     if not QUIET:

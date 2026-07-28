@@ -55,8 +55,13 @@ end entity video_line_buffer;
 
 architecture rtl of video_line_buffer is
     type t_ram is array(0 to ((2**G_DEPTH) - 1)) of std_logic_vector(G_WIDTH - 1 downto 0);
-    signal s_ram_a : t_ram;
-    signal s_ram_b : t_ram;
+    -- Zero-initialized to match iCE40 EBR power-up state: without this,
+    -- simulation reads 'U' before the first written line, and 'U'
+    -- poisons downstream arithmetic (numeric_std 'U' * 0 = 'U') — e.g.
+    -- mycelium's whole output, including the dry mix leg, decoded as
+    -- black in the vmtest suite until first-line data was defined.
+    signal s_ram_a : t_ram := (others => (others => '0'));
+    signal s_ram_b : t_ram := (others => (others => '0'));
     signal s_output_a : std_logic_vector(G_WIDTH - 1 downto 0);
     signal s_output_b : std_logic_vector(G_WIDTH - 1 downto 0);
     signal s_i_wr_addr : unsigned(G_DEPTH - 1 downto 0);

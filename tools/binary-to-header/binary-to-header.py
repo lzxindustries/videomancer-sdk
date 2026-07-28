@@ -25,11 +25,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import argparse
+import errno
 import os
+import shutil
 import sys
 import tempfile
 import filecmp
 from pathlib import Path
+
+
+def safe_replace(src: str, dst: str) -> None:
+    """Atomically replace dst with src; copy when /tmp and output differ (WSL drvfs)."""
+    try:
+        os.replace(src, dst)
+    except OSError as exc:
+        if exc.errno != errno.EXDEV:
+            raise
+        shutil.copy2(src, dst)
+        os.unlink(src)
 
 
 def read_template(template_path: str) -> str:
@@ -204,12 +217,12 @@ Examples:
                     print(f"Header unchanged: {args.output_header}")
                 os.unlink(temp_header_path)
             else:
-                os.replace(temp_header_path, args.output_header)
+                safe_replace(temp_header_path, args.output_header)
                 header_updated = True
                 if args.verbose:
                     print(f"Header updated: {args.output_header}")
         else:
-            os.replace(temp_header_path, args.output_header)
+            safe_replace(temp_header_path, args.output_header)
             header_updated = True
             if args.verbose:
                 print(f"Header created: {args.output_header}")
@@ -222,12 +235,12 @@ Examples:
                     print(f"Source unchanged: {args.output_source}")
                 os.unlink(temp_source_path)
             else:
-                os.replace(temp_source_path, args.output_source)
+                safe_replace(temp_source_path, args.output_source)
                 source_updated = True
                 if args.verbose:
                     print(f"Source updated: {args.output_source}")
         else:
-            os.replace(temp_source_path, args.output_source)
+            safe_replace(temp_source_path, args.output_source)
             source_updated = True
             if args.verbose:
                 print(f"Source created: {args.output_source}")

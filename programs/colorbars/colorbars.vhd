@@ -412,6 +412,17 @@ begin
     -- ========================================================================
     -- Output Assignment
     -- ========================================================================
-    data_out <= s_io_2;
+    -- Gate to studio blanking outside the (sync-pipe-delayed) AVID:
+    -- the bar generator renders from its own counters.
+    data_out.y       <= s_io_2.y when s_io_2.avid = '1'
+                        else std_logic_vector(to_unsigned(64, s_io_2.y'length));
+    data_out.u       <= s_io_2.u when s_io_2.avid = '1'
+                        else std_logic_vector(to_unsigned(512, s_io_2.u'length));
+    data_out.v       <= s_io_2.v when s_io_2.avid = '1'
+                        else std_logic_vector(to_unsigned(512, s_io_2.v'length));
+    data_out.avid    <= s_io_2.avid;
+    data_out.hsync_n <= s_io_2.hsync_n;
+    data_out.vsync_n <= s_io_2.vsync_n;
+    data_out.field_n <= s_io_2.field_n;
 
 end architecture colorbars;

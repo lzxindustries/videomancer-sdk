@@ -40,7 +40,16 @@ namespace videomancer_abi_v1_0
         constexpr uint8_t toggle_switches  = 0x06;
         constexpr uint8_t linear_pot_12    = 0x07;
         constexpr uint8_t video_timing_id  = 0x08;
+        constexpr uint8_t sync_phase_advance_clks = 0x09;
     }
+
+    /// @brief Post-program sync delay added to reg 0x09 for yuv444 core
+    ///        (blanking 2 + 444→422 sync 2). Aligns Sync Out with encoder HSYNC.
+    constexpr uint16_t yuv444_core_sync_post_delay_clks = 4;
+    /// @brief Same post-program path as yuv444 for gbr444 (blanking + 422 sync).
+    constexpr uint16_t gbr444_core_sync_post_delay_clks = 4;
+    /// @brief Native 422 cores have no blanking/converter after program_top.
+    constexpr uint16_t gbr422_core_sync_post_delay_clks = 0;
 
     /// @brief Bit positions for toggle switches in register 0x06
     namespace toggle_switch_bit

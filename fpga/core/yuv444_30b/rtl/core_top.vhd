@@ -26,6 +26,7 @@ use ieee.numeric_std.all;
 library work;
 use work.video_stream_pkg.all;
 use work.video_timing_pkg.all;
+use work.video_sync_pkg.all;
 use work.core_config_pkg.all;
 use work.core_pkg.all;
 use work.all;
@@ -90,8 +91,8 @@ architecture rtl of core_top is
   signal s_spi_addr : unsigned(C_SPI_TRANSFER_ADDR_WIDTH - 1 downto 0) := (others => '0');
   signal s_spi_ram : t_spi_ram := (others => (others => '0'));
   signal s_spi_ram_d : t_spi_ram := (others => (others => '0'));
-  signal s_vsync_n_d : std_logic := '1';
-  signal s_vsync_n_event : std_logic := '0';
+  signal s_hsync_n_d : std_logic := '0';
+  signal s_hsync_n_event : std_logic := '0';
   signal s_video_timing_id : t_video_timing_id := (others => '0');
   signal s_video_in : t_video_stream_yuv422_20b;
   signal s_program_in : t_video_stream_yuv444_30b;
@@ -105,14 +106,16 @@ architecture rtl of core_top is
   signal s_o_field_n : std_logic := '0';
   signal s_o_avid : std_logic := '0';
 
-  -- Sync reference signals for sync output generator.
-  -- In dual mode, references HDMI RX input timing (matching the Analog Enc
-  -- passthrough path). In other modes, references the program output timing
-  -- (matching the HDMI TX / Analog Enc output path).
+  -- Sync output: program-input reference on vid_clk with SPI reg 0x09 phase advance.
+  signal s_sync_clk            : std_logic := '0';
+  signal s_sync_timing_id      : t_video_timing_id := (others => '0');
   signal s_sync_ref_hsync_n    : std_logic := '1';
   signal s_sync_ref_vsync_n    : std_logic := '1';
-  signal s_hdmi_rx_hsync_meta  : std_logic := '1';
-  signal s_hdmi_rx_vsync_meta  : std_logic := '1';
+  signal s_sync_phase_advance  : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
+  signal s_spi_phase_d         : std_logic_vector(C_SPI_TRANSFER_DATA_BITS - 1 downto 0) := (others => '0');
+  -- 444→422 emits sync 1 clk before Y/C; delay HDMI H/V to match pixel data.
+  signal s_hdmi_hsync_d        : std_logic := '1';
+  signal s_hdmi_vsync_d        : std_logic := '1';
 
   -- SD standalone clean PLL clock. Derived inside GEN_SD_STANDALONE_IN by
   -- feeding the ADV7181C LLC pad through a fabric ÷2 register and into
@@ -123,6 +126,12 @@ architecture rtl of core_top is
   -- relationship to the data registers.
   signal s_sd_standalone_clk_27_pll : std_logic := '0';
 
+  -- HD clock decimation signals (non-standalone configs only)
+  signal prog_clk : std_logic := '0';
+  signal s_prog_data_in : t_video_stream_yuv444_30b;
+  signal s_prog_data_out : t_video_stream_yuv444_30b;
+  signal s_prog_registers : t_spi_ram := (others => (others => '0'));
+
 begin
 
   GEN_SD_HDMI_IN : if C_ENABLE_SD and C_ENABLE_HDMI generate
@@ -132,16 +141,11 @@ begin
     s_video_in.c(9 downto 2) <= i_hdmi_rx_d(7 downto 0);
     s_video_in.y(1 downto 0) <= i_hdmi_rx_d(23 downto 22);
     s_video_in.c(1 downto 0) <= i_hdmi_rx_d(19 downto 18);
-    -- Sync and active-video gating come from the internal free-running
-    -- video sync generator (slaved to the external HDMI vsync below).
-    -- The HDMI receiver's DE pin is intentionally not used.
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.hsync_n <= i_hdmi_rx_hsync;
+    s_video_in.vsync_n <= i_hdmi_rx_vsync;
+    s_video_in.avid    <= i_hdmi_rx_de;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= i_hdmi_rx_hsync;
-    s_sync_ref_vsync_n <= i_hdmi_rx_vsync;
-    o_mcu_gpout_clk <= s_o_avid;
+    o_mcu_gpout_clk <= i_hdmi_rx_de;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -153,13 +157,11 @@ begin
     s_video_in.c(9 downto 2) <= i_hdmi_rx_d(7 downto 0);
     s_video_in.y(1 downto 0) <= i_hdmi_rx_d(23 downto 22);
     s_video_in.c(1 downto 0) <= i_hdmi_rx_d(19 downto 18);
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.hsync_n <= i_hdmi_rx_hsync;
+    s_video_in.vsync_n <= i_hdmi_rx_vsync;
+    s_video_in.avid    <= i_hdmi_rx_de;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= i_hdmi_rx_hsync;
-    s_sync_ref_vsync_n <= i_hdmi_rx_vsync;
-    o_mcu_gpout_clk <= s_o_avid;
+    o_mcu_gpout_clk <= i_hdmi_rx_de;
     i_spi_sdo <= i_hdmi_rx_vsync;
 
   end generate;
@@ -169,16 +171,11 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    -- Sync and active-video gating come from the internal free-running
-    -- video sync generator (slaved to the external analog decoder vsync
-    -- below). The decoder's FIELD/DE pin is intentionally not used.
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.hsync_n <= i_vid_dec_hsync;
+    s_video_in.vsync_n <= i_vid_dec_vsync;
+    s_video_in.avid    <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= i_vid_dec_hsync;
-    s_sync_ref_vsync_n <= i_vid_dec_vsync;
-    o_mcu_gpout_clk <= s_o_avid;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -188,13 +185,11 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.hsync_n <= i_vid_dec_hsync;
+    s_video_in.vsync_n <= i_vid_dec_vsync;
+    s_video_in.avid    <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= i_vid_dec_hsync;
-    s_sync_ref_vsync_n <= i_vid_dec_vsync;
-    o_mcu_gpout_clk <= s_o_avid;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -220,14 +215,11 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    -- Sync and active-video gating come from the internal free-running
-    -- video sync generator. Reference selection (sync_ref_*) is handled
-    -- by the dedicated CDC block below.
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.hsync_n <= i_vid_dec_hsync;
+    s_video_in.vsync_n <= i_vid_dec_vsync;
+    s_video_in.avid    <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= s_o_avid;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -243,11 +235,11 @@ begin
     vid_clk <= i_vid_dec_clk;
     s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
     s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.hsync_n <= i_vid_dec_hsync;
+    s_video_in.vsync_n <= i_vid_dec_vsync;
+    s_video_in.avid    <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    o_mcu_gpout_clk <= s_o_avid;
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
     i_spi_sdo <= i_vid_dec_vsync;
 
   end generate;
@@ -255,46 +247,20 @@ begin
   -- ========================================================================
   -- STANDALONE INPUT GENERATES
   -- ========================================================================
-  -- In standalone bitstreams the analog decoder and HDMI receiver video
-  -- datapaths are disconnected from the video pipeline. The FPGA derives
-  -- the pixel clock from the ADV7181C LLC pin (i_vid_dec_clk). Firmware
-  -- programs the decoder's CP-PLL in clock-generator-only mode so LLC is:
-  --   * 27.000 MHz for SD/ED bitstreams (NTSC, PAL, 480p, 576p)
-  --   * 74.250 MHz for HD bitstreams (or 74.25/1.001 for dropframe rates)
-  -- For SD bitstreams the FPGA divides LLC by 2 in fabric to produce the
-  -- 13.5 MHz NTSC/PAL pixel clock, and selects between 13.5 and 27 MHz at
-  -- runtime via a glitch-free clock mux based on the timing-id interlace
-  -- bit. For HD bitstreams the LLC is used directly. Pin 128
-  -- (RP2040_GPOUT_CLK) is driven as a debug AVID heartbeat to the MCU,
-  -- identical to all other bitstream variants.
+  -- Standalone bitstreams derive vid_clk from the ADV7181C LLC pin.  Firmware
+  -- programs the decoder CP-PLL as the master pixel clock and enables RGB 1V
+  -- sampling; the FPGA passes decoder Y/C data and HS/VS/DE into the pipeline.
 
   GEN_SD_STANDALONE_IN : if C_ENABLE_SD and C_ENABLE_STANDALONE generate
-    -- SD standalone supports NTSC and PAL only (13.5 MHz pipeline,
-    -- 27 MHz encoder/HDMI CLK). LLC always arrives at 27 MHz from the
-    -- ADV7181C in clock-generator-only mode. Clock generation is:
-    --
-    --   i_vid_dec_clk (27 MHz LLC pad)
-    --     |--> fabric ÷2 register --> 13.5 MHz fabric --> sd_video_clk_pll_2x
-    --                                                       |
-    --                                                       v
-    --                                          s_sd_standalone_clk_27_pll
-    --                                                  (clean global 27 MHz)
-    --                                                       |
-    --                                                       +--> not --> o_vid_enc_clk
-    --                                                       +--> not --> o_hdmi_tx_clk
-    --                                                       |
-    --                                                       v
-    --                                          fabric ÷2 register --> vid_clk (13.5)
-    --
-    -- vid_clk and the encoder/HDMI CLK are now both derived from the
-    -- same PLL output, deterministically phased. ADV7393 sees data
-    -- launched on vid_clk's rising edge and samples on the falling
-    -- edge of the 27 MHz CLK (mid-data-cycle). ADV7513 sees a clean
-    -- 27 MHz from the PLL global net, so its TMDS PLL can lock.
+    -- SD standalone: LLC @ 27 MHz from ADV7181C master CP-PLL.
+    -- NTSC/PAL use vid_clk @ 13.5 MHz; 480p/576p use vid_clk @ 27 MHz.
     signal s_llc_div2_pre  : std_logic := '0';
     signal s_vid_clk_div2  : std_logic := '0';
+    signal s_ed_progressive : std_logic;
   begin
-    -- Stage 1: divide raw LLC pad by 2 in fabric to feed the PLL.
+    s_ed_progressive <= '1' when (s_video_timing_id = C_480P or s_video_timing_id = C_576P)
+                        else '0';
+
     p_llc_div2 : process(i_vid_dec_clk)
     begin
       if rising_edge(i_vid_dec_clk) then
@@ -302,7 +268,6 @@ begin
       end if;
     end process;
 
-    -- Stage 2: clean 13.5 MHz → 27 MHz on a global clock net.
     pll_inst : entity work.sd_video_clk_pll_2x
     port map(
       i_clk    => s_llc_div2_pre,
@@ -311,65 +276,46 @@ begin
       i_bypass => '0'
     );
 
-    -- Stage 3: divide PLL output by 2 to make vid_clk (13.5 MHz),
-    -- now phase-aligned with the encoder/HDMI 27 MHz output clocks.
     p_vid_clk_div2 : process(s_sd_standalone_clk_27_pll)
     begin
       if rising_edge(s_sd_standalone_clk_27_pll) then
         s_vid_clk_div2 <= not s_vid_clk_div2;
       end if;
     end process;
-    vid_clk <= s_vid_clk_div2;
 
-    -- Decoder data path disconnected: drive black pixels into the
-    -- pipeline, gate active video by the free-running internal sync
-    -- generator. Sync references tied inactive so video_sync_generator
-    -- counter free-runs without phantom resets from output self-feedback.
-    s_video_in.y(9 downto 0) <= (others => '0');
-    s_video_in.c(9 downto 0) <= (others => '0');
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    vid_clk <= s_sd_standalone_clk_27_pll when s_ed_progressive = '1' else s_vid_clk_div2;
+
+    s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
+    s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
+    s_video_in.hsync_n <= i_vid_dec_hsync;
+    s_video_in.vsync_n <= i_vid_dec_vsync;
+    s_video_in.avid    <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    s_sync_ref_hsync_n <= '1';
-    s_sync_ref_vsync_n <= '1';
-
-    o_mcu_gpout_clk <= s_o_avid;
-    i_spi_sdo <= '0';
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
+    i_spi_sdo <= i_vid_dec_vsync;
   end generate;
 
   GEN_HD_STANDALONE_IN : if C_ENABLE_HD and C_ENABLE_STANDALONE generate
   begin
-    -- HD standalone: LLC is already the correct 74.25 MHz (or /1.001)
-    -- pixel clock; pass through unmodified. All 11 HD timings (including
-    -- dropframe rates) are supported because firmware programs the
-    -- CP-PLL divisor to track the selected timing exactly.
     vid_clk <= i_vid_dec_clk;
 
-    s_video_in.y(9 downto 0) <= (others => '0');
-    s_video_in.c(9 downto 0) <= (others => '0');
-    s_video_in.hsync_n <= s_o_hsync;
-    s_video_in.vsync_n <= s_o_vsync;
-    s_video_in.avid    <= s_o_avid;
+    s_video_in.y(9 downto 0) <= i_vid_dec_d(9 downto 0);
+    s_video_in.c(9 downto 0) <= i_vid_dec_d(19 downto 10);
+    s_video_in.hsync_n <= i_vid_dec_hsync;
+    s_video_in.vsync_n <= i_vid_dec_vsync;
+    s_video_in.avid    <= i_vid_dec_field_de;
     s_video_in.field_n <= '1';
-    -- Sync references tied inactive so video_sync_generator counter
-    -- free-runs without phantom resets from output self-feedback.
-    s_sync_ref_hsync_n <= '1';
-    s_sync_ref_vsync_n <= '1';
 
-    o_mcu_gpout_clk <= s_o_avid;
-    i_spi_sdo <= '0';
+    o_mcu_gpout_clk <= i_vid_dec_field_de;
+    i_spi_sdo <= i_vid_dec_vsync;
   end generate;
 
   -- ========================================================================
   -- UNCONDITIONAL SYNC ROUTING: HDMI RX -> DECODER EXT SYNC INPUTS
   -- ========================================================================
-  -- Forward HDMI receiver sync signals to the analog decoder's external
-  -- HSYNC_IN/VSYNC_IN pins in all bitstream variants. In analog and HDMI
-  -- modes, the decoder firmware configures sync extraction from the video
-  -- signal itself (ignoring these pins). In dual and standalone modes,
-  -- firmware configures the decoder for external sync, genlocking it to
-  -- the HDMI receiver's timing.
+  -- Forward HDMI receiver sync to the decoder EXT sync inputs.  Firmware
+  -- configures the decoder to use these pins only in dual routing mode;
+  -- analog, HDMI, and standalone modes ignore them.
   o_vid_dec_hsync_in <= i_hdmi_rx_hsync;
   o_vid_dec_vsync_in <= i_hdmi_rx_vsync;
 
@@ -415,83 +361,85 @@ begin
   process (vid_clk)
   begin
     if rising_edge(vid_clk) then
-      s_vsync_n_d <= s_program_in.vsync_n;
+      s_hsync_n_d <= s_program_in.hsync_n;
     end if;
   end process;
 
-  -- Detect falling edge of active-low VSYNC (start of vertical sync).
-  s_vsync_n_event <= s_vsync_n_d and not s_program_in.vsync_n;
+  s_hsync_n_event <= s_hsync_n_d and not s_program_in.hsync_n;
 
-  -- Shadow RAM process with proper block RAM inference.
-  -- Latches all 9 SPI registers atomically on VSYNC, ensuring all programs
-  -- see a tear-free, frame-coherent parameter snapshot for the entire field.
-  process (vid_clk)
+  -- Latch MCU SPI writes into shadow RAM once per line.
+  -- 0x00-0x08: program-visible (per-line modulation + timing_id).
+  -- 0x09 phase_advance: latched on the same HSYNC edge into a core-only
+  -- register so Sync Out never pairs a new advance with a stale format.
+  GEN_SHADOW_RAM_HSYNC : process (vid_clk)
   begin
     if rising_edge(vid_clk) then
-      if s_vsync_n_event = '1' then
-        -- Copy entire RAM on vsync event
+      if s_hsync_n_event = '1' then
         for i in 0 to 8 loop
           s_spi_ram_d(i) <= s_spi_ram(i);
         end loop;
+        s_spi_phase_d <= s_spi_ram(9);
       end if;
     end if;
   end process;
 
   s_video_timing_id <= s_spi_ram_d(8)(3 downto 0);
 
-  yuv444_30b_top_inst : entity work.program_top
-    port map(
-      clk => vid_clk,
-      registers_in => s_spi_ram_d,
-      data_in => s_program_in,
-      data_out => s_program_out
-    );
-
   -- ========================================================================
-  -- SYNC OUTPUT REFERENCE SELECTION
+  -- HD CLOCK DECIMATION (non-standalone input-routing configs)
   -- ========================================================================
-  -- The video sync generator's HSYNC/VSYNC reference is driven by the
-  -- external source's sync pins (set in each GEN_*_IN block above) for
-  -- HDMI and analog modes. In dual mode, vid_clk is the analog decoder's
-  -- clock domain but the desired reference is the HDMI receiver, so a
-  -- 2FF synchronizer provides clean capture across the (genlock'd but
-  -- nominally separate) clock domains.
-
-  GEN_SYNC_REF_HDMI_RX : if C_ENABLE_DUAL generate
-    p_sync_ref_cdc : process(vid_clk)
-    begin
-      if rising_edge(vid_clk) then
-        s_hdmi_rx_hsync_meta <= i_hdmi_rx_hsync;
-        s_sync_ref_hsync_n   <= s_hdmi_rx_hsync_meta;
-        s_hdmi_rx_vsync_meta <= i_hdmi_rx_vsync;
-        s_sync_ref_vsync_n   <= s_hdmi_rx_vsync_meta;
-      end if;
-    end process;
+  GEN_DIRECT_PROG_CLK : if C_ENABLE_STANDALONE or (not C_ENABLE_HD) or (C_HD_CLOCK_DIVISOR = 1) generate
+    prog_clk <= vid_clk;
+    s_prog_data_in <= s_program_in;
+    s_program_out <= s_prog_data_out;
+    s_prog_registers <= s_spi_ram_d;
   end generate;
 
-  video_field_detector_inst : entity work.video_field_detector
-    generic map(
-      G_LINE_COUNTER_WIDTH => 12
-    )
-    port map(
-      clk => vid_clk,
-      hsync => s_sync_ref_hsync_n,
-      vsync => s_sync_ref_vsync_n,
-      field_n => s_o_field_n
-    );
+  GEN_DECIMATED_PROG_CLK : if (not C_ENABLE_STANDALONE) and C_ENABLE_HD and (C_HD_CLOCK_DIVISOR > 1) generate
 
-  video_sync_generator_inst : entity work.video_sync_generator
+    GEN_DIV2_PLL : if C_HD_CLOCK_DIVISOR = 2 generate
+      hd_pll_div2_inst : entity work.hd_video_clk_pll_div2
+      port map(
+        i_clk    => vid_clk,
+        o_clk    => prog_clk,
+        i_resetb => '1',
+        i_bypass => '0'
+      );
+    end generate;
+
+    GEN_DIV4_PLL : if C_HD_CLOCK_DIVISOR = 4 generate
+      hd_pll_div4_inst : entity work.hd_video_clk_pll_div4
+      port map(
+        i_clk    => vid_clk,
+        o_clk    => prog_clk,
+        i_resetb => '1',
+        i_bypass => '0'
+      );
+    end generate;
+
+    p_input_cdc : process(prog_clk)
+    begin
+      if rising_edge(prog_clk) then
+        s_prog_data_in <= s_program_in;
+        s_prog_registers <= s_spi_ram_d;
+      end if;
+    end process;
+
+    p_output_cdc : process(vid_clk)
+    begin
+      if rising_edge(vid_clk) then
+        s_program_out <= s_prog_data_out;
+      end if;
+    end process;
+
+  end generate;
+
+  yuv444_30b_top_inst : entity work.program_top
     port map(
-      clk => vid_clk,
-      ref_hsync => s_sync_ref_hsync_n,
-      ref_vsync => s_sync_ref_vsync_n,
-      ref_field_n => s_o_field_n,
-      timing => s_video_timing_id,
-      trisync_p => s_o_trisync_out_p,
-      trisync_n => s_o_trisync_out_n,
-      hsync => s_o_hsync,
-      vsync => s_o_vsync,
-      avid => s_o_avid
+      clk => prog_clk,
+      registers_in => s_prog_registers,
+      data_in => s_prog_data_in,
+      data_out => s_prog_data_out
     );
 
   yuv444_30b_blanking_inst : entity work.yuv444_30b_blanking
@@ -506,6 +454,54 @@ begin
       clk => vid_clk,
       i_data => s_blanking_out,
       o_data => s_video_out
+    );
+
+  -- ========================================================================
+  -- SYNC OUTPUT (program-input lock + phase advance)
+  -- ========================================================================
+  s_sync_clk           <= vid_clk;
+  s_sync_ref_hsync_n   <= s_program_in.hsync_n;
+  s_sync_ref_vsync_n   <= s_program_in.vsync_n;
+  s_sync_timing_id     <= s_video_timing_id;
+  s_sync_phase_advance <= resize(unsigned(s_spi_phase_d), C_VIDEO_SYNC_DATA_WIDTH);
+
+  -- Align HDMI TX H/V with Y/C (converter sync leads data by 1 clk).
+  p_hdmi_sync_align : process(vid_clk)
+  begin
+    if rising_edge(vid_clk) then
+      s_hdmi_hsync_d <= s_video_out.hsync_n;
+      s_hdmi_vsync_d <= s_video_out.vsync_n;
+    end if;
+  end process;
+
+  video_field_detector_inst : entity work.video_field_detector
+    generic map(
+      G_LINE_COUNTER_WIDTH => 12
+    )
+    port map(
+      clk => s_sync_clk,
+      hsync => s_sync_ref_hsync_n,
+      vsync => s_sync_ref_vsync_n,
+      field_n => s_o_field_n
+    );
+
+  video_sync_generator_inst : entity work.video_sync_generator
+    generic map(
+      G_LOCK_TO_REF   => true,
+      G_PHASE_ADVANCE => true
+    )
+    port map(
+      clk                => s_sync_clk,
+      ref_hsync          => s_sync_ref_hsync_n,
+      ref_vsync          => s_sync_ref_vsync_n,
+      ref_field_n        => s_o_field_n,
+      timing             => s_sync_timing_id,
+      phase_advance_clks => s_sync_phase_advance,
+      trisync_p          => s_o_trisync_out_p,
+      trisync_n          => s_o_trisync_out_n,
+      hsync              => s_o_hsync,
+      vsync              => s_o_vsync,
+      avid               => s_o_avid
     );
 
   o_vid_sync_out_p <= s_o_trisync_out_p;
@@ -531,8 +527,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     -- o_hdmi_tx_hsync <= s_o_hsync;
     -- o_hdmi_tx_vsync <= s_o_vsync;
     o_hdmi_tx_clk <= not vid_clk;
@@ -552,8 +548,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     -- o_hdmi_tx_hsync <= s_o_hsync;
     -- o_hdmi_tx_vsync <= s_o_vsync;
     o_hdmi_tx_clk <= not vid_clk;
@@ -580,8 +576,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     -- o_hdmi_tx_hsync <= s_o_hsync;
     -- o_hdmi_tx_vsync <= s_o_vsync;
     o_hdmi_tx_clk <= not vid_clk;
@@ -601,8 +597,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     -- o_hdmi_tx_hsync <= s_o_hsync;
     -- o_hdmi_tx_vsync <= s_o_vsync;
     o_hdmi_tx_clk <= not vid_clk;
@@ -614,8 +610,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     -- o_hdmi_tx_hsync <= s_o_hsync;
     -- o_hdmi_tx_vsync <= s_o_vsync;
     o_hdmi_tx_clk <= not vid_clk;
@@ -627,8 +623,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     -- o_hdmi_tx_hsync <= s_o_hsync;
     -- o_hdmi_tx_vsync <= s_o_vsync;
     o_hdmi_tx_clk <= not vid_clk;
@@ -667,8 +663,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     o_hdmi_tx_clk <= not vid_clk;
 
   end generate;
@@ -684,8 +680,8 @@ begin
     o_hdmi_tx_d(23 downto 14) <= s_video_out.y(9 downto 0);
     o_hdmi_tx_d(13 downto 4) <= s_video_out.c(9 downto 0);
     o_hdmi_tx_d(3 downto 0) <= "0000";
-    o_hdmi_tx_hsync <= s_video_out.hsync_n;
-    o_hdmi_tx_vsync <= s_video_out.vsync_n;
+    o_hdmi_tx_hsync <= s_hdmi_hsync_d;
+    o_hdmi_tx_vsync <= s_hdmi_vsync_d;
     o_hdmi_tx_clk <= not vid_clk;
 
   end generate;

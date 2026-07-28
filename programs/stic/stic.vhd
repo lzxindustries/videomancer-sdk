@@ -107,7 +107,14 @@ architecture stic of program_top is
     --   Stage 9 : sat V clamp + grid/scanline/flicker
     --   Stage 10: output register (implicit in s_proc)
     --   4 clk   : interpolator wet/dry mix
-    constant C_PROCESSING_DELAY_CLKS : integer := 14;
+    -- Total data latency incl. the 4-clk mix interpolators (and %4
+    -- padding): sync/AVID tap the full depth, dry data taps 4 short so
+    -- data-through-mix and sync reach data_out co-timed (was 14 with
+    -- sync tapped at the same depth as dry data - video trailed the
+    -- program's own sync by the mix latency).
+    constant C_MIX_LATENCY_CLKS : integer := 4;
+    constant C_PROCESSING_DELAY_CLKS : integer := 20;
+    constant C_DRY_TAP : integer := C_PROCESSING_DELAY_CLKS - C_MIX_LATENCY_CLKS;
     constant C_CHROMA_MID : unsigned(C_VIDEO_DATA_WIDTH - 1 downto 0) :=
         to_unsigned(512, C_VIDEO_DATA_WIDTH);
 
@@ -743,7 +750,14 @@ begin
     p_stage7_sat_u : process(clk)
     begin
         if rising_edge(clk) then
-            s_bri_y <= resize(shift_right(s_bri_product, 9), C_VIDEO_DATA_WIDTH);
+            -- Clamp: gain > 1.0 (pot > 512) previously WRAPPED here —
+            -- the resize dropped bit 10 and Brightness at max darkened
+            -- the picture (found by the vmtest semantic contracts).
+            if shift_right(s_bri_product, 9) > 1023 then
+                s_bri_y <= (others => '1');
+            else
+                s_bri_y <= resize(shift_right(s_bri_product, 9), C_VIDEO_DATA_WIDTH);
+            end if;
             s_sat_prod_u <= s_sat_off_u
                           * signed('0' & std_logic_vector(s_saturation));
             s_sat_off_v_d7 <= s_sat_off_v;
@@ -916,18 +930,24 @@ begin
             s_hsync_n_d <= v_hsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_vsync_n_d <= v_vsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_field_n_d <= v_field_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_y_d       <= v_y_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_u_d       <= v_u_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_v_d       <= v_v_delay(C_PROCESSING_DELAY_CLKS - 1);
+            s_y_d       <= v_y_delay(C_DRY_TAP - 1);
+            s_u_d       <= v_u_delay(C_DRY_TAP - 1);
+            s_v_d       <= v_v_delay(C_DRY_TAP - 1);
         end if;
     end process;
 
     -- ========================================================================
     -- Output Assignment
     -- ========================================================================
-    data_out.y <= std_logic_vector(s_mix_y_result);
-    data_out.u <= std_logic_vector(s_mix_u_result);
-    data_out.v <= std_logic_vector(s_mix_v_result);
+    -- Gate to studio blanking outside AVID: the mix free-runs during
+    -- blanking and parameter extremes must never leak video-level
+    -- content into H/V blank.
+    data_out.y <= std_logic_vector(s_mix_y_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(64, s_mix_y_result'length));
+    data_out.u <= std_logic_vector(s_mix_u_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, s_mix_u_result'length));
+    data_out.v <= std_logic_vector(s_mix_v_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, s_mix_v_result'length));
 
     data_out.avid    <= s_avid_d;
     data_out.hsync_n <= s_hsync_n_d;

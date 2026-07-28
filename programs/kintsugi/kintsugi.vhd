@@ -115,7 +115,15 @@ architecture kintsugi of program_top is
     -- cracks appear centered on the detected edge rather than starting
     -- entirely to the right of it.
     constant C_CRACK_CENTERING   : integer := 4;
-    constant C_PROCESSING_DELAY_CLKS : integer := 20 + C_CRACK_CENTERING;
+    -- interpolator_u pipeline depth (see dsp/interpolator.vhd): the dry
+    -- video passes through the mix interpolators after the delay chain,
+    -- so sync must be delayed by this much extra to stay co-timed.
+    constant C_MIX_LATENCY_CLKS  : integer := 4;
+    -- Total program_top data latency: dry chain + crack centering + mix.
+    constant C_PROCESSING_DELAY_CLKS : integer := 24 + C_CRACK_CENTERING;
+    -- Dry-data tap: mix latency shorter than the sync tap, so that
+    -- data-through-mix and sync arrive at data_out together.
+    constant C_DRY_TAP : integer := C_PROCESSING_DELAY_CLKS - C_MIX_LATENCY_CLKS;
 
     -- Line buffer depth (2^11 = 2048 pixels per line)
     constant C_LINE_DEPTH : integer := 11;
@@ -308,6 +316,7 @@ architecture kintsugi of program_top is
     signal s_hsync_n_d      : std_logic;
     signal s_vsync_n_d      : std_logic;
     signal s_field_n_d      : std_logic;
+    signal s_avid_d         : std_logic := '0';
     signal s_y_d            : std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
     signal s_u_d            : std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
     signal s_v_d            : std_logic_vector(C_VIDEO_DATA_WIDTH - 1 downto 0);
@@ -936,6 +945,7 @@ begin
         variable v_hsync_delay : t_sync_delay := (others => '1');
         variable v_vsync_delay : t_sync_delay := (others => '1');
         variable v_field_delay : t_sync_delay := (others => '1');
+        variable v_avid_delay  : t_sync_delay := (others => '0');
         variable v_y_delay     : t_data_delay := (others => (others => '0'));
         variable v_u_delay     : t_data_delay := (others => (others => '0'));
         variable v_v_delay     : t_data_delay := (others => (others => '0'));
@@ -944,6 +954,7 @@ begin
             v_hsync_delay := data_in.hsync_n & v_hsync_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_vsync_delay := data_in.vsync_n & v_vsync_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_field_delay := data_in.field_n & v_field_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
+            v_avid_delay  := data_in.avid    & v_avid_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_y_delay     := data_in.y       & v_y_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_u_delay     := data_in.u       & v_u_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
             v_v_delay     := data_in.v       & v_v_delay(0 to C_PROCESSING_DELAY_CLKS - 2);
@@ -951,20 +962,29 @@ begin
             s_hsync_n_d <= v_hsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_vsync_n_d <= v_vsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_field_n_d <= v_field_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_y_d       <= v_y_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_u_d       <= v_u_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_v_d       <= v_v_delay(C_PROCESSING_DELAY_CLKS - 1);
+            s_avid_d    <= v_avid_delay(C_PROCESSING_DELAY_CLKS - 1);
+            s_y_d       <= v_y_delay(C_DRY_TAP - 1);
+            s_u_d       <= v_u_delay(C_DRY_TAP - 1);
+            s_v_d       <= v_v_delay(C_DRY_TAP - 1);
         end if;
     end process;
 
     -- ========================================================================
     -- Output Assignment
     -- ========================================================================
-    data_out.y <= std_logic_vector(s_mix_y_result);
-    data_out.u <= std_logic_vector(s_mix_u_result);
-    data_out.v <= std_logic_vector(s_mix_v_result);
+    -- Gate to studio blanking outside the (delay-matched) input AVID:
+    -- the mix interpolators free-run during blanking and would emit
+    -- video-level junk into H/V blank otherwise. AVID itself comes from
+    -- the same delay chain as H/V so all output timing is co-phased
+    -- with the data-through-mix path.
+    data_out.y <= std_logic_vector(s_mix_y_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(64, C_VIDEO_DATA_WIDTH));
+    data_out.u <= std_logic_vector(s_mix_u_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, C_VIDEO_DATA_WIDTH));
+    data_out.v <= std_logic_vector(s_mix_v_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, C_VIDEO_DATA_WIDTH));
 
-    data_out.avid    <= s_mix_y_valid and s_mix_u_valid and s_mix_v_valid;
+    data_out.avid    <= s_avid_d;
     data_out.hsync_n <= s_hsync_n_d;
     data_out.vsync_n <= s_vsync_n_d;
     data_out.field_n <= s_field_n_d;

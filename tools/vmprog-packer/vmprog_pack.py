@@ -62,7 +62,7 @@ VMPROG_MAGIC = 0x47504D56  # 'VMPG'
 
 # Version
 VERSION_MAJOR = 1
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 
 # Structure sizes
 HEADER_SIZE = 64
@@ -480,8 +480,9 @@ def build_vmprog_package(input_dir: Path, output_path: Path, sign: bool = True, 
         will_sign = private_key is not None and public_key is not None
 
         if not will_sign:
-            print("WARNING: Signing requested but keys could not be loaded")
-            print("Package will be created without signature")
+            print("ERROR: Signing requested but Ed25519 keys could not be loaded", file=sys.stderr)
+            print("Use --no-sign only for local development builds.", file=sys.stderr)
+            return False
 
     # Build TOC entries and payloads
     toc_entries: List[TOCEntry] = []

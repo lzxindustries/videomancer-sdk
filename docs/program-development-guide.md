@@ -85,6 +85,10 @@ Break your processing into stages:
 - Each stage adds 1+ clock cycles of latency
 - Sync signals must be delayed to match video data path
 - Balance latency vs. resource usage
+- **`C_PROCESSING_DELAY_CLKS`** must equal the **total** `program_top` latency from
+  `data_in` to `data_out`, including IO-align register stages. This value is packed
+  into vmprog as `processing_delay_clks` and drives Sync Out phase advance (SPI 0x09).
+  It must be **divisible by 4** (pad with extra IO-align stages when needed).
 
 ### Step 3: Create the TOML Configuration
 

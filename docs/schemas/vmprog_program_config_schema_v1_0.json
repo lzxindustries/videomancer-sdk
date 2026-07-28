@@ -243,11 +243,15 @@
           "description": "Core architecture identifier",
           "enum": [
             "yuv444_30b",
-            "yuv422_20b"
+            "yuv422_20b",
+            "gbr444_30b",
+            "gbr422_20b"
           ],
           "examples": [
             "yuv444_30b",
-            "yuv422_20b"
+            "yuv422_20b",
+            "gbr444_30b",
+            "gbr422_20b"
           ]
         },
         "supported_timings": {

@@ -32,6 +32,10 @@
 --   8. counter_survives_full_line
 --   9. config_pipeline_latency
 --  10. multiple_fsync_resets
+--  11. freerun_no_fsync_snap
+--  12. phase_advance_shifts_hsync
+--  13. phase_advance_1080i5994_eq
+--  14. phase_advance_line_wrap_keeps_vsync
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -60,6 +64,12 @@ architecture tb of tb_video_sync_gen is
   signal trisync_n   : std_logic;
   signal hsync       : std_logic;
   signal vsync       : std_logic;
+  signal hsync_freerun : std_logic;
+  signal hsync_phase   : std_logic;
+  signal vsync_phase   : std_logic;
+  signal trisync_p_phase : std_logic;
+  signal trisync_n_phase : std_logic;
+  signal phase_advance : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0) := (others => '0');
   signal test_done   : std_logic := '0';
 
   -- 480P known values
@@ -91,6 +101,40 @@ begin
       trisync_n   => trisync_n,
       hsync       => hsync,
       vsync       => vsync
+    );
+
+  dut_freerun : entity rtl_lib.video_sync_generator
+    generic map (
+      G_LOCK_TO_REF => false
+    )
+    port map (
+      clk         => clk,
+      ref_hsync   => ref_hsync,
+      ref_vsync   => ref_vsync,
+      ref_field_n => ref_field_n,
+      timing      => timing,
+      trisync_p   => open,
+      trisync_n   => open,
+      hsync       => hsync_freerun,
+      vsync       => open
+    );
+
+  dut_phase : entity rtl_lib.video_sync_generator
+    generic map (
+      G_LOCK_TO_REF   => true,
+      G_PHASE_ADVANCE => true
+    )
+    port map (
+      clk                => clk,
+      ref_hsync          => ref_hsync,
+      ref_vsync          => ref_vsync,
+      ref_field_n        => ref_field_n,
+      timing             => timing,
+      phase_advance_clks => phase_advance,
+      trisync_p          => trisync_p_phase,
+      trisync_n          => trisync_n_phase,
+      hsync              => hsync_phase,
+      vsync              => vsync_phase
     );
 
   main : process
@@ -130,6 +174,12 @@ begin
 
     variable v_hsync_high_count : integer;
     variable v_hsync_before     : std_logic;
+    variable v_base_low_clks    : integer;
+    variable v_phase_low_clks   : integer;
+    variable v_hsync_prev       : std_logic;
+    variable v_found_first_edge : boolean;
+    variable v_trisync_prev     : std_logic;
+    variable v_trisync_edges    : integer;
 
   begin
     test_runner_setup(runner, runner_cfg);
@@ -137,10 +187,11 @@ begin
     while test_suite loop
 
       -- Reset to known state
-      timing      <= C_480P;
-      ref_vsync   <= '1';
-      ref_field_n <= '1';
-      ref_hsync   <= '1';
+      timing        <= C_480P;
+      ref_vsync     <= '1';
+      ref_field_n   <= '1';
+      ref_hsync     <= '1';
+      phase_advance <= (others => '0');
       settle_config;
 
       -- ====================================================================
@@ -283,6 +334,119 @@ begin
         advance_clks(C_480P_CPL / 2);
         trigger_vsync_fsync;
         check_equal(hsync, '1', "hsync after third fsync mid-line");
+
+      -- ====================================================================
+      elsif run("freerun_no_fsync_snap") then
+      -- ====================================================================
+        -- Mid-line ref_vsync must snap the locked DUT but not the free-run
+        -- instance (standalone / G_LOCK_TO_REF=false).
+        advance_clks(C_480P_CPL / 2);
+        check_equal(hsync_freerun, '0', "freerun mid-line before fsync");
+        trigger_vsync_fsync;
+        check_equal(hsync, '1', "locked DUT snaps to fsync seed");
+        check_equal(hsync_freerun, '0', "freerun DUT ignores ref_vsync snap");
+
+      -- ====================================================================
+      elsif run("phase_advance_shifts_hsync") then
+      -- ====================================================================
+        phase_advance <= to_unsigned(10, phase_advance'length);
+        trigger_vsync_fsync;
+        settle_config;
+
+        v_hsync_prev       := hsync;
+        v_base_low_clks    := 0;
+        v_found_first_edge := false;
+        for i in 1 to 2 * C_480P_CPL loop
+          wait until rising_edge(clk);
+          wait for 1 ns;
+          v_base_low_clks := v_base_low_clks + 1;
+          if hsync = '1' and v_hsync_prev = '0' then
+            v_found_first_edge := true;
+            exit;
+          end if;
+          v_hsync_prev := hsync;
+        end loop;
+        check(v_found_first_edge, "baseline hsync rising edge should occur after fsync");
+
+        trigger_vsync_fsync;
+        settle_config;
+
+        v_hsync_prev       := hsync_phase;
+        v_phase_low_clks   := 0;
+        v_found_first_edge := false;
+        for i in 1 to 2 * C_480P_CPL loop
+          wait until rising_edge(clk);
+          wait for 1 ns;
+          v_phase_low_clks := v_phase_low_clks + 1;
+          if hsync_phase = '1' and v_hsync_prev = '0' then
+            v_found_first_edge := true;
+            exit;
+          end if;
+          v_hsync_prev := hsync_phase;
+        end loop;
+        check(v_found_first_edge, "advanced hsync rising edge should occur after fsync");
+
+        -- Positive phase offsets DELAY the waveform so the jack tracks
+        -- the processed-video pipeline (VMT-F004).
+        if v_phase_low_clks >= v_base_low_clks then
+          check_equal(v_phase_low_clks - v_base_low_clks, 10,
+                      "phase offset trails baseline hsync rising edge");
+        else
+          check_equal(v_phase_low_clks + C_480P_CPL - v_base_low_clks, 10,
+                      "phase offset trails baseline hsync rising edge (wrap)");
+        end if;
+
+      -- ====================================================================
+      elsif run("phase_advance_1080i5994_eq") then
+      -- ====================================================================
+        timing <= C_1080I5994;
+        phase_advance <= to_unsigned(22, phase_advance'length);
+        settle_config;
+
+        ref_field_n <= '1';
+        wait until rising_edge(clk);
+        ref_field_n <= '0';
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        settle_config;
+
+        v_trisync_prev  := trisync_p_phase;
+        v_trisync_edges := 0;
+        for i in 1 to 4 * 2200 loop
+          wait until rising_edge(clk);
+          wait for 1 ns;
+          if trisync_p_phase /= v_trisync_prev then
+            v_trisync_edges := v_trisync_edges + 1;
+          end if;
+          v_trisync_prev := trisync_p_phase;
+        end loop;
+        check(v_trisync_edges >= 1,
+              "1080i5994 eq/tri path should toggle trisync_p under phase advance");
+
+      -- ====================================================================
+      elsif run("phase_advance_line_wrap_keeps_vsync") then
+      -- ====================================================================
+      -- With phase advance near clocks_per_line, v_eff_clks wraps while
+      -- s_counter_lines has not yet incremented. v_eff_lines must advance
+      -- with the wrap so line-gated vsync edges still fire (Fix C).
+        timing <= C_480P;
+        -- Advance by CPL-5 so wrap window is early in each free-run line.
+        phase_advance <= to_unsigned(C_480P_CPL - 5, phase_advance'length);
+        settle_config;
+        trigger_vsync_fsync;
+        settle_config;
+
+        v_found_first_edge := false;
+        for i in 1 to (C_480P_LPF + 10) * C_480P_CPL loop
+          wait until rising_edge(clk);
+          wait for 1 ns;
+          if vsync_phase = '1' then
+            v_found_first_edge := true;
+            exit;
+          end if;
+        end loop;
+        check(v_found_first_edge,
+              "vsync must assert under large phase advance (v_eff_lines wrap)");
 
       end if;
     end loop;

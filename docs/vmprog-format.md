@@ -136,6 +136,8 @@ Identifies the core architecture that the program is designed for:
 | 0 | `none` | No core specified (invalid) |
 | 1 | `yuv444_30b` | YUV 4:4:4 30-bit core |
 | 2 | `yuv422_20b` | YUV 4:2:2 20-bit core |
+| 3 | `gbr444_30b` | GBR 4:4:4 30-bit core (G/B/R parallels Y/U/V) |
+| 4 | `gbr422_20b` | GBR 4:2:2 20-bit core (G on Y bus, B/R on C) |
 
 ---
 

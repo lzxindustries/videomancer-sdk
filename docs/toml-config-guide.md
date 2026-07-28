@@ -11,7 +11,7 @@ program_name = "My Program"
 program_version = "1.0.0"
 abi_version = ">=1.0,<2.0"
 hardware_compatibility = ["rev_b"]
-core = "yuv444_30b"           # Optional, default yuv444_30b
+core = "yuv444_30b"           # Optional: yuv444_30b | yuv422_20b | gbr444_30b | gbr422_20b
 author = "Your Name"           # Optional
 license = "GPL-3.0"            # Optional
 categories = ["Color"]          # Optional — see program-categories.md
@@ -45,7 +45,7 @@ initial_value_label = "Off"
 - `program_type` - `"processing"` (transforms input video) or `"synthesis"` (generates output without input)
 
 **Optional:**
-- `core` - Core architecture: "yuv444_30b" (default) or "yuv422_20b"
+- `core` - Core architecture: `"yuv444_30b"` (default), `"yuv422_20b"`, `"gbr444_30b"`, or `"gbr422_20b"`
 - `author`, `license` (max 31-63 chars)
 - `categories` - Array of up to 8 [predefined categories](program-categories.md) (max 31 chars each)
 - `description`, `url` (max 127 chars)

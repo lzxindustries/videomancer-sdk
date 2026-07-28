@@ -79,7 +79,14 @@ use work.video_timing_pkg.all;
 use work.clamp_pkg.all;
 architecture sabattier of program_top is
 
-    constant C_PROCESSING_DELAY_CLKS : integer := 16;
+    -- Total data latency incl. the 4-clk mix interpolators (and %4
+    -- padding): sync/AVID tap the full depth, dry data taps 4 short so
+    -- data-through-mix and sync reach data_out co-timed (was 16 with
+    -- sync tapped at the same depth as dry data - video trailed the
+    -- program's own sync by the mix latency).
+    constant C_MIX_LATENCY_CLKS : integer := 4;
+    constant C_PROCESSING_DELAY_CLKS : integer := 20;
+    constant C_DRY_TAP : integer := C_PROCESSING_DELAY_CLKS - C_MIX_LATENCY_CLKS;
 
     -- ========================================================================
     -- Parameter signals
@@ -602,18 +609,24 @@ begin
             s_hsync_n_d <= v_hsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_vsync_n_d <= v_vsync_delay(C_PROCESSING_DELAY_CLKS - 1);
             s_field_n_d <= v_field_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_y_d       <= v_y_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_u_d       <= v_u_delay(C_PROCESSING_DELAY_CLKS - 1);
-            s_v_d       <= v_v_delay(C_PROCESSING_DELAY_CLKS - 1);
+            s_y_d       <= v_y_delay(C_DRY_TAP - 1);
+            s_u_d       <= v_u_delay(C_DRY_TAP - 1);
+            s_v_d       <= v_v_delay(C_DRY_TAP - 1);
         end if;
     end process;
 
     -- ========================================================================
     -- Output Assignment
     -- ========================================================================
-    data_out.y <= std_logic_vector(s_mix_y_result);
-    data_out.u <= std_logic_vector(s_mix_u_result);
-    data_out.v <= std_logic_vector(s_mix_v_result);
+    -- Gate to studio blanking outside AVID: the mix free-runs during
+    -- blanking and parameter extremes must never leak video-level
+    -- content into H/V blank.
+    data_out.y <= std_logic_vector(s_mix_y_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(64, s_mix_y_result'length));
+    data_out.u <= std_logic_vector(s_mix_u_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, s_mix_u_result'length));
+    data_out.v <= std_logic_vector(s_mix_v_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, s_mix_v_result'length));
 
     data_out.avid    <= s_avid_d;
     data_out.hsync_n <= s_hsync_n_d;

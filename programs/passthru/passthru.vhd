@@ -1,6 +1,6 @@
 -- Videomancer SDK - Open source FPGA-based video effects development kit
 -- Copyright (C) 2025 LZX Industries LLC
--- File: passthru.vhd - Simple passthrough program for Videomancer
+-- File: passthru.vhd - YUV444 passthrough (legacy alias of passthru_yuv)
 -- License: GNU General Public License v3.0
 -- https://github.com/lzxindustries/videomancer-sdk
 --

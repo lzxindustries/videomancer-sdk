@@ -5,6 +5,242 @@ All notable changes to the Videomancer SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **video_sync_generator simulation initialization** — the ~45
+  per-format threshold/table signals (and `s_timing`) had no initial
+  values; until the first timing-change event they carried 'U', and the
+  generator's per-clock compares flooded ~8 metavalue warnings per
+  clock (~450k per 3 simulated frames). All now zero-initialize —
+  synthesis-neutral (iCE40 GSR) — and the vmtest x-prop audit tier
+  (IEEE asserts enabled, zero-warnings contract after a 10 us settle
+  grace) holds the whole tree at zero across every config and core.
+
+- **Sync Out processing-delay compensation direction (VMT-F004)** — the
+  phase register (0x09) was applied as a true phase ADVANCE, moving the
+  jack waveform earlier while the processed video it must track emerges
+  later: jack sync led jack video by 2x (prog_delay + core_post),
+  growing with program pipeline depth (+38 clk with howler, +54 with
+  kintsugi vs the passthru baseline; clock-exact across timings). The
+  generator now applies the register as a delay (subtract-with-borrow
+  mirroring the rc.37 Fix C wrap), the port keeps its ABI name, and the
+  firmware formula is unchanged. Validated in simulation: jack phase is
+  bit-identical across passthru/howler/kintsugi in both output-sync
+  domains, and the register sweep moves the waveform linearly in the
+  tracking direction. Bench note: absolute jack phase moves by
+  2x the passthru advance (10 clk yuv cores, 2 clk gbr422) vs prior
+  builds — re-verify sync-out alignment at next bench session.
+- **mycelium output timing, blanking, and range bug** — same co-timing
+  class as the kintsugi fix (sync chain missing the 4-clk mix latency:
+  video +4 px vs its own sync; AVID from mix-valid; video-level junk in
+  blanking) plus a sim-fatal bound-check overflow in the diffusion-shift
+  decode (pre-clamp intermediate exceeded `integer range 2 to 9` at low
+  Diffusion with Spots). Sync/field/AVID now share one delay chain with
+  the dry tap mix-latency short, outputs gate to studio blanking
+  outside AVID, and `C_PROCESSING_DELAY_CLKS` declares the true total
+  (36, %4-conformant). Dry-path fiducial offsets now match passthru
+  exactly.
+- **video_line_buffer simulation initialization** — the dual-bank RAMs
+  had no initial value; before the first written line, simulation read
+  'U', which poisons downstream arithmetic ('U' * 0 = 'U') — mycelium's
+  entire output (including the dry mix leg) decoded as black. Both
+  banks now zero-initialize, matching iCE40 EBR power-up.
+
+- **kintsugi output timing and blanking** — three co-timing defects found
+  by the vmtest processing-delay validation: (1) the dry video path runs
+  through the mix interpolators (4-clk pipeline) but H/V/field bypassed
+  them, so video trailed the program's own delayed sync by 4 px;
+  (2) `data_out.avid` came from the mix valid chain instead of the input
+  AVID delay-matched to H/V; (3) the mix interpolators free-run during
+  blanking, emitting video-level junk (~Y=177 every 4th clock) across
+  H-blank and VBI — which also skewed frame reconstruction by a line.
+  The sync/field/AVID delay chain now includes the mix latency
+  (`C_MIX_LATENCY_CLKS`), the dry tap is shortened to compensate, output
+  data is gated to studio blanking outside AVID, and
+  `C_PROCESSING_DELAY_CLKS` now declares the true total latency
+  (28 = 24 + crack centering), which also corrects the Sync Out phase
+  advance the firmware derives from it. Verified: fiducial offsets and
+  blanking now match the passthru baseline exactly in simulation.
+
+- **gbr444 HDMI-input B/R pairing (VMT-F001)** — the DE-phased B/R input mux
+  led the downstream 422 phase logic's pair grid by one sample (the grid drops
+  the first sample after AVID rise and pairs from the second), producing an
+  exact R<->B swap on every HDMI-input `gbr444_30b` bitstream regardless of the
+  receiver's DE-to-data phase. The mux phase now advances off a registered DE
+  so the B slot lands on the converter's first-of-pair sample. Found and
+  verified by the vmtest simulation matrix (all 8 configs x 15 timings green
+  under emulated ADV7611 streams at both DE phases); `gbr422_20b` uses a
+  self-consistent mux/demux grid and is intentionally unchanged. Hardware
+  confirmation on an HDMI-input `passthru_rgb` loop should gate release.
+
+### Added
+
+- **`gbr422_20b` core** — GBR 4:2:2 program interface (`core_id` = 4);
+  pad protocol G on Y bus / B/R on C; `passthru_gbr422` example.
+- **Passthru split** — `passthru_yuv` (yuv444) and `passthru_rgb` (gbr444).
+- **Embedded `passthru_rgb`** — `videomancer_passthru_rgb_vmprog` (`gbr444_30b`)
+  packed into firmware alongside YUV `passthru.vmprog`.
+
+- **Analog Out — YYY** — triple luma on all three DAC channels with sync on
+  every output (ADV7393 manual CSC: R=G=B=Y, `sync_on_rgb`).
+- **Analog In — YPbPr 1V** — component sampling on the 1V DC jacks (same AFE
+  as RGB 1V, identity CSC / no RGB matrix).
+- **Analog In — YYY 1V** — triple luma on the 1V DC jacks; ADV7181C CSC mixes
+  channels with BT.601 luma weights into Y and forces neutral Cb/Cr.
+- **`gbr444_30b` program core** — RGB ABI (`vmprog_core_id` = 3), HDMI RGB444
+  IO policy (ADV7611/7513), example `passthru_rgb`. Analog in uses ADV7181C
+  12-bit DDR RGB + FPGA soft-IDDR (`adv7181c_rgb_ddr_to_gbr444`); analog out
+  stays GBR422 on Y/C into ADV7393 YCbCr digital (HD has no RGB digital in).
+- **HDMI RGB888 pack (gbr444)** — TX packed from GBR444 blanking (full G/B/R),
+  not from the post-422 bus (which duplicated C onto R and B).
+- **HDMI RGB888 demux (gbr422)** — TX via `gbr422_20b_to_gbr444_30b` (proper
+  B/R from consecutive C samples); encoder remains native GBR422.
+- **Dual HDMI→encoder (gbr\*)** — C bus alternates B/R with DE phase (was B-only).
+- **ADV7181C DDR policy** — `ivideo_decoder::set_rgb_ddr_output` from GBR
+  `core_id`; identity CSC for RGB/YYY, YPbPr→RGB CSC for component.
+- **Analog Out — SOG** — true sync-on-green-only (`r_gs_b`); **RGsB** remains
+  sync on all three channels.
+- **SYSTEM — Test Pattern** — ADV7393 bars/hatch toggle.
+- **SYSTEM — Out Level** — Studio (EIA-770) vs Full-range ED/HD DAC levels.
+- Dual/Standalone Analog In override annotations in SYSTEM menu and status.
+
+### Changed
+
+- **Analog Out label** — former **RGB** option renamed **RGsB** (behavior
+  unchanged: RGB colorspace with sync on all channels).
+- Firmware applies IO pixel format from loaded program `core_id` on
+  `evt_fpga_program_loaded`.
+- **Sync Out documentation** — ABI clarifies that SPI reg 0x09 *advances*
+  Sync Out vs program input so the jack pre-compensates pipeline latency to
+  processed video H; program video ports keep H/V on the delayed pixel pipeline.
+
+### Fixed
+
+- **Sync Out phase-advance line wrap (Fix C)** — when `phase_advance_clks`
+  wraps `v_eff_clks` across a line boundary, line-gated compares
+  (`eq_pulses`, `vsync_a/b`, AVID-V) now use `v_eff_lines` (counter lines + 1
+  mod frame) so interlaced eq/VBI stay coupled to the advanced horizontal
+  phase. Completes the rc.35 eq/VBI clk unification; addresses residual 1080i
+  Sync Out strobing under external ramp extraction.
+- **SPI reg 0x09 latch** — `sync_phase_advance_clks` latches on the same HSYNC
+  edge as `video_timing_id` into a core-only register (programs still see
+  only 0x00–0x08).
+- **HDMI sync↔pixel co-timing** — `gbr444` HDMI RGB align pipe is +3 (matches
+  444→422 *data* latency); `yuv444` / `gbr422` HDMI H/V delayed 1 clk so TX
+  sync matches post-converter pixel data (encoder HSYNC may still lead data
+  by 1 clk by ADV7393 design).
+- **ADV7181C CP `csc_22` clobber** — removed raw IO-map `0x67=0x13` after CSC
+  setup (that register is decimation/soft-filter, not clamp speed). DDR RGB
+  now keeps 444 filter; YUV restores 422+soft via typed fields.
+- **ADV7181C SD YPbPr lock (rc.37 follow-up)** — restore clamp average
+  `none` (pre-rc.37 `0xC5=0x01` behavior; `average_1_8` slowed SOG recovery);
+  apply `cp_update` only on timing *change* (was ~100 Hz double-write);
+  STDI prefers LCF field counts over a flaky interlaced flag so NTSC/PAL is
+  not misclassified as 480p/576p (double-wide frames / TV invalid format).
+- **Datasheet Table refs** — DDR packing is Rev. E **Table 10** (Table 9 is
+  ADC mux); ADV7393 CSC layout comment points at 0x03–0x09 / Table 48.
+
+## [1.0.0-rc.35] - 2026-07-22
+
+### Fixed
+
+- **Sync Out eq/VBI phase advance (Fix B)** — all horizontal sync edge compares
+  now use `v_eff_clks` (counter + phase advance modulo line length) uniformly
+  for `hsync`, `hsync_2x`, `csync`, `csync_2x`, `eq_pulses`, `csync_serration`,
+  and vsync clk events. Fixes interlaced tri-level mux misalignment that caused
+  1080i Sync Out strobing on external ramp sync extraction.
+
+### Added
+
+- **VUnit phase-advance suite** — 15 format `_phase` configs plus
+  `1080i5994_phase22`; tests for hsync edge lead, line period, and eq trisync under advance.
+
+## [1.0.0-rc.34] - 2026-07-22
+
+### Fixed
+
+- **Processing-delay chroma inversion** — `processing_delay_clks` now reflects
+  true `program_top` boundary latency (including IO-align). Packer validates
+  ÷4 alignment; embedded programs with under-counted or odd delays corrected;
+  Sync Out phase advance matches processed video H/chroma.
+
+### Changed
+
+- **Delay resolver** — `toml_to_config_binary.py` infers total I/O latency from
+  VHDL constants, IO-align stage chains, and dry/sync pipe patterns.
+- **Documentation** — `abi-format.md` and program development guide define
+  `C_PROCESSING_DELAY_CLKS` as full boundary delay.
+
+## [1.0.0-rc.33] - 2026-07-21
+
+### Added
+
+- **vmprog format 1.1** — `processing_delay_clks` field in program config for
+  per-program pipeline delay metadata used by sync phase compensation.
+- **SPI register 0x09** — `sync_phase_advance_clks` (core-only): horizontal
+  phase advance in `vid_clk` pixels, written at program load.
+- **`video_sync_generator` phase advance** — `G_PHASE_ADVANCE` generic and
+  `phase_advance_clks` port advance horizontal sync/AVID comparisons (modulo
+  line length) so sync output leads program input by pipeline latency.
+  Horizontal pulse registers use level windows for `s_hsync` / `s_csync`
+  when phase advance is enabled; `hsync_2x` / `csync_2x` stay edge-driven.
+
+- **Standalone RGB 1V input sampling** — `sd_standalone` / `hd_standalone` bitstreams
+  reconnect the ADV7181C 20-bit Y/C datapath and HS/VS/DE into the pipeline.
+  Firmware enables RGB 1V AFE with frozen midpoint clamp while keeping manual
+  CP-PLL master-clock programming (`force_master_pll`). Incoming voltages are
+  assumed synchronous with the programmed timing; no FPGA → decoder external
+  sync feedback.
+
+### Changed
+
+- **Sync output (all routing modes)** — unified program-input sync path in
+  `core_top.vhd` (yuv422_20b and yuv444_30b): sync generator locks to
+  `s_program_in` on `vid_clk` with `G_LOCK_TO_REF` and applies SPI reg 0x09
+  phase advance (`processing_delay_clks` + core post-delay). Replaces
+  per-mode routing (HDMI RX domain in Dual, free-run standalone, program-
+  output lock in HDMI/Analog).
+
+- **SPI shadow RAM latch (all bitstreams)** — `core_top.vhd` (yuv422_20b and
+  yuv444_30b) latches MCU SPI register writes into program-visible shadow RAM
+  on every HSYNC falling edge for **all** bitstream variants, including
+  standalone. Standalone previously latched on VSYNC (field rate), which
+  blocked per-line CV/Audio modulation from reaching FPGA programs. Input-
+  routing bitstreams (`sd/hd_{analog,hdmi,dual}`) were already HSYNC-latched
+  since SDK 0.5.1.
+
+### Fixed
+
+- **Sync output vs processed video alignment** — external sync jack pre-compensates
+  for program-specific pipeline delay so sync out aligns with processed video
+  on HDMI TX / analog enc across Analog, HDMI, Dual, and Standalone modes.
+- **SD standalone 480p/576p vid_clk** — mux selects 27 MHz PLL output for ED
+  progressive timings instead of always using 13.5 MHz.
+
+## [0.5.1] - 2026-06-20
+
+### Fixed
+
+- **rc.26 regression — original 6 bitstream sync architecture restored**
+  - Input-routing bitstreams (`sd/hd_{analog,hdmi,dual}`) again gate the video
+    pipeline with external HSYNC/VSYNC/DE from the ADV7611 or ADV7181C, matching
+    SDK 0.5.0 / firmware rc.25 behavior.
+  - Sync generator reference for non-dual input modes restored to program output
+    timing (`s_video_out`), not external input pins.
+  - Shadow SPI register latch restored to HSYNC falling edge for input-routing
+    modes (VSYNC latch retained for standalone only).
+  - HD clock decimation path and `C_HD_CLOCK_DIVISOR` restored in `core_config`
+    packages for community builds using divisor 2/4.
+- **Standalone bitstreams unchanged** — `sd_standalone` / `hd_standalone` retain
+  internal sync generator gating, ADV7181C LLC clock tree, and free-run sync ref.
+
+### Changed
+
+- `core_top.vhd` (yuv444_30b and yuv422_20b): sync/FPGA interaction is now
+  bifurcated on `C_ENABLE_STANDALONE` instead of applied globally.
+
 ## [0.5.0] - 2026-04-08
 
 ### Added

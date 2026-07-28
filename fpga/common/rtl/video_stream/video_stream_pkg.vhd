@@ -48,4 +48,27 @@ package video_stream_pkg is
     field_n : std_logic;
   end record;
 
+  -- GBR 4:4:4 30-bit (field order parallels YUV: G~Y, B~U, R~V).
+  -- 10-bit lanes; 8 bpc sources use MSBs. Physical HDMI wires remain R/G/B.
+  type t_video_stream_gbr444_30b is record
+    g       : std_logic_vector(9 downto 0);
+    b       : std_logic_vector(9 downto 0);
+    r       : std_logic_vector(9 downto 0);
+    avid    : std_logic;
+    hsync_n : std_logic;
+    vsync_n : std_logic;
+    field_n : std_logic;
+  end record;
+
+  -- GBR 4:2:2 20-bit (field order parallels YUV: G~Y, C~interleaved B/R).
+  -- Pad map: Y bus = G, C bus = B/R (same wire protocol as YUV422).
+  type t_video_stream_gbr422_20b is record
+    g       : std_logic_vector(9 downto 0);
+    c       : std_logic_vector(9 downto 0);
+    avid    : std_logic;
+    hsync_n : std_logic;
+    vsync_n : std_logic;
+    field_n : std_logic;
+  end record;
+
 end package video_stream_pkg;

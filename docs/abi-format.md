@@ -68,7 +68,9 @@ MOSI ────────┤ 0 │A4 │A3 │A2 │A1 │A0 │D9 │D8 │
 | 0x07 | [9:0] | `linear_potentiometer_12` | W | Linear potentiometer 12 value (0-1023) |
 | 0x08 | [3:0] | `video_timing_id` | W | Video timing mode identifier (0-15) |
 | 0x08 | [9:4] | - | Reserved | Reserved for future use |
-| 0x09-0x1F | - | - | Reserved | Reserved for future expansion |
+| 0x09 | [9:0] | `sync_phase_advance_clks` | W | Core-only: Sync Out horizontal phase advance in `vid_clk` pixels (`processing_delay_clks` + core post-delay). Latched on the same HSYNC edge as `video_timing_id` into a core-only register (not program-visible). |
+| 0x09 | [15:10] | - | Reserved | Reserved (write as 0; SPI frame uses bits 9-0 only) |
+| 0x0A-0x1F | - | - | Reserved | Reserved for future expansion |
 
 ### Register Details
 
@@ -81,6 +83,12 @@ MOSI ────────┤ 0 │A4 │A3 │A2 │A1 │A0 │D9 │D8 │
 **Resolution:** 10 bits (~0.1% per step)
 
 Potentiometer values are read from ADC inputs and transmitted to the FPGA for real-time video parameter control. The FPGA program is responsible for scaling and mapping these values to meaningful video processing parameters.
+
+**Shadow RAM latch:** The MCU writes the live SPI RAM (`s_spi_ram`); programs read
+the shadow copy (`s_spi_ram_d`, registers 0x00–0x08). On each **HSYNC falling edge**
+of the program video input the core latches 0x00–0x08 into program shadow RAM and
+latches 0x09 into a core-only phase-advance register used by `video_sync_generator`.
+Line-rate snapshot of 0x00–0x07 is required for firmware per-line modulation.
 
 #### Switch Register (0x06)
 
@@ -145,6 +153,32 @@ configs so that programs always see one pixel per clock.
 | 0x06 | `toggle_switch_7-11` | Bits [4:0], 0=OFF 1=ON |
 | 0x07 | `linear_potentiometer_12` | 10-bit value (0-1023) |
 | 0x08 | `video_timing_id` | Bits [3:0], timing mode 0-15 |
+| 0x09 | `sync_phase_advance_clks` | Bits [9:0], pipeline phase advance (core-only) |
+
+### Processing delay metadata (vmprog 1.1)
+
+`processing_delay_clks` in the program config is the **true `program_top` input→output
+latency in `vid_clk` pixels**, including any IO-align register stages at the
+program boundary. Firmware writes SPI register 0x09 as
+`processing_delay_clks + core_post_delay`, clamped to 1023:
+- **yuv444_30b / gbr444_30b:** `core_post_delay` = 4 (blanking 2 + 444→422 sync 2)
+- **yuv422_20b / gbr422_20b:** `core_post_delay` = 0
+
+**Sync Out semantics:** Register 0x09 *advances* Sync Out relative to program
+**input** by that many `vid_clk` pixels so the external jack pre-compensates the
+pipeline and coincides with processed-video H at the encoder / HDMI pins (under
+the calibrated per-format `fsync` seeds). Program video ports (analog H/V, SOG,
+HDMI TX) keep sync on the **same delayed pipeline** as their pixels — they do
+not use the Sync Out generator.
+
+**Alignment rule:** `processing_delay_clks` must be **even** (minimum) and should be
+**divisible by 4**. Odd totals invert Cb/Cr relative to Sync Out / ADV7393 HSYNC
+phase; totals not divisible by 4 break the house IO-align convention used across
+embedded programs.
+
+Declare the same value as `C_PROCESSING_DELAY_CLKS` in VHDL (or set
+`processing_delay_clks` explicitly in TOML). Do not report pre-IO-align sync pipe
+depth only — that under-counts and misaligns Sync Out after rc.33.
 
 Video timing modes are enumerated in the [Video Timing ID table](#video-timing-id-0x08) above.
 Constants defined in `fpga/common/rtl/video_timing/video_timing_pkg.vhd` and

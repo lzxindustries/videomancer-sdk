@@ -260,20 +260,21 @@ fi
 # Check for OSS CAD Suite
 if [ ! -d "build/oss-cad-suite" ]; then
     echo -e "${RED}ERROR: OSS CAD Suite not found!${NC}"
-    echo -e "${RED}Please run ./setup.sh first to install the FPGA toolchain.${NC}"
+    echo -e "${RED}Please run bash scripts/setup.sh first to install the FPGA toolchain.${NC}"
+    echo -e "${RED}Monorepo: lzx cad.firmware.toolchain.init${NC}"
     exit 1
 fi
 
 # Validate OSS CAD Suite installation
 if [ ! -f "build/oss-cad-suite/environment" ]; then
     echo -e "${RED}ERROR: OSS CAD Suite installation is incomplete or corrupted!${NC}"
-    echo -e "${RED}Missing environment setup script. Please run ./setup.sh again.${NC}"
+    echo -e "${RED}Missing environment setup script. Please run bash scripts/setup.sh again.${NC}"
     exit 1
 fi
 
 if [ ! -d "build/oss-cad-suite/bin" ]; then
     echo -e "${RED}ERROR: OSS CAD Suite binaries not found!${NC}"
-    echo -e "${RED}Installation appears incomplete. Please run ./setup.sh again.${NC}"
+    echo -e "${RED}Installation appears incomplete. Please run bash scripts/setup.sh again.${NC}"
     exit 1
 fi
 
@@ -287,12 +288,23 @@ if [ -f "${VIDEOMANCER_KEYS_DIR%/}/lzx_official_signed_descriptor_priv.bin" ] &&
         echo -e "${GREEN}✓ Ed25519 signing keys found - packages will be signed${NC}"
     else
         echo -e "${YELLOW}⚠ Ed25519 keys found but cryptography library not available${NC}"
-        echo -e "${YELLOW}  Packages will be unsigned. Install with:${NC}"
-        echo -e "${YELLOW}    sudo apt install python3-cryptography${NC}"
+        if [ "${VIDEOMANCER_ALLOW_UNSIGNED:-0}" = "1" ]; then
+            echo -e "${YELLOW}  Unsigned packages allowed (VIDEOMANCER_ALLOW_UNSIGNED=1)${NC}"
+        else
+            echo -e "${RED}  Install python3-cryptography or set VIDEOMANCER_ALLOW_UNSIGNED=1 for local dev only.${NC}"
+            exit 1
+        fi
     fi
 else
-    echo -e "${YELLOW}⚠ Ed25519 signing keys not found - packages will be unsigned${NC}"
-    echo -e "${YELLOW}  To enable signing, run: ./scripts/setup_ed25519_signing.sh${NC}"
+    if [ "${VIDEOMANCER_ALLOW_UNSIGNED:-0}" = "1" ]; then
+        echo -e "${YELLOW}⚠ Ed25519 signing keys not found - unsigned packages allowed (VIDEOMANCER_ALLOW_UNSIGNED=1)${NC}"
+    else
+        echo -e "${RED}ERROR: Ed25519 signing keys not found${NC}"
+        echo -e "${RED}  Embedded/release vmprogs must be signed.${NC}"
+        echo -e "${RED}  Run: ./scripts/setup_ed25519_signing.sh${NC}"
+        echo -e "${RED}  Or set VIDEOMANCER_ALLOW_UNSIGNED=1 for local dev only.${NC}"
+        exit 1
+    fi
 fi
 echo ""
 
@@ -313,6 +325,8 @@ FAILED_PROGRAMS=0
 
 for PROGRAM in $PROGRAMS; do
     TOTAL_PROGRAMS=$((TOTAL_PROGRAMS + 1))
+    LOGICAL="${PROGRAM%_vmprog}"
+    LOGICAL="${LOGICAL#videomancer_}"
     PROJECT_ROOT="${VIDEOMANCER_PROGRAMS_DIR}/${PROGRAM}/"
     BUILD_ROOT="${VIDEOMANCER_BUILD_DIR}/${PROGRAM}/"
     mkdir -p "${BUILD_ROOT}"
@@ -398,7 +412,7 @@ for PROGRAM in $PROGRAMS; do
         mkdir -p "${HW_BUILD_ROOT}/bitstreams"
 
         # Remove stale .vmprog so a failed build can't be masked by a previous success
-        rm -f "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog"
+        rm -f "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog"
 
         # Synthesize FPGA bitstreams (8 variants)
         echo -e "${GREEN}Synthesizing FPGA bitstreams for ${HARDWARE}...${NC}"
@@ -647,13 +661,13 @@ for PROGRAM in $PROGRAMS; do
         mkdir -p "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}"
 
         # Package into .vmprog format
-        echo -e "${GREEN}Packaging ${PROGRAM}.vmprog for ${HARDWARE}...${NC}"
+        echo -e "${GREEN}Packaging ${LOGICAL}.vmprog for ${HARDWARE}...${NC}"
         cd ${VIDEOMANCER_SDK_ROOT}/tools/vmprog-packer
 
         PACK_LOG=$(mktemp)
         if [ "$SIGN_PACKAGES" = true ]; then
             echo -e "${CYAN}  Signing package with Ed25519...${NC}"
-            if ! /usr/bin/python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+            if ! /usr/bin/python3 vmprog_pack.py --keys-dir "${VIDEOMANCER_KEYS_DIR%/}" --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog" > "$PACK_LOG" 2>&1; then
                 echo -e "${RED}Packaging failed. Error output:${NC}"
                 cat "$PACK_LOG"
                 rm -f "$PACK_LOG"
@@ -662,7 +676,14 @@ for PROGRAM in $PROGRAMS; do
                 continue 2
             fi
         else
-            if ! /usr/bin/python3 vmprog_pack.py --no-sign --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" > "$PACK_LOG" 2>&1; then
+            if [ "${VIDEOMANCER_ALLOW_UNSIGNED:-0}" != "1" ]; then
+                echo -e "${RED}Packaging requires signed packages; set VIDEOMANCER_ALLOW_UNSIGNED=1 to override for dev.${NC}"
+                rm -f "$PACK_LOG"
+                cd ../..
+                FAILED_PROGRAMS=$((FAILED_PROGRAMS + 1))
+                continue 2
+            fi
+            if ! /usr/bin/python3 vmprog_pack.py --no-sign --hardware "${HARDWARE}" --toml-path "${PROGRAM_TOML}" "${HW_BUILD_ROOT%/}" "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog" > "$PACK_LOG" 2>&1; then
                 echo -e "${RED}Packaging failed. Error output:${NC}"
                 cat "$PACK_LOG"
                 rm -f "$PACK_LOG"
@@ -676,12 +697,12 @@ for PROGRAM in $PROGRAMS; do
         cd ../..
 
         # Verify output file
-        if [ -f "${VIDEOMANCER_OUT_DIR}/${HARDWARE}/${PROGRAM}.vmprog" ]; then
-            FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog" 2>/dev/null)
+        if [ -f "${VIDEOMANCER_OUT_DIR}/${HARDWARE}/${LOGICAL}.vmprog" ]; then
+            FILESIZE=$(stat -f%z "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog" 2>/dev/null || stat -c%s "${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog" 2>/dev/null)
             if [ "$SIGN_PACKAGES" = true ]; then
-                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
+                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog (${FILESIZE} bytes, SIGNED)${NC}"
             else
-                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${PROGRAM}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
+                echo -e "${GREEN}✓ Successfully created: ${VIDEOMANCER_OUT_DIR%/}/${HARDWARE}/${LOGICAL}.vmprog (${FILESIZE} bytes, unsigned)${NC}"
             fi
         else
             echo -e "${RED}✗ Failed to create output file${NC}"

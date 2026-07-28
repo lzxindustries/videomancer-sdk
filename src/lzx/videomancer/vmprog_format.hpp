@@ -145,6 +145,8 @@ namespace lzx {
         none = 0,
         yuv444_30b = 1,
         yuv422_20b = 2,
+        gbr444_30b = 3,  ///< GBR 4:4:4 program interface (G~Y, B~U, R~V); IO CSCs own colorspace
+        gbr422_20b = 4,  ///< GBR 4:2:2 program interface (G on Y bus, B/R on C)
     };
 
     // Parameter control mode - defines how parameter values are interpreted and displayed
@@ -442,7 +444,8 @@ namespace lzx {
         vmprog_preset_config_v1_0 presets[max_presets];  // Factory preset definitions
         uint16_t supported_timings;  // Bitmask of supported video_timing_id values (0 = all)
         vmprog_program_type_v1_0 program_type;  // Processing or synthesis
-        uint8_t reserved[19];  // Padding to 7936 total
+        uint16_t processing_delay_clks;  // program_top input→output latency (incl. IO-align); must be %4==0
+        uint8_t reserved[17];  // Padding to 7936 total
     };
 
 #pragma pack(pop)
@@ -1135,7 +1138,32 @@ namespace lzx {
             return vmprog_validation_result::invalid_enum_value;
         }
 
-        // Verify reserved fields are zeroed
+        // Pipeline delay must fit SPI reg 0x09 (10-bit) and preserve YUV422 Cb/Cr phase.
+        // synthesis: 0; passthru: 1; processing: even and divisible by 4.
+        if (config.processing_delay_clks > 1023u) {
+            return vmprog_validation_result::invalid_enum_value;
+        }
+        if (config.program_type == vmprog_program_type_v1_0::synthesis) {
+            if (config.processing_delay_clks != 0u &&
+                ((config.processing_delay_clks % 2u) != 0u ||
+                 (config.processing_delay_clks % 4u) != 0u)) {
+                return vmprog_validation_result::invalid_enum_value;
+            }
+        } else {
+            const bool is_passthru =
+                (std::strncmp(config.program_id, "passthru", 8) == 0) ||
+                (std::strstr(config.program_id, ".passthru") != nullptr);
+            if (is_passthru) {
+                if (config.processing_delay_clks != 1u) {
+                    return vmprog_validation_result::invalid_enum_value;
+                }
+            } else if ((config.processing_delay_clks % 2u) != 0u ||
+                       (config.processing_delay_clks % 4u) != 0u) {
+                return vmprog_validation_result::invalid_enum_value;
+            }
+        }
+
+        // Verify reserved padding is zeroed
         for (size_t i = 0; i < sizeof(config.reserved); ++i) {
             if (config.reserved[i] != 0) {
                 return vmprog_validation_result::reserved_field_not_zero;
@@ -1499,6 +1527,8 @@ namespace lzx {
             case vmprog_core_id_v1_0::none: return "none";
             case vmprog_core_id_v1_0::yuv444_30b: return "yuv444_30b";
             case vmprog_core_id_v1_0::yuv422_20b: return "yuv422_20b";
+            case vmprog_core_id_v1_0::gbr444_30b: return "gbr444_30b";
+            case vmprog_core_id_v1_0::gbr422_20b: return "gbr422_20b";
             default: return "unknown";
         }
     }

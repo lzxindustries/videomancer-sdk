@@ -1,18 +1,18 @@
 # Copyright (C) 2025 LZX Industries LLC
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Passthru Program Configuration
+# Passthru YUV Program Configuration
 
 [program]
 program_id = "com.lzxindustries.passthru"
 program_version = "1.0.0"
 abi_version = ">=1.0,<2.0"
-program_name = "Passthru"
+program_name = "Passthru YUV"
 author = "Lars Larsen"
 license = "GPL-3.0"
 categories = ["Color"]
 program_type = "processing"
-description = "Simple passthrough program with null parameters for testing."
+description = "1-cycle YUV444 passthrough reference (yuv444_30b core)."
 url = "https://github.com/lzxindustries/videomancer-sdk"
 hardware_compatibility = ["rev_b"]
 core = "yuv444_30b"

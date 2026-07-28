@@ -811,9 +811,14 @@ begin
     -- ========================================================================
     -- Output Assignment (sync delay = 20, divisible by 4, no IO align needed)
     -- ========================================================================
-    data_out.y <= std_logic_vector(s_mix_y_result);
-    data_out.u <= std_logic_vector(s_mix_u_result);
-    data_out.v <= std_logic_vector(s_mix_v_result);
+    -- Gate to studio blanking outside AVID: extreme zoom/shift
+    -- resampling must never paint the blanking interval.
+    data_out.y <= std_logic_vector(s_mix_y_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(64, s_mix_y_result'length));
+    data_out.u <= std_logic_vector(s_mix_u_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, s_mix_u_result'length));
+    data_out.v <= std_logic_vector(s_mix_v_result) when s_avid_d = '1'
+                  else std_logic_vector(to_unsigned(512, s_mix_v_result'length));
 
     data_out.avid    <= s_avid_d;
     data_out.hsync_n <= s_hsync_n_d;

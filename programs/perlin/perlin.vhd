@@ -1057,9 +1057,13 @@ begin
     -- ========================================================================
     -- Output Assignment
     -- ========================================================================
-    data_out.y      <= std_logic_vector(smC_y);
-    data_out.u      <= std_logic_vector(smC_u);
-    data_out.v      <= std_logic_vector(smC_v);
+    -- Gate to studio blanking outside the delay-matched AVID.
+    data_out.y      <= std_logic_vector(smC_y) when s_avid_d = '1'
+                       else std_logic_vector(to_unsigned(64, smC_y'length));
+    data_out.u      <= std_logic_vector(smC_u) when s_avid_d = '1'
+                       else std_logic_vector(to_unsigned(512, smC_u'length));
+    data_out.v      <= std_logic_vector(smC_v) when s_avid_d = '1'
+                       else std_logic_vector(to_unsigned(512, smC_v'length));
     data_out.avid   <= s_avid_d;
     data_out.hsync_n <= s_hsync_n_d;
     data_out.vsync_n <= s_vsync_n_d;

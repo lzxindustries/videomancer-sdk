@@ -70,6 +70,10 @@ rtl_lib.add_source_files(video_sync_dir / "video_sync_generator.vhd")
 rtl_lib.add_source_files(video_stream_dir / "yuv422_20b_to_yuv444_30b.vhd")
 rtl_lib.add_source_files(video_stream_dir / "yuv444_30b_to_yuv422_20b.vhd")
 rtl_lib.add_source_files(video_stream_dir / "yuv444_30b_blanking.vhd")
+rtl_lib.add_source_files(video_stream_dir / "gbr444_30b_blanking.vhd")
+rtl_lib.add_source_files(video_stream_dir / "gbr422_20b_to_gbr444_30b.vhd")
+rtl_lib.add_source_files(video_stream_dir / "gbr444_30b_to_gbr422_20b.vhd")
+rtl_lib.add_source_files(video_stream_dir / "adv7181c_rgb_ddr_to_gbr444.vhd")
 rtl_lib.add_source_files(video_stream_dir / "video_line_buffer.vhd")
 
 # Add video timing modules
@@ -235,6 +239,33 @@ for name, tid, cpl, intlc, tri in [
     tb_syncfmt.add_config(name, generics=dict(
         G_TIMING_ID=tid, G_CLOCKS_PER_LINE=cpl,
         G_IS_INTERLACED=intlc, G_TRISYNC_EN=tri))
+
+for name, tid, cpl, intlc, tri in [
+    ("ntsc_phase",       0,  858, 1, 0),
+    ("1080i50_phase",    1, 2640, 1, 1),
+    ("1080i5994_phase",  2, 2200, 1, 1),
+    ("1080p24_phase",    3, 2750, 0, 1),
+    ("480p_phase",       4,  858, 0, 0),
+    ("720p50_phase",     5, 1980, 0, 1),
+    ("720p5994_phase",   6, 1650, 0, 1),
+    ("1080p30_phase",    7, 2200, 0, 1),
+    ("pal_phase",        8,  864, 1, 0),
+    ("1080p2398_phase",  9, 2750, 0, 1),
+    ("1080i60_phase",   10, 2200, 1, 1),
+    ("1080p25_phase",   11, 2640, 0, 1),
+    ("576p_phase",      12,  864, 0, 0),
+    ("1080p2997_phase", 13, 2200, 0, 1),
+    ("720p60_phase",    14, 1650, 0, 1),
+]:
+    tb_syncfmt.add_config(name, generics=dict(
+        G_TIMING_ID=tid, G_CLOCKS_PER_LINE=cpl,
+        G_IS_INTERLACED=intlc, G_TRISYNC_EN=tri,
+        G_PHASE_ADVANCE=1, G_PHASE_ADVANCE_CLKS=20))
+
+tb_syncfmt.add_config("1080i5994_phase22", generics=dict(
+    G_TIMING_ID=2, G_CLOCKS_PER_LINE=2200,
+    G_IS_INTERLACED=1, G_TRISYNC_EN=1,
+    G_PHASE_ADVANCE=1, G_PHASE_ADVANCE_CLKS=22))
 
 # Main entry point
 if __name__ == "__main__":
