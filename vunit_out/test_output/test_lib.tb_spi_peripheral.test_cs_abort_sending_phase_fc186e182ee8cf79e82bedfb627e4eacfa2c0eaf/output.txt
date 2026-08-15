@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing CS abort while peripheral is sending data
-simulation stopped @28625ns with status 0

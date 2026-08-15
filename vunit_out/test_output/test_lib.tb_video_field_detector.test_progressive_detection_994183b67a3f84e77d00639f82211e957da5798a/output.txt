@@ -1,2 +1,0 @@
-       200000000 fs - default              -    INFO - Testing progressive (non-interlaced) detection
-simulation stopped @24630ns with status 0

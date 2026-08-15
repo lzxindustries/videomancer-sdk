@@ -1,1 +1,0 @@
-simulation stopped @426ns with status 0

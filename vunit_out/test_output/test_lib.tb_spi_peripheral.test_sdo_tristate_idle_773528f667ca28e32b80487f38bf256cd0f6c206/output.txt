@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing SDO is tri-state when CS is high
-simulation stopped @9600ns with status 0

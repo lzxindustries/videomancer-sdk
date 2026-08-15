@@ -1,4 +1,0 @@
-       200000000 fs - default              -    INFO - Testing field parity toggling
-     16520000000 fs - default              -    INFO - Field parity after interlaced fields: field_n='1'
-     24680000000 fs - default              -    INFO - Field parity after toggle: field_n='1'
-simulation stopped @24680ns with status 0

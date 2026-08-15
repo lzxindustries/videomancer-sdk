@@ -1,3 +1,0 @@
-        [22;96;49m67500000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Testing phase reset on AVID rising edge
-       [22;96;49m243000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Phase reset test completed
-simulation stopped @243ns with status 0

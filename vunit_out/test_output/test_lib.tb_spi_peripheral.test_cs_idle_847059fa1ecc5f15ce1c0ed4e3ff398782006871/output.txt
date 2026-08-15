@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing CS idle state
-simulation stopped @2600ns with status 0

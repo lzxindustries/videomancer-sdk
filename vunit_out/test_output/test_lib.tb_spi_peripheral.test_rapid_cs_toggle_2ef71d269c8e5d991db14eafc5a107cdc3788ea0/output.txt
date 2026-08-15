@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing very brief CS assertion does not corrupt state
-simulation stopped @12850ns with status 0

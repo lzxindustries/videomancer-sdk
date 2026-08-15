@@ -41,6 +41,8 @@ namespace videomancer_abi_v1_0
         constexpr uint8_t linear_pot_12    = 0x07;
         constexpr uint8_t video_timing_id  = 0x08;
         constexpr uint8_t sync_phase_advance_clks = 0x09;
+        constexpr uint8_t h_phase_sync_out        = 0x0A;
+        constexpr uint8_t h_phase_analog_in       = 0x0B;
     }
 
     /// @brief Post-program sync delay added to reg 0x09 for yuv444 core

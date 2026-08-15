@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing explicit write of 0x00
-simulation stopped @30100ns with status 0

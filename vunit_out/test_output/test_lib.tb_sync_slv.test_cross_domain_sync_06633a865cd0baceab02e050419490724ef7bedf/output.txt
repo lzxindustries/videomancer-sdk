@@ -1,2 +1,0 @@
-               0 fs - default              -    INFO - Testing cross-domain synchronization (async clocks)
-simulation stopped @120050ps with status 0

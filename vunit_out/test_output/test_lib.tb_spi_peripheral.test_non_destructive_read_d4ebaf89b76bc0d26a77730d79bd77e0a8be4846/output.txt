@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing that reads are non-destructive
-simulation stopped @30125ns with status 0

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing recovery after auto-increment naturally ends at max
-simulation stopped @34100ns with status 0

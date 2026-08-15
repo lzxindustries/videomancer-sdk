@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing read of unwritten register returns 0x00
-simulation stopped @10100ns with status 0

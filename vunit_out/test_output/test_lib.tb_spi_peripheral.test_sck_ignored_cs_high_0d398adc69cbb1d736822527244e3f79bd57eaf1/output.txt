@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing SCK activity is ignored when CS is high
-simulation stopped @10100ns with status 0

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing auto-increment read across 3 registers
-simulation stopped @18185ns with status 0

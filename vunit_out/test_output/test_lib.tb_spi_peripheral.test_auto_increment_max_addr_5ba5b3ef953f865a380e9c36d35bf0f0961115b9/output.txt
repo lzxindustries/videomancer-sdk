@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing auto-increment write stops at max address
-simulation stopped @18100ns with status 0

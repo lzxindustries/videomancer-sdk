@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing addr output correctness on read
-simulation stopped @10125ns with status 0

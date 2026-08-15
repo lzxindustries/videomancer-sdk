@@ -1150,9 +1150,17 @@ namespace lzx {
                 return vmprog_validation_result::invalid_enum_value;
             }
         } else {
+            // Exact logical id "passthru" only — strstr(".passthru") falsely
+            // matched com.lzxindustries.passthru_rgb and rejected its 0-cycle
+            // GBR package (boot: config validation failed (17)).
+            const char* logical_id = config.program_id;
+            for (const char* p = config.program_id; *p != '\0'; ++p) {
+                if (*p == '.') {
+                    logical_id = p + 1;
+                }
+            }
             const bool is_passthru =
-                (std::strncmp(config.program_id, "passthru", 8) == 0) ||
-                (std::strstr(config.program_id, ".passthru") != nullptr);
+                (std::strcmp(logical_id, "passthru") == 0);
             if (is_passthru) {
                 if (config.processing_delay_clks != 1u) {
                     return vmprog_validation_result::invalid_enum_value;

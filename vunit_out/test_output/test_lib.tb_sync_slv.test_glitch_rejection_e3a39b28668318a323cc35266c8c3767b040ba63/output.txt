@@ -1,2 +1,0 @@
-               0 fs - default              -    INFO - Testing glitch rejection
-simulation stopped @93500ps with status 0

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing register overwrite
-simulation stopped @20100ns with status 0

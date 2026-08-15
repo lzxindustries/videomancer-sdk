@@ -1,0 +1,19 @@
+# Colorbars RGB follows the released Colorbars pipeline implementation.
+
+[pipeline]
+stage = "release"
+last_advanced = "2026-07-29T07:50:00Z"
+ai_authored = true
+
+[stages.implement]
+completed = "2026-07-29T07:50:00Z"
+notes = "Direct RGB/GBR444 equivalent of Colorbars for standalone RGB validation"
+
+[stages.lint]
+completed = "2026-07-29T07:50:00Z"
+ghdl_clean = true
+naming_clean = true
+
+[stages.release]
+completed = "2026-07-29T07:50:00Z"
+notes = "Added with the released Colorbars control and pipeline contract"

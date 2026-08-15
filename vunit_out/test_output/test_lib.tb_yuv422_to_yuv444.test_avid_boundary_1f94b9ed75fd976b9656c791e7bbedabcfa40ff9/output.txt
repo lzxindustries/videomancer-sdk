@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing AVID de-assert/re-assert boundary
-       446500000 fs - default              -    INFO - After line break: U=660 V=660
-simulation stopped @446500ps with status 0

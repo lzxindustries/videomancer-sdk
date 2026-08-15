@@ -60,6 +60,13 @@ package video_sync_pkg is
     -- -- field_lines_0            : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     fsync_clks               : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     fsync_lines              : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
+    -- `_1` / `_0` name the counter position that SETS the signal high /
+    -- low, not a polarity. Every timing here follows one convention:
+    -- hsync, hsync_2x and vsync are HIGH for the duration of their sync
+    -- pulse (set at clk/line 1, cleared at 1 + width), so consumers that
+    -- need active-low video sync invert once and work for all 15 formats.
+    -- csync/serration/eq keep the composite active-low sense instead,
+    -- because they drive the analog Sync Out summer directly.
     hsync_clks_0             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     hsync_clks_1             : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
     hsync_clks_b_0           : unsigned(C_VIDEO_SYNC_DATA_WIDTH - 1 downto 0);
@@ -133,8 +140,8 @@ package video_sync_pkg is
     -- field_lines_0            => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     fsync_clks               => to_unsigned(858-38, C_VIDEO_SYNC_DATA_WIDTH),
     fsync_lines              => to_unsigned(3, C_VIDEO_SYNC_DATA_WIDTH),
-    hsync_clks_1             => to_unsigned(1 + 63, C_VIDEO_SYNC_DATA_WIDTH),
-    hsync_clks_0             => to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH),
+    hsync_clks_1             => to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH),
+    hsync_clks_0             => to_unsigned(1 + 63, C_VIDEO_SYNC_DATA_WIDTH),
     hsync_clks_b_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     hsync_clks_b_0           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     csync_clks_1             => to_unsigned(1 + 63, C_VIDEO_SYNC_DATA_WIDTH),
@@ -202,8 +209,8 @@ package video_sync_pkg is
     -- field_lines_0            => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     fsync_clks               => to_unsigned(864 - 38, C_VIDEO_SYNC_DATA_WIDTH),
     fsync_lines              => to_unsigned(625, C_VIDEO_SYNC_DATA_WIDTH),
-    hsync_clks_1             => to_unsigned(1 + 63, C_VIDEO_SYNC_DATA_WIDTH),
-    hsync_clks_0             => to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH),
+    hsync_clks_1             => to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH),
+    hsync_clks_0             => to_unsigned(1 + 63, C_VIDEO_SYNC_DATA_WIDTH),
     hsync_clks_b_1           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     hsync_clks_b_0           => to_unsigned(0, C_VIDEO_SYNC_DATA_WIDTH),
     csync_clks_1             => to_unsigned(1 + 63, C_VIDEO_SYNC_DATA_WIDTH),

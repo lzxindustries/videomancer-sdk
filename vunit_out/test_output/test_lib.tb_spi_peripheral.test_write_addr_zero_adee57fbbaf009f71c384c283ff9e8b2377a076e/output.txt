@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing write to address 0
-simulation stopped @11100ns with status 0

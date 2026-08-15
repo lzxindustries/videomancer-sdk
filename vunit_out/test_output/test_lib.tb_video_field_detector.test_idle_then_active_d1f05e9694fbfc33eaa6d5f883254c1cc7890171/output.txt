@@ -1,2 +1,0 @@
-       200000000 fs - default              -    INFO - Testing long idle then active
-simulation stopped @21520ns with status 0

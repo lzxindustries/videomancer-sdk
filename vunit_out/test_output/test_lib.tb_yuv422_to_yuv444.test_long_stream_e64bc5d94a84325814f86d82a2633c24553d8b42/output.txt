@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing long continuous stream (100 pixel pairs)
-      2875500000 fs - default              -    INFO - Long stream test completed (100 pairs processed without stall)
-simulation stopped @2875500ps with status 0

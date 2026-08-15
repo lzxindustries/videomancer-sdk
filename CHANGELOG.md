@@ -7,7 +7,189 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.47] - 2026-08-14
+
 ### Fixed
+
+- **SD/ED YUV HDMI color accuracy** — Standalone `yuv444_30b` HDMI pack remaps
+  full-range Y/U/V to limited range before ADV7513; Table 59 CSC (SDTV YCbCr
+  limited → RGB full) then produces primary-accurate Colorbars on RGB HDMI
+  sinks. Fixes oversaturated / hue-shifted bars after rc.46 limited-range CSC
+  was fed full-range FPGA data.
+- **HD YUV HDMI colorimetry** — AVI InfoFrame colorimetry is BT.601 for all
+  YUV/422 output (was BT.709 at HD). Matches the BT.601 working space used on
+  analog out and across the FPGA pipeline.
+
+## [1.0.0-rc.46] - 2026-08-07
+
+### Fixed
+
+- **SD/ED YUV HDMI false-color** — ADV7513 now loads ADI Table 35 CSC
+  (SDTV YCbCr limited → RGB full) for SD/ED YUV cores on Style-1 444 pack.
+  HDMI out is true RGB with AVI RGB (fixes pink whites / scrambled bars on
+  RGB sinks such as Roland V-4EX input 4). HD YUV 422 and GBR RGB paths
+  unchanged. Previously Style-1 Y|U|V was announced as RGB AVI with CSC off
+  (“false-color capture parity”).
+
+## [1.0.0-rc.45] - 2026-08-05
+
+### Fixed
+
+- **Desk HIL gate** — vmtest harness fixes for YYY 1V, dual HD offset/reload, and 1080p shift search; acceptance **180/184** on desk (r0 HDMI-only residual). Firmware unchanged vs rc.44.
+
+## [1.0.0-rc.44] - 2026-08-05
+
+### Fixed
+
+- **RGsB dual loopback (a4-3)** — FPGA EXT HS/VS on `r_gs_b` at HD; STDI/SOG alone failed 720p/1080p return leg lock.
+- **Composite / S-Video dual loopback** — Restore FPGA EXT sync on YPbPr CP when Dual remaps CVBS/Y-C at HD; fixes hue shift and `cb_cr_swapped` bar failures (regression from selective `fpga_drives_decoder_sync()`).
+- **YPbPr AC dual loopback (a1-2)** — Restore FPGA EXT sync for `analog_video_in_mode::ypbpr` at HD (anchor leg same regression as composite).
+- **Gate E program scan** — Pre-release filter SD-only; all 27 embedded programs visible on `program scan`.
+
+## [1.0.0-rc.43] - 2026-08-03
+
+### Added
+
+- **H Phase Out / In (dual IO)** — SPI registers `0x0A` / `0x0B`, unified Sync Out
+  on program-input reference, EXT analog-in delay trim, ABI docs, vmtest serial +
+  HIL gate.
+
+### Fixed
+
+- **`dual_sync_delay`** — split read/write BRAM inference (`syn_ramstyle =
+  block_ram`); registered read compensated in `dual_ext_sync_delay_total`.
+- **Dual Sync Out LC budget** — unified single `video_sync_generator` on
+  `vid_clk` with program-input reference (dual and non-dual); removes duplicate
+  HDMI-RX-domain generator that broke HX4K placement on heavy vmprogs.
+- **All 27 embedded vmprogs rebuild** — Lumarian pipeline delay trim + packed
+  sync shift; Mycelium wet-only chroma mix on HD Dual (luma wet/dry unchanged);
+  Moire/Pinwheel/Howler fit with unified core alone.
+
+### Changed
+
+- **Mycelium HD Dual** — U/V wet/dry mix is wet-only (saves two `interpolator_u`
+  instances); luma mix unchanged.
+
+## [1.0.0-rc.42] - 2026-08-03
+
+### Fixed
+
+- **HD dual passthru (720p60 / 1080p30)** — Stop NTSC HS-position CP overrides on HD
+  progressive dual lock; `invert_cr_cb` for external-sync HD. Fixes offset, Cb/Cr
+  swap, and bar-level failures on YPbPr and RGB 1V loopback.
+- **RTL dual sync delay** — HD progressive uses 17 LLC clocks in
+  `dual_ext_sync_delay_clks`; passthru bitstream rebuilt.
+- **Desk HIL** — `banding_spectral` ignores full-width shallow-ramp false positives.
+
+## [1.0.0-rc.41] - 2026-08-02
+
+### Fixed
+
+- **PAL dual 576i passthru** — ADV7181 CP lock and RTL external-sync delay for 576i50
+  dual YPbPr loopback; geometry HIL green after interlaced-UVC policy.
+
+## [1.0.0-rc.40] - 2026-07-31
+
+### Fixed
+
+- **Program-library upload reset** — Feed RP2040 watchdog during `fs put` /
+  FatFS commits so long Connect program-pack transfers no longer reset
+  mid-upload (host USB hangup / broken pipe). Pairs with LZX Connect 1.3.5.
+
+### Added
+
+- **Shell developer hooks** — `screen dump` and `ui inject` (developer mode
+  only) for desk vmtest automation.
+
+## [1.0.0-rc.39] - 2026-07-31
+
+### Fixed
+
+- **Dual RGB 1V clamp / bar crush** — HDMI RX HS/VS into ADV7181C EXT sync
+  delayed ~50 LLC clocks (`dual_sync_delay` on all four cores) so clamp
+  recovery overshoot clears before active video. Delay line uses a small
+  circular BRAM (not an FF shift register) so Lumarian HD Dual still fits
+  the HX4K. RGB 1V DAC path keeps `sync_on_rgb` off (sync tips on 1V rails
+  were crushing auto-clamp). ADV7393 HD CSC chroma coeffs scaled ×0.92
+  (GY unchanged) to cut G→R/B leak on the dual RGB 1V loopback while greys
+  stay accurate.
+- **Dual analog loopback CSC / mode switch** — correct R/B mapping and
+  dual-leg YPbPr AC ↔ RGB 1V switching; FPGA reload on dual `analog_in`
+  changes. All release-stage embedded packs rebuilt and Ed25519-signed
+  from this RTL.
+
+### Fixed (prior Unreleased backlog)
+
+- **Standalone progressive blank (480p/576p/720p/1080p)** — freerun
+  ADV7181C programs the shared FIELD/DE pin as FIELD, which is constant
+  on progressive standards and therefore useless as AVID. Standalone
+  cores (`yuv444_30b`, `yuv422_20b`, `gbr444_30b`, `gbr422_20b`) now take
+  only the LLC clock from the decoder and free-run
+  `video_sync_generator` (`G_LOCK_TO_REF => not C_ENABLE_STANDALONE`) for
+  HS/VS/AVID. Generator H/V is inverted once onto the active-low stream
+  nets. NTSC/PAL `hsync_clks_*` in `video_sync_pkg` aligned to the same
+  active-high pulse convention as the other 13 timings. Full-tier
+  vmtest: all 15 standalone YUV timings pass with decoder sync idle.
+
+- **YUV SD standalone 480p/576p HDMI still blank after freerun-sync fix** —
+  HIL: sideloaded `colorbars` (YUV) stayed flat ~0.027 at 480p/576p while
+  interlaced and HD worked; sideloaded `colorbars_rgb` (GBR) passed
+  480p/576p. Root cause: any fabric mux on `vid_clk` (PLL vs ÷2, or even
+  LLC vs ÷2) blanked ED on ICE40; GBR never muxes — `vid_clk <= LLC` always.
+  YUV SD standalone now matches GBR (`vid_clk <= i_vid_dec_clk`; encoder
+  27 MHz from LLC on ED or 2× PLL on interlaced). Firmware master-PLL
+  freerun sets interlaced YUV LLC to 13.5 MHz (was 27 MHz) so the pin is
+  the pixel clock for both rate classes.
+
+- **YUV ED HDMI Style-3 422 @ 27 MHz still blank after LLC fix** — HIL
+  diagnostic: configuring ADV7513 identically to working RGB ED
+  (`r15=00 r16=38`) while the FPGA still drove YUV left 480p flat-black,
+  so the blank is on the YUV HDMI pack path. SD standalone HDMI always
+  drives 8-bit YUV444 (Y/U/V on the Style-1 pin groups) with a GBR-style
+  2-cycle H/V align; firmware programs SD+ED as Input ID 0 / Style 1 /
+  RGB AVI (false-color capture parity). Interlaced keeps pixel-rep ×2.
+
+- **YUV ED still blank after Style-1 444 pack (HIL)** — ADV7513 readback
+  at 480p matched working RGB (`r15/r16/DE` identical) while capture stayed
+  unique=1 black (not blanking teal), so DE was not locking. Standalone
+  **ED** (`is_ed` 480p/576p) now forces ADV7181C CP 12-bit DDR RGB LLC pad
+  mode for YUV as well as GBR (freerun AVID does not use decoder pixels).
+  Interlaced SD keeps SDR LLC (already HIL-green). HD keeps SDR LLC —
+  forcing DDR for all standalone or for SD+ED poisoned first HD after SD.
+
+- **Embedded Colorbars shipped pre-freerun-fix RTL** — HIL of the product path
+  (embedded program, no sideload) blanked 8 of 15 standalone timings while the
+  workspace pack passed all 15, because the generated blob predated the
+  standalone freerun/HDMI RTL fixes. Colorbars rebuilt from current RTL
+  (206770 B) and re-embedded. Product-path HIL now passes all 15 timings
+  including 1080i60 (previously untested) with firmware-driven SD↔HD variant
+  reloads and no host re-sideload.
+
+- **All other embedded packs also predated freerun-fix RTL** — the same
+  staleness applied to every shipping program except the refreshed Colorbars.
+  All 27 embedded packs rebuilt from current RTL and re-embedded
+  (`videomancer-1.0.0-rc.38+30`). Glorious needed `firmware.seed = 2` (nextpnr
+  router assert on seed 1 for `hd_standalone`). Lumarian overflows the HX4K
+  by ~20 LCs under default `synth_ice40`; `firmware.synth_opts = "-abc2"`
+  recovers ~24 LCs and fits (build system now forwards the TOML field).
+
+- **Sideloaded standalone SD↔HD left first HD blank** — `_streamed_program_active`
+  made `video_timing` changes call `configure_video_chain()` only, without
+  reloading the matching bitstream variant inside the .vmprog. When the
+  stream was named after a registry program (e.g. `colorbars`), standalone
+  timing changes that cross SD↔HD now clear the streamed latch and
+  reload-by-name for the new variant. Pure `Sideload` names still need the
+  host to re-stream (hil/session.py passthru bounce). The streamed bitstream
+  is never retained (MCU RAM is ~98% full), so the registry reload is the
+  only in-device option; firmware now logs a warning when it substitutes.
+
+- **HDMI YUV Cb/Cr swap (rc.37 co-timing regression)** — `yuv444_30b`
+  HDMI TX again drives H/V with the 444→422 converter's native 1-clk sync
+  lead over Y/C. ADV7513 Style-3 + on-chip DE gen treats the first active
+  sample after DE as Cb; the rc.37 1-clk H/V delay aligned sync to pixels
+  and swapped Cb/Cr on HDMI out (vmtest HIL: Yellow↔Cyan, Red↔Blue). Analog
+  encoder sync was already undelayed and unaffected. `gbr422` HDMI align
+  pipe unchanged (RGB path).
 
 - **video_sync_generator simulation initialization** — the ~45
   per-format threshold/table signals (and `s_timing`) had no initial
@@ -77,6 +259,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`colorbars_rgb` diagnostic program** — direct full-range RGB/GBR444
+  companion to YUV `colorbars`, with matching EBU/SMPTE, 75/100%,
+  blue-only, mono, and bypass controls. Embedded as
+  `videomancer_colorbars_rgb_vmprog`; standalone HIL now defaults to both
+  programs across all 15 timings (30 cases) so YUV SDR and DDR RGB paths
+  are validated independently.
 - **`gbr422_20b` core** — GBR 4:2:2 program interface (`core_id` = 4);
   pad protocol G on Y bus / B/R on C; `passthru_gbr422` example.
 - **Passthru split** — `passthru_yuv` (yuv444) and `passthru_rgb` (gbr444).

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing auto-increment bulk write then bulk read roundtrip
-simulation stopped @44100ns with status 0

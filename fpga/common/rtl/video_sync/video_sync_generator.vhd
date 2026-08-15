@@ -269,15 +269,17 @@ begin
   --   * G_LOCK_TO_REF true: snap to fsync seed on ref_vsync/field edge,
   --     then wrap at s_clocks_per_line / s_lines_per_frame.
   --   * G_LOCK_TO_REF false: pure free-run (standalone only).
+  -- Use >= so a timing-id shrink (e.g. 1080p 2200 → 480p 858) cannot
+  -- leave the counter stranded above the new line length forever.
   counters : process (clk)
   begin
     if rising_edge(clk) then
       if G_LOCK_TO_REF and s_ref_fsync = '1' then
         s_counter_clks <= s_fsync_clks;
         s_counter_lines <= s_fsync_lines;
-      elsif s_counter_clks = s_clocks_per_line then
+      elsif s_clocks_per_line /= 0 and s_counter_clks >= s_clocks_per_line then
         s_counter_clks <= to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
-        if s_counter_lines = s_lines_per_frame then
+        if s_lines_per_frame /= 0 and s_counter_lines >= s_lines_per_frame then
           s_counter_lines <= to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);
         else
           s_counter_lines <= s_counter_lines + to_unsigned(1, C_VIDEO_SYNC_DATA_WIDTH);

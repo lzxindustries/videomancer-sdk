@@ -65,6 +65,7 @@ rtl_lib.add_source_files(serial_dir / "spi_peripheral.vhd")
 # Add video sync modules
 rtl_lib.add_source_files(video_sync_dir / "video_field_detector.vhd")
 rtl_lib.add_source_files(video_sync_dir / "video_sync_generator.vhd")
+rtl_lib.add_source_files(video_sync_dir / "dual_sync_delay.vhd")
 
 # Add video processing modules
 rtl_lib.add_source_files(video_stream_dir / "yuv422_20b_to_yuv444_30b.vhd")
@@ -266,6 +267,12 @@ tb_syncfmt.add_config("1080i5994_phase22", generics=dict(
     G_TIMING_ID=2, G_CLOCKS_PER_LINE=2200,
     G_IS_INTERLACED=1, G_TRISYNC_EN=1,
     G_PHASE_ADVANCE=1, G_PHASE_ADVANCE_CLKS=22))
+
+# Dual EXT-sync delay: production uses G_DELAY_CLKS=50; also cover a
+# short chain so the pulse-edge checks stay fast in the suite.
+tb_dual_delay = test_lib.entity("tb_dual_sync_delay")
+tb_dual_delay.add_config("delay4", generics=dict(G_DELAY_CLKS=4))
+tb_dual_delay.add_config("delay50", generics=dict(G_DELAY_CLKS=50))
 
 # Main entry point
 if __name__ == "__main__":

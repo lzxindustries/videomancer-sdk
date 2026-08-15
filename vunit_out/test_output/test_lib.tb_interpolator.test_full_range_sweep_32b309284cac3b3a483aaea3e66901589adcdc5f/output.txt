@@ -1,8 +1,0 @@
-               0 fs - default              -    INFO - Testing full-range sweep
-../../src/ieee2008/numeric_std-body.vhdl:1441:7:@5ns:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1289:7:@5ns:(assertion warning): NUMERIC_STD.">": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1441:7:@15ns:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1289:7:@15ns:(assertion warning): NUMERIC_STD.">": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1441:7:@25ns:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1289:7:@25ns:(assertion warning): NUMERIC_STD.">": metavalue detected, returning FALSE
-simulation stopped @95ns with status 0

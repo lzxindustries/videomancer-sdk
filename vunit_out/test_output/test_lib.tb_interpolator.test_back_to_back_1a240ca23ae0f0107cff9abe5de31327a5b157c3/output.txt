@@ -1,9 +1,0 @@
-               0 fs - default              -    INFO - Testing back-to-back pipeline throughput
-../../src/ieee2008/numeric_std-body.vhdl:1441:7:@5ns:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1289:7:@5ns:(assertion warning): NUMERIC_STD.">": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1441:7:@15ns:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1289:7:@15ns:(assertion warning): NUMERIC_STD.">": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1441:7:@25ns:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
-../../src/ieee2008/numeric_std-body.vhdl:1289:7:@25ns:(assertion warning): NUMERIC_STD.">": metavalue detected, returning FALSE
-       225000000 fs - default              -    INFO - Back-to-back throughput test passed
-simulation stopped @225ns with status 0

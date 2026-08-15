@@ -1,2 +1,0 @@
-       102250000 fs - default              -    INFO - Verifying 2-cycle pipeline latency
-simulation stopped @183250ps with status 0

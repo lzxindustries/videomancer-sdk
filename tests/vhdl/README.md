@@ -129,6 +129,28 @@ Then open with GTKWave:
 gtkwave vunit_out/ghdl/rtl_lib.tb_sync_slv.test_two_ff_delay_xxx/wave.vcd
 ```
 
+## Troubleshooting
+
+**Every test fails at link with `cannot find .../vunit_out/ghdl/libraries/**/*.o`**
+
+A `vunit_out/` left behind by a different GHDL build is not repaired in place, so
+the whole suite reports failures that have nothing to do with the RTL. Wipe it:
+
+```bash
+rm -rf vunit_out
+```
+
+**`ModuleNotFoundError: No module named 'vunit'` after sourcing the toolchain**
+
+`build/oss-cad-suite/environment` puts its own `python3` first on `PATH`, and that
+interpreter has no VUnit. Source the environment for `ghdl`, then run the suite
+with the system interpreter (or a venv that has `vunit-hdl`):
+
+```bash
+source build/oss-cad-suite/environment
+/usr/bin/python3 run.py
+```
+
 ## VUnit Features Used
 
 - **Test runner context** - Provides `test_runner_setup`, `test_runner_cleanup`, etc.
@@ -165,8 +187,11 @@ Current coverage:
 - ✅ YUV422 to YUV444 converter (`yuv422_to_yuv444`)
 - ✅ YUV444 to YUV422 converter (`yuv444_to_yuv422`)
 - ✅ Blanking module (`blanking_yuv444`)
-- 🔲 SPI peripheral controller (`spi_peripheral`)
-- 🔲 Video sync generator (`video_sync_generator`)
+- ✅ SPI peripheral controller (`spi_peripheral`)
+- ✅ Video sync generator (`video_sync_generator`) — `tb_video_sync_gen` plus
+  `tb_video_sync_gen_formats` (all 15 timings, and a `_phase` config per timing
+  covering hsync lead, line period, and eq trisync under phase compensation)
+- ✅ Frame phase accumulator (`frame_phase_accumulator`)
 - 🔲 Video field detector (`video_field_detector`)
 
 ## Resources

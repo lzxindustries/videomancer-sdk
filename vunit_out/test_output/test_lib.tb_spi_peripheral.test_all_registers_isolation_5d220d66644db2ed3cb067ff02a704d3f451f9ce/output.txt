@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing all 16 registers for isolation
-simulation stopped @170100ns with status 0

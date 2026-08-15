@@ -1,4 +1,0 @@
-        67500000 fs - default              -    INFO - Testing phase-1 chroma output values
-       230500000 fs - default              -    INFO - Chroma verification: output U=700 V=700
-       326000000 fs - default              -    INFO - Second pair chroma: output U=900 V=900
-simulation stopped @326ns with status 0

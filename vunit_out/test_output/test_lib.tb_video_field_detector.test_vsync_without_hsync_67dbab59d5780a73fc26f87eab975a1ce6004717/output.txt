@@ -1,3 +1,0 @@
-       200000000 fs - default              -    INFO - Testing VSYNC behavior without HSYNC
-      1420000000 fs - default              -    INFO - No-HSYNC test completed: field_n='1' interlaced='1'
-simulation stopped @1420ns with status 0

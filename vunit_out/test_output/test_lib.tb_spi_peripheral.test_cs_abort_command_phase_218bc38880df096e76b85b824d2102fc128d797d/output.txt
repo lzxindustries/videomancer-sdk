@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing CS abort during command phase
-simulation stopped @15225ns with status 0

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing walking ones data pattern
-simulation stopped @160100ns with status 0

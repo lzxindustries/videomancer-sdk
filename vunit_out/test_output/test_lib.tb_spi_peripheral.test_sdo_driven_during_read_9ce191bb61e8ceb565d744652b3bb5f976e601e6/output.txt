@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing SDO is actively driven (not Z) during read
-simulation stopped @10625ns with status 0

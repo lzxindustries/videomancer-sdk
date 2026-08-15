@@ -1,2 +1,0 @@
-               0 fs - default              -    INFO - Testing rapid async transitions
-simulation stopped @153750ps with status 0

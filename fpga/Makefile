@@ -16,6 +16,8 @@ HARDWARE = rev_b
 CORE = yuv444_30b
 PLATFORM = ice40
 SEED ?= 1
+# Optional synth_ice40 flags from program TOML firmware.synth_opts (e.g. -abc2).
+SYNTH_OPTS ?=
 
 VHD_FILES = $(wildcard $(VIDEOMANCER_SDK_ROOT)/fpga/core/${CORE}/rtl/*.vhd) \
 	$(VIDEOMANCER_SDK_ROOT)/fpga/common/rtl/core_config/$(CONFIG)_pkg.vhd \
@@ -42,7 +44,7 @@ all: $(BIN_FILE)
 
 $(JSON_FILE): $(VHD_FILES)
 	@mkdir -p $(dir $@)
-	yosys -m ghdl -p 'ghdl --std=08 $^ -e hardware_top; synth_ice40 -json $@'
+	yosys -m ghdl -p 'ghdl --std=08 $^ -e hardware_top; synth_ice40 $(SYNTH_OPTS) -json $@'
 
 $(ASC_FILE): $(JSON_FILE)
 	@mkdir -p $(dir $@)

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing wr_en pulses exactly once per write
-simulation stopped @20100ns with status 0

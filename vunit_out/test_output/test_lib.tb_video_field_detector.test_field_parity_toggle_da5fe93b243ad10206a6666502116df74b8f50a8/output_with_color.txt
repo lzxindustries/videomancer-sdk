@@ -1,4 +1,0 @@
-       [22;96;49m200000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Testing field parity toggling
-     [22;96;49m16520000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Field parity after interlaced fields: field_n='1'
-     [22;96;49m24680000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Field parity after toggle: field_n='1'
-simulation stopped @24680ns with status 0

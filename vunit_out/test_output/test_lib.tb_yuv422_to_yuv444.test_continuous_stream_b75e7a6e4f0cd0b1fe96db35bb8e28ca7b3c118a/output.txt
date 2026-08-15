@@ -1,3 +1,0 @@
-        67500000 fs - default              -    INFO - Testing continuous pixel stream with output checks
-       432000000 fs - default              -    INFO - Continuous stream test completed (10 pixel pairs processed)
-simulation stopped @432ns with status 0

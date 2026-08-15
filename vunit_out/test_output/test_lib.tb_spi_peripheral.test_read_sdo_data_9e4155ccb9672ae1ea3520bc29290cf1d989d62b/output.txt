@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing read transaction captures correct SDO data
-simulation stopped @10125ns with status 0

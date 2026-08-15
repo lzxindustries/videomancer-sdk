@@ -70,7 +70,11 @@ MOSI ────────┤ 0 │A4 │A3 │A2 │A1 │A0 │D9 │D8 │
 | 0x08 | [9:4] | - | Reserved | Reserved for future use |
 | 0x09 | [9:0] | `sync_phase_advance_clks` | W | Core-only: Sync Out horizontal phase advance in `vid_clk` pixels (`processing_delay_clks` + core post-delay). Latched on the same HSYNC edge as `video_timing_id` into a core-only register (not program-visible). |
 | 0x09 | [15:10] | - | Reserved | Reserved (write as 0; SPI frame uses bits 9-0 only) |
-| 0x0A-0x1F | - | - | Reserved | Reserved for future expansion |
+| 0x0A | [6:0] | `h_phase_sync_out` | W | Dual IO only: H Phase Out trim for Sync Out generator (0–127, **64 = 0 px**). Latched on `i_hdmi_rx_clk` HSYNC. Ignored on standalone / HDMI-only configs. |
+| 0x0A | [9:7] | - | Reserved | Reserved (write as 0) |
+| 0x0B | [6:0] | `h_phase_analog_in` | W | Dual IO only: H Phase In trim for EXT analog-in sync path (0–127, **64 = 0 px**). Latched on `i_hdmi_rx_clk` HSYNC together with factory base delay. Ignored when FPGA does not drive decoder sync. |
+| 0x0B | [9:7] | - | Reserved | Reserved (write as 0) |
+| 0x0C-0x1F | - | - | Reserved | Reserved for future expansion |
 
 ### Register Details
 
@@ -154,6 +158,29 @@ configs so that programs always see one pixel per clock.
 | 0x07 | `linear_potentiometer_12` | 10-bit value (0-1023) |
 | 0x08 | `video_timing_id` | Bits [3:0], timing mode 0-15 |
 | 0x09 | `sync_phase_advance_clks` | Bits [9:0], pipeline phase advance (core-only) |
+| 0x0A | `h_phase_sync_out` | Bits [6:0], dual IO Sync Out trim (64 = center) |
+| 0x0B | `h_phase_analog_in` | Bits [6:0], dual IO EXT analog-in sync trim (64 = center) |
+
+#### H Phase Out / In (0x0A, 0x0B) — dual IO only
+
+On **dual routing** configs (`hd_dual`, `sd_dual`), firmware exposes OLED settings
+**H Phase Out** and **H Phase In** (settings IDs 17 and 18) that map to SPI
+registers 0x0A and 0x0B. Values are 7-bit unsigned (**0–127**); **64 = no trim**
+(±64 pixel range). Firmware writes these on program load and when the setting
+changes; shell `remote write 10|11 <val>` accepts the same range.
+
+| Register | Domain | Effect |
+|----------|--------|--------|
+| 0x0A | Sync Out | Trims HS/VS emitted on the Sync Out jack relative to HDMI RX timebase |
+| 0x0B | Analog in (EXT) | Trims sync fed to ADV7181 when FPGA drives decoder sync |
+
+Register 0x09 (`sync_phase_advance_clks`) remains the **factory pipeline**
+advance for standalone / program-path Sync Out. On dual IO, firmware sets
+0x09 to `processing_delay_clks + core_post_delay` only (raw advance = 0);
+user trim is applied separately via 0x0A and 0x0B.
+
+**Access:** Core-only — not latched into program shadow RAM. Standalone and
+HDMI-only cores ignore 0x0A/0x0B.
 
 ### Processing delay metadata (vmprog 1.1)
 

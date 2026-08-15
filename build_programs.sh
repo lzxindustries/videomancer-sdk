@@ -248,12 +248,14 @@ else
 fi
 echo ""
 
-# Check Python PIL dependency required by build-time tools/hooks
-if ! python3 -c "from PIL import Image" 2>/dev/null; then
+# Check Python PIL dependency required by build-time tools/hooks.
+# Use /usr/bin/python3 — sourcing OSS CAD Suite puts its own python3 first on
+# PATH, and that interpreter typically has no Pillow.
+if ! /usr/bin/python3 -c "from PIL import Image" 2>/dev/null; then
     echo -e "${RED}ERROR: Missing Python PIL module (Pillow)${NC}"
     echo -e "${YELLOW}Install one of:${NC}"
     echo -e "${YELLOW}  sudo apt install python3-pil${NC}"
-    echo -e "${YELLOW}  python3 -m pip install --user pillow${NC}"
+    echo -e "${YELLOW}  /usr/bin/python3 -m pip install --user pillow${NC}"
     exit 1
 fi
 
@@ -370,13 +372,30 @@ for PROGRAM in $PROGRAMS; do
     # Get optional nextpnr placement seed override (defaults to Makefile's SEED ?= 1).
     # Use to work around occasional nextpnr-ice40 router assertions on specific designs.
     NEXTPNR_SEED=$(parse_toml_field "$PROGRAM_TOML" "firmware.seed")
+    # Optional synth_ice40 flags (e.g. -abc2) for designs that overflow under default synth.
+    SYNTH_OPTS=$(parse_toml_field "$PROGRAM_TOML" "firmware.synth_opts")
+    # Strip surrounding quotes from TOML string values.
+    SYNTH_OPTS="${SYNTH_OPTS%\"}"
+    SYNTH_OPTS="${SYNTH_OPTS#\"}"
+    SYNTH_OPTS="${SYNTH_OPTS%\'}"
+    SYNTH_OPTS="${SYNTH_OPTS#\'}"
 
     echo -e "${CYAN}Supported hardware: ${HARDWARE_VARIANTS}${NC}"
     echo -e "${CYAN}Core architecture: ${CORE}${NC}"
     if [ -n "$NEXTPNR_SEED" ]; then
         echo -e "${CYAN}nextpnr seed override: ${NEXTPNR_SEED}${NC}"
     fi
+    if [ -n "$SYNTH_OPTS" ]; then
+        echo -e "${CYAN}synth_ice40 opts: ${SYNTH_OPTS}${NC}"
+    fi
     echo ""
+    MAKE_EXTRA=( )
+    if [ -n "$NEXTPNR_SEED" ]; then
+        MAKE_EXTRA+=( "SEED=${NEXTPNR_SEED}" )
+    fi
+    if [ -n "$SYNTH_OPTS" ]; then
+        MAKE_EXTRA+=( "SYNTH_OPTS=${SYNTH_OPTS}" )
+    fi
 
     # Loop through each supported hardware variant
     for HARDWARE in $HARDWARE_VARIANTS; do
@@ -440,7 +459,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [1/8] HD Analog - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -462,7 +481,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [2/8] SD Analog - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_analog DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -489,7 +508,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [3/8] HD HDMI - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -511,7 +530,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [4/8] SD HDMI - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_hdmi DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -538,7 +557,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [5/8] HD Dual - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -560,7 +579,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [6/8] SD Dual - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_dual DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -587,7 +606,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [7/8] HD Standalone - Fmin: 74.25 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=hd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=74.25 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"
@@ -609,7 +628,7 @@ for PROGRAM in $PROGRAMS; do
 
         echo -e "${CYAN}  [8/8] SD Standalone - Fmin: 27 MHz...${NC}"
         START=$(date +%s.%N)
-        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM ${NEXTPNR_SEED:+SEED=$NEXTPNR_SEED} > "$MAKE_LOG" 2>&1; then
+        if ! make VIDEOMANCER_SDK_ROOT="${VIDEOMANCER_SDK_ROOT}" PROJECT_ROOT="${PROJECT_ROOT}" BUILD_ROOT="${HW_BUILD_ROOT}" PROGRAM=$PROGRAM CONFIG=sd_standalone DEVICE=$DEVICE PACKAGE=$PACKAGE FREQUENCY=27 HARDWARE=$HARDWARE CORE=$CORE PLATFORM=$PLATFORM "${MAKE_EXTRA[@]}" > "$MAKE_LOG" 2>&1; then
             echo -e "${RED}Build failed. Error output:${NC}"
             cat "$MAKE_LOG"
             rm -f "$MAKE_LOG"

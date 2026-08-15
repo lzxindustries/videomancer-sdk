@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing rd_en pulses exactly once per read
-simulation stopped @10125ns with status 0

@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing single register write
-simulation stopped @11100ns with status 0

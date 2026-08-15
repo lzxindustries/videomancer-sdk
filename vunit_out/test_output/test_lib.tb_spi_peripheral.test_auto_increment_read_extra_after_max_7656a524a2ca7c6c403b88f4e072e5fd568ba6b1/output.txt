@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing auto-increment read ignores extra clocks after max
-simulation stopped @18155ns with status 0

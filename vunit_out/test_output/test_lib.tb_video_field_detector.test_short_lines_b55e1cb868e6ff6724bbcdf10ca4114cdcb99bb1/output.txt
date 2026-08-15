@@ -1,2 +1,0 @@
-       200000000 fs - default              -    INFO - Testing very short line periods
-simulation stopped @3880ns with status 0

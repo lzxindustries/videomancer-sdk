@@ -1,2 +1,0 @@
-        [22;96;49m56000000 fs[0m - [1;37;49mdefault[0m              -    [1;37;49mINFO[0m - Verifying valid latency = 2 cycles for G_WIDTH=9
-simulation stopped @145ns with status 0

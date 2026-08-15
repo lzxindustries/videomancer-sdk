@@ -1,2 +1,0 @@
-        67500000 fs - default              -    INFO - Testing VSYNC propagation with 2-cycle delay
-simulation stopped @165ns with status 0

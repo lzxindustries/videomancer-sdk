@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing addr output correctness on write
-simulation stopped @10100ns with status 0

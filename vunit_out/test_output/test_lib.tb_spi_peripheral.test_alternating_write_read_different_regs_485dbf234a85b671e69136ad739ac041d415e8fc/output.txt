@@ -1,2 +1,0 @@
-       100000000 fs - default              -    INFO - Testing alternating write-read across different registers
-simulation stopped @85600ns with status 0

@@ -1,2 +1,0 @@
-        36000000 fs - default              -    INFO - Verifying valid latency = 1 cycle for w=8 d=4
-simulation stopped @95ns with status 0

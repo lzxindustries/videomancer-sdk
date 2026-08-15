@@ -1,2 +1,0 @@
-               0 fs - default              -    INFO - Testing synchronization of zero value
-simulation stopped @30ns with status 0

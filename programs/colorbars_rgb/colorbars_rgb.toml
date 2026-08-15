@@ -1,0 +1,109 @@
+# Copyright (C) 2026 LZX Industries LLC
+# SPDX-License-Identifier: GPL-3.0-only
+
+[program]
+program_id = "com.lzxindustries.colorbars_rgb"
+program_name = "Colorbars RGB"
+program_version = "1.0.0"
+abi_version = ">=1.0,<2.0"
+author = "Lars Larsen"
+license = "GPL-3.0"
+categories = ["Analysis"]
+program_type = "synthesis"
+description = "Direct-RGB reference color bars with EBU and SMPTE+PLUGE patterns, 75/100% level, blue-only, mono, and bypass"
+hardware_compatibility = ["rev_b"]
+core = "gbr444_30b"
+url = "https://github.com/lzxindustries/videomancer-sdk"
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_1"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_2"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_3"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_4"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_5"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
+
+[[parameter]]
+parameter_id = "rotary_potentiometer_6"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
+
+[[parameter]]
+parameter_id = "toggle_switch_7"
+name_label = "Level"
+value_labels = ["75%", "100%"]
+initial_value_label = "100%"
+
+[[parameter]]
+parameter_id = "toggle_switch_8"
+name_label = "Pattern"
+value_labels = ["EBU", "SMPTE"]
+initial_value_label = "EBU"
+
+[[parameter]]
+parameter_id = "toggle_switch_9"
+name_label = "Blue Only"
+value_labels = ["Off", "On"]
+initial_value_label = "Off"
+
+[[parameter]]
+parameter_id = "toggle_switch_10"
+name_label = "Mono"
+value_labels = ["Color", "Mono"]
+initial_value_label = "Color"
+
+[[parameter]]
+parameter_id = "toggle_switch_11"
+name_label = "Bypass"
+value_labels = ["Bars", "Input"]
+initial_value_label = "Bars"
+
+[[parameter]]
+parameter_id = "linear_potentiometer_12"
+name_label = "-"
+control_mode = "linear"
+display_min_value = 0
+display_max_value = 100
+initial_value = 512
+suffix_label = ""
