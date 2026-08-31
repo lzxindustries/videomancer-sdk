@@ -581,6 +581,7 @@ class MainWindow(QMainWindow):
             video_mode      = self._program_panel.video_mode,
             decimation      = self._program_panel.decimation,
             warmup_frames   = self._program_panel.warmup_frames,
+            write_waveform  = self._program_panel.write_waveform,
         )
         self._worker.log_line.connect(self._on_log_line)
         self._worker.progress.connect(self._on_progress)

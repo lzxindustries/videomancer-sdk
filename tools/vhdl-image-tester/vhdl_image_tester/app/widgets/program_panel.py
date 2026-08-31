@@ -18,6 +18,7 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QFileDialog,
     QFormLayout,
@@ -105,6 +106,10 @@ class ProgramPanel(QWidget):
     @property
     def warmup_frames(self) -> int:
         return self._warmup_spin.value()
+
+    @property
+    def write_waveform(self) -> bool:
+        return self._waveform_write.isChecked()
 
     # ── UI Construction ─────────────────────────────────────────────────────
 
@@ -249,6 +254,19 @@ class ProgramPanel(QWidget):
         warmup_container = QWidget()
         warmup_container.setLayout(warmup_row)
         sim_form.addRow("Warmup frames:", warmup_container)
+
+        waveform_row = QHBoxLayout()
+        waveform_row.setContentsMargins(0, 0, 0, 0)
+        waveform_row.setSpacing(2)
+
+        self._waveform_write = QCheckBox()
+        self._waveform_write.setFixedSize(24, 24)
+
+        waveform_row.addWidget(self._waveform_write)
+
+        waveform_container = QWidget()
+        waveform_container.setLayout(waveform_row)
+        sim_form.addRow("Write waveform:", waveform_container)
 
         root.addWidget(sim_group)
         root.addStretch()

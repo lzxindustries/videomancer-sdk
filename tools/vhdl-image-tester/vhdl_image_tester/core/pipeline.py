@@ -87,6 +87,7 @@ def run_pipeline(
     decimation:        int                    = SIM_DEFAULT_DECIMATION,
     warmup_frames:     int                    = SIM_WARMUP_FRAMES,
     capture_frames:    int                    = SIM_CAPTURE_FRAMES,
+    write_waveform:    bool                   = False,
     log_callback:      Callable[[str], None]  = print,
     progress_callback: Callable[[int, int], None] | None = None,
     build_dir:         Path | None            = None,
@@ -187,6 +188,7 @@ def run_pipeline(
             build_dir         = run_dir,
             config            = vs.fpga_config,
             core              = program.core,
+            write_waveform    = write_waveform,
             log_callback      = emit,
             progress_callback = progress_callback,
         )
@@ -258,6 +260,7 @@ def _make_simulation_worker_class() -> type:
             decimation:      int = SIM_DEFAULT_DECIMATION,
             warmup_frames:   int = SIM_WARMUP_FRAMES,
             capture_frames:  int = SIM_CAPTURE_FRAMES,
+            write_waveform:  bool = False,
         ) -> None:
             super().__init__()
             self._program         = program
@@ -267,6 +270,7 @@ def _make_simulation_worker_class() -> type:
             self._decimation      = decimation
             self._warmup_frames   = warmup_frames
             self._capture_frames  = capture_frames
+            self._write_waveform  = write_waveform
 
         def run(self) -> None:
             result = run_pipeline(
@@ -277,6 +281,7 @@ def _make_simulation_worker_class() -> type:
                 decimation        = self._decimation,
                 warmup_frames     = self._warmup_frames,
                 capture_frames    = self._capture_frames,
+                write_waveform    = self._write_waveform,
                 log_callback      = self.log_line.emit,
                 progress_callback = self.progress.emit,
             )

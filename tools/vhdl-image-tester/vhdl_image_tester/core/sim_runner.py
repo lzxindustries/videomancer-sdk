@@ -358,6 +358,7 @@ def run_simulation(
     build_dir:        Path,
     config:           str = "sd_analog",
     core:             str = "yuv444_30b",
+    write_waveform:   bool = False,
     log_callback:     LogCallback | None = None,
     progress_callback: ProgressCallback | None = None,
 ) -> None:
@@ -417,6 +418,13 @@ def run_simulation(
     # ── Step 3: Run ──────────────────────────────────────────────────────────
     _log(log_callback, "\n[3/3] Running simulation...")
     run_cmd = [ghdl, "-r", _GHDL_STD, workdir_flag, _TOP_ENTITY]
+
+    if write_waveform:
+        wave_file = program_dir / "wave.ghw"
+        _log(log_callback, f"\nwave file: {wave_file}")
+        wave_flag = f"--wave={wave_file}"
+        run_cmd.append(wave_flag)
+
     _run(run_cmd, build_dir, log_callback, description="run simulation",
          check_output_marker="VIT_DONE",
          progress_callback=progress_callback)
